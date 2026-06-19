@@ -1,0 +1,123 @@
+// Schema Prisma - Ecommerce FABIOLA (Fase 1)
+// Storefront + mini-panel. El inventario kardex (entradas/salidas) es Fase 2:
+// se agregarán tablas nuevas sin modificar estas.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum MetodoPago {
+  WHATSAPP
+  YAPE
+  PLIN
+}
+
+enum EstadoPedido {
+  PENDIENTE
+  VALIDADO
+  RECHAZADO
+}
+
+model Categoria {
+  id        String     @id @default(cuid())
+  nombre    String
+  slug      String     @unique
+  orden     Int        @default(0)
+  activo    Boolean    @default(true)
+  productos Producto[]
+  creadoEn  DateTime   @default(now())
+  actualizadoEn DateTime @updatedAt
+
+  @@map("categorias")
+}
+
+model Producto {
+  id           String           @id @default(cuid())
+  nombre       String
+  slug         String           @unique
+  descripcion  String?
+  precio       Decimal          @db.Decimal(10, 2)
+  precioOferta Decimal?         @db.Decimal(10, 2)
+  stock        Int              @default(0)
+  activo       Boolean          @default(true)
+  destacado    Boolean          @default(false)
+  categoriaId  String
+  categoria    Categoria        @relation(fields: [categoriaId], references: [id])
+  imagenes     ImagenProducto[]
+  items        ItemPedido[]
+  creadoEn     DateTime         @default(now())
+  actualizadoEn DateTime        @updatedAt
+
+  @@index([categoriaId])
+  @@index([activo])
+  @@map("productos")
+}
+
+model ImagenProducto {
+  id         String   @id @default(cuid())
+  url        String
+  orden      Int      @default(0)
+  productoId String
+  producto   Producto @relation(fields: [productoId], references: [id], onDelete: Cascade)
+
+  @@index([productoId])
+  @@map("imagenes_producto")
+}
+
+model Pedido {
+  id            String       @id @default(cuid())
+  codigo        String       @unique
+  nombreCliente String
+  telefono      String
+  total         Decimal      @db.Decimal(10, 2)
+  metodoPago    MetodoPago
+  estado        EstadoPedido @default(PENDIENTE)
+  comprobanteUrl String?
+  items         ItemPedido[]
+  creadoEn      DateTime     @default(now())
+  actualizadoEn DateTime     @updatedAt
+
+  @@index([estado])
+  @@map("pedidos")
+}
+
+model ItemPedido {
+  id             String   @id @default(cuid())
+  pedidoId       String
+  pedido         Pedido   @relation(fields: [pedidoId], references: [id], onDelete: Cascade)
+  productoId     String
+  producto       Producto @relation(fields: [productoId], references: [id])
+  nombreProducto String
+  precioUnitario Decimal  @db.Decimal(10, 2)
+  cantidad       Int
+  subtotal       Decimal  @db.Decimal(10, 2)
+
+  @@index([pedidoId])
+  @@map("items_pedido")
+}
+
+model Configuracion {
+  id        String   @id @default(cuid())
+  whatsapp  String?
+  datosYape String?
+  datosPlin String?
+  banners   Json?
+  actualizadoEn DateTime @updatedAt
+
+  @@map("configuracion")
+}
+
+model Usuario {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  nombre       String?
+  creadoEn     DateTime @default(now())
+
+  @@map("usuarios")
+}
