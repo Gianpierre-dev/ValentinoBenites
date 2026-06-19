@@ -3,9 +3,23 @@ import * as bcrypt from 'bcrypt';
 
 const prisma = new PrismaClient();
 
-const ADMIN_EMAIL = 'admin@fabiola.pe';
-const ADMIN_PASSWORD = 'admin123';
+const ADMIN_EMAIL = process.env.SEED_ADMIN_EMAIL ?? 'admin@fabiola.pe';
 const WHATSAPP = '51999999999';
+const EN_PRODUCCION = process.env.NODE_ENV === 'production';
+
+// La contraseña del admin nunca se hardcodea: viene de SEED_ADMIN_PASSWORD.
+// En producción es obligatoria (sin fallback) y la seed se niega a correr.
+function obtenerPasswordAdmin(): string {
+  const desdeEnv = process.env.SEED_ADMIN_PASSWORD;
+  if (EN_PRODUCCION) {
+    throw new Error(
+      'La seed no debe ejecutarse en producción (NODE_ENV=production).',
+    );
+  }
+  if (desdeEnv && desdeEnv.length >= 8) return desdeEnv;
+  // Solo en desarrollo: contraseña de conveniencia para el entorno local.
+  return 'admin123';
+}
 
 interface DefinicionCategoria {
   nombre: string;
@@ -124,18 +138,20 @@ async function main(): Promise<void> {
   console.log('Iniciando seed de FABIOLA...');
   await limpiar();
 
-  // Usuario admin
-  const passwordHash = await bcrypt.hash(ADMIN_PASSWORD, 10);
-  await prisma.usuario.upsert({
+  // Usuario admin. Solo se crea si no existe; no se pisa la contraseña de un
+  // admin ya presente (evita resets accidentales).
+  const adminExistente = await prisma.usuario.findUnique({
     where: { email: ADMIN_EMAIL },
-    update: { passwordHash, nombre: 'Administrador' },
-    create: {
-      email: ADMIN_EMAIL,
-      passwordHash,
-      nombre: 'Administrador',
-    },
   });
-  console.log(`Usuario admin: ${ADMIN_EMAIL} / ${ADMIN_PASSWORD}`);
+  if (!adminExistente) {
+    const passwordHash = await bcrypt.hash(obtenerPasswordAdmin(), 10);
+    await prisma.usuario.create({
+      data: { email: ADMIN_EMAIL, passwordHash, nombre: 'Administrador' },
+    });
+    console.log(`Usuario admin creado: ${ADMIN_EMAIL} (contraseña no mostrada)`);
+  } else {
+    console.log(`Usuario admin ya existe: ${ADMIN_EMAIL} (sin cambios)`);
+  }
 
   // Configuracion inicial
   const configExistente = await prisma.configuracion.findFirst();

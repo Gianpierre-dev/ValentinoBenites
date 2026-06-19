@@ -7,6 +7,8 @@ import {
   IsNotEmpty,
   IsOptional,
   IsString,
+  IsUrl,
+  MaxLength,
   Min,
   ValidateNested,
 } from 'class-validator';
@@ -40,7 +42,13 @@ export class CrearPedidoDto {
   @IsEnum(MetodoPago, { message: 'El metodo de pago no es valido.' })
   metodoPago!: MetodoPago;
 
+  // El comprobante debe ser una URL https de nuestro propio storage
+  // (lo devuelve POST /storage/upload), no una URL arbitraria del cliente.
   @IsOptional()
-  @IsString()
+  @IsUrl(
+    { protocols: ['https'], require_protocol: true },
+    { message: 'El comprobante debe ser una URL https válida.' },
+  )
+  @MaxLength(2048)
   comprobanteUrl?: string;
 }

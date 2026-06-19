@@ -1,7 +1,8 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { randomUUID } from 'node:crypto';
+import { detectarMimeReal, EXTENSION_POR_MIME } from './storage.config';
 
 export interface ArchivoSubido {
   url: string;
@@ -38,7 +39,16 @@ export class StorageService {
   }
 
   async subir(archivo: Express.Multer.File): Promise<ArchivoSubido> {
-    const nombre = this.construirNombre(archivo.originalname);
+    // No se confía en archivo.mimetype (lo controla el cliente): se valida la
+    // firma real del contenido y se deriva la extensión del MIME verificado.
+    const mimeReal = detectarMimeReal(archivo.buffer);
+    if (!mimeReal) {
+      throw new BadRequestException(
+        'El archivo no es una imagen válida (JPG, PNG o WebP).',
+      );
+    }
+
+    const nombre = this.construirNombre(mimeReal);
 
     if (!this.cliente) {
       this.logger.warn(
@@ -47,12 +57,16 @@ export class StorageService {
       return { url: `/uploads/placeholder/${nombre}` };
     }
 
+    // ACL public-read es intencional para fotos de catálogo (deben verse sin
+    // autenticación). Los comprobantes de pago deberían migrar a objetos
+    // privados + URLs firmadas en Fase 2 (ver ESTADO.md).
     await this.cliente.send(
       new PutObjectCommand({
         Bucket: this.bucket,
         Key: nombre,
         Body: archivo.buffer,
-        ContentType: archivo.mimetype,
+        ContentType: mimeReal,
+        ContentDisposition: 'inline',
         ACL: 'public-read',
       }),
     );
@@ -66,10 +80,8 @@ export class StorageService {
     );
   }
 
-  private construirNombre(nombreOriginal: string): string {
-    const extension = nombreOriginal.includes('.')
-      ? nombreOriginal.slice(nombreOriginal.lastIndexOf('.'))
-      : '';
+  private construirNombre(mimeReal: string): string {
+    const extension = EXTENSION_POR_MIME[mimeReal] ?? '';
     return `productos/${randomUUID()}${extension}`;
   }
 }
