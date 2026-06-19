@@ -1,0 +1,27 @@
+import { Module } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { JwtModule } from '@nestjs/jwt';
+import { PassportModule } from '@nestjs/passport';
+import { AuthController } from './auth.controller';
+import { AuthService } from './auth.service';
+import { JwtStrategy } from './jwt.strategy';
+
+@Module({
+  imports: [
+    PassportModule,
+    JwtModule.registerAsync({
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => ({
+        secret: config.get<string>('JWT_SECRET'),
+        signOptions: {
+          // ms StringValue ('7d', '12h'); leemos un string libre desde el .env.
+          expiresIn: (config.get<string>('JWT_EXPIRES_IN') ??
+            '7d') as `${number}d`,
+        },
+      }),
+    }),
+  ],
+  controllers: [AuthController],
+  providers: [AuthService, JwtStrategy],
+})
+export class AuthModule {}

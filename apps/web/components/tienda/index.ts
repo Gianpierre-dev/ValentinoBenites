@@ -1,0 +1,9 @@
+export { TarjetaProducto } from "./tarjeta-producto";
+export { GrillaProductos } from "./grilla-productos";
+export { GaleriaProducto } from "./galeria-producto";
+export { SelectorCantidad } from "./selector-cantidad";
+export { AccionesProducto } from "./acciones-producto";
+export { Buscador } from "./buscador";
+export { FiltroCategorias } from "./filtro-categorias";
+export { Newsletter } from "./newsletter";
+export { FormularioCheckout } from "./formulario-checkout";

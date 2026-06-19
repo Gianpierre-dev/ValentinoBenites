@@ -1,0 +1,74 @@
+"use client";
+
+import { useRouter, useSearchParams } from "next/navigation";
+import type { Categoria } from "@/lib/tipos";
+import { cn } from "@/lib/utilidades";
+
+interface PropsFiltroCategorias {
+  categorias: Categoria[];
+  /** Slug de la categoria activa; vacio = "Todos". */
+  categoriaActiva?: string;
+}
+
+/**
+ * Filtro de categorias del catalogo en forma de chips. Navega cambiando el query
+ * param `categoria` y conserva la busqueda `q` activa.
+ */
+export function FiltroCategorias({
+  categorias,
+  categoriaActiva,
+}: PropsFiltroCategorias) {
+  const router = useRouter();
+  const parametros = useSearchParams();
+
+  const irA = (slug?: string) => {
+    const params = new URLSearchParams(parametros.toString());
+    if (slug) {
+      params.set("categoria", slug);
+    } else {
+      params.delete("categoria");
+    }
+    const consulta = params.toString();
+    router.push(consulta ? `/catalogo?${consulta}` : "/catalogo");
+  };
+
+  const claseChip = (activa: boolean) =>
+    cn(
+      "border px-4 py-2 text-sm uppercase tracking-wide transition-colors",
+      activa
+        ? "border-acento bg-acento text-acento-contraste"
+        : "border-borde text-texto hover:border-texto/40",
+    );
+
+  return (
+    <nav aria-label="Filtrar por categoria">
+      <ul className="flex flex-wrap gap-2">
+        <li>
+          <button
+            type="button"
+            onClick={() => irA(undefined)}
+            aria-current={!categoriaActiva ? "true" : undefined}
+            className={claseChip(!categoriaActiva)}
+          >
+            Todos
+          </button>
+        </li>
+        {categorias.map((categoria) => {
+          const activa = categoria.slug === categoriaActiva;
+          return (
+            <li key={categoria.id}>
+              <button
+                type="button"
+                onClick={() => irA(categoria.slug)}
+                aria-current={activa ? "true" : undefined}
+                className={claseChip(activa)}
+              >
+                {categoria.nombre}
+              </button>
+            </li>
+          );
+        })}
+      </ul>
+    </nav>
+  );
+}
