@@ -1,0 +1,33 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Builds
+dist/
+.next/
+out/
+build/
+
+# Env (NOTA: en estos proyectos el .env SÍ se commitea por decisión de Gian;
+# se ignoran solo los locales de ejemplo temporales)
+*.local
+
+# Prisma
+apps/api/prisma/*.db
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# OS / Editor
+.DS_Store
+Thumbs.db
+.idea/
+*.swp
+
+# Testing
+coverage/
+
+# Temp
+*.tmp
