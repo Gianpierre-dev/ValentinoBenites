@@ -6,7 +6,8 @@ import type { Categoria, Producto } from "@/lib/tipos";
 
 export const metadata: Metadata = {
   title: "Catalogo",
-  description: "Explora todos los productos de Fabiola: carteras, calzado y accesorios.",
+  description:
+    "Explora todos los productos de Valentino Benites: carteras, calzado y accesorios.",
 };
 
 /**

@@ -42,9 +42,9 @@ export function BarraLateral() {
       <div className="border-b border-borde px-6 py-5">
         <Link
           href="/admin"
-          className="text-lg font-semibold uppercase tracking-[0.25em] text-texto-fuerte"
+          className="text-base font-semibold uppercase tracking-[0.2em] text-texto-fuerte"
         >
-          Fabiola
+          Valentino Benites
         </Link>
         <p className="mt-1 text-xs uppercase tracking-wide text-texto/60">Panel de gestion</p>
       </div>

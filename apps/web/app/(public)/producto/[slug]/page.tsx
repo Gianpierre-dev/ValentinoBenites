@@ -32,7 +32,8 @@ export async function generateMetadata({
 
   return {
     title: producto.nombre,
-    description: producto.descripcion ?? `Compra ${producto.nombre} en Fabiola.`,
+    description:
+      producto.descripcion ?? `Compra ${producto.nombre} en Valentino Benites.`,
   };
 }
 

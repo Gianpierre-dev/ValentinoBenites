@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import {
   IconBrandInstagram,
@@ -29,9 +30,18 @@ export function PieDePagina() {
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-4">
           <div>
-            <p className="text-lg font-semibold uppercase tracking-[0.3em] text-texto-fuerte">
-              Fabiola
-            </p>
+            <div className="flex items-center gap-2.5">
+              <Image
+                src="/logo-valentino.png"
+                alt="Valentino Benites"
+                width={36}
+                height={36}
+                className="h-9 w-9 object-contain"
+              />
+              <p className="text-base font-semibold uppercase tracking-[0.25em] text-texto-fuerte">
+                Valentino Benites
+              </p>
+            </div>
             <p className="mt-3 max-w-xs text-sm text-texto">
               Moda y accesorios para mujer. Calidad y estilo en cada detalle.
             </p>
@@ -117,7 +127,7 @@ export function PieDePagina() {
 
         <div className="mt-10 border-t border-borde pt-6">
           <p className="text-xs text-texto">
-            &copy; {ANIO_ACTUAL} Fabiola. Todos los derechos reservados.
+            &copy; {ANIO_ACTUAL} Valentino Benites. Todos los derechos reservados.
           </p>
         </div>
       </div>

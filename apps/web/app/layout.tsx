@@ -9,15 +9,15 @@ const fuenteSans = Inter({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://fabiola.pe"),
+  metadataBase: new URL("https://esvalentinobenites.com"),
   title: {
-    default: "Fabiola | Moda y accesorios para mujer",
-    template: "%s | Fabiola",
+    default: "Valentino Benites | Moda y accesorios para mujer",
+    template: "%s | Valentino Benites",
   },
   description:
     "Tienda de moda y accesorios para mujer. Carteras, calzado y mas, con estilo y calidad.",
   openGraph: {
-    title: "Fabiola",
+    title: "Valentino Benites",
     description: "Moda y accesorios para mujer.",
     type: "website",
     locale: "es_PE",

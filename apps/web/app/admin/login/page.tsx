@@ -45,8 +45,8 @@ export default function PaginaLogin() {
     <main className="flex min-h-screen items-center justify-center bg-fondo px-4">
       <div className="w-full max-w-sm">
         <div className="mb-8 text-center">
-          <span className="text-xl font-semibold uppercase tracking-[0.3em] text-texto-fuerte">
-            Fabiola
+          <span className="text-xl font-semibold uppercase tracking-[0.25em] text-texto-fuerte">
+            Valentino Benites
           </span>
           <p className="mt-2 flex items-center justify-center gap-1.5 text-sm text-texto/70">
             <IconLock className="h-4 w-4" aria-hidden />
