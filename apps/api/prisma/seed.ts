@@ -8,13 +8,20 @@ const WHATSAPP = '51999999999';
 const EN_PRODUCCION = process.env.NODE_ENV === 'production';
 
 // La contraseña del admin nunca se hardcodea: viene de SEED_ADMIN_PASSWORD.
-// En producción es obligatoria (sin fallback) y la seed se niega a correr.
+// En producción la seed se niega a correr salvo que se habilite EXPLÍCITAMENTE
+// con dos variables presentes a la vez: PERMITIR_SEED_PROD=true y un
+// SEED_ADMIN_PASSWORD fuerte (>=8 caracteres). Sin ambas, la seed lanza error.
 function obtenerPasswordAdmin(): string {
   const desdeEnv = process.env.SEED_ADMIN_PASSWORD;
   if (EN_PRODUCCION) {
-    throw new Error(
-      'La seed no debe ejecutarse en producción (NODE_ENV=production).',
-    );
+    const permitido = process.env.PERMITIR_SEED_PROD === 'true';
+    if (!permitido || !desdeEnv || desdeEnv.length < 8) {
+      throw new Error(
+        'La seed no debe ejecutarse en producción. Para habilitarla, define ' +
+          'PERMITIR_SEED_PROD=true y SEED_ADMIN_PASSWORD (>=8 caracteres).',
+      );
+    }
+    return desdeEnv;
   }
   if (desdeEnv && desdeEnv.length >= 8) return desdeEnv;
   // Solo en desarrollo: contraseña de conveniencia para el entorno local.

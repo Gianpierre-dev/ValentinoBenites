@@ -24,6 +24,17 @@ Node 24 vía nvm. Base de datos local: `fabiola` (postgres / sql @ localhost:543
 - Admin: http://localhost:3024/admin/login  →  admin@fabiola.pe / admin123
   (en dev la contraseña sale de SEED_ADMIN_PASSWORD o cae a 'admin123')
 
+## Producción (Railway) — DESPLEGADO
+Proyecto Railway: `fabiola` (workspace stigold-code's Projects). 3 servicios: Postgres + api + web.
+- **Storefront**: https://web-production-77a4c.up.railway.app
+- **API**: https://api-production-2c9f.up.railway.app/api
+- **Admin**: https://web-production-77a4c.up.railway.app/admin/login
+  - admin@fabiola.pe / `Fabiola-82d493d51d`  (CAMBIAR esta contraseña)
+- DB sembrada en prod: 44 productos, 6 categorías.
+- Config monorepo: cada servicio con Root Directory `/` + Config Path `apps/{api,web}/railway.json`
+  (se setea por API GraphQL de Railway, no por CLI; ver memoria fabiola-deploy-railway).
+- Deploy por CLI: `railway up --service api --ci` / `--service web --ci`.
+
 ## Pendientes reales
 - Credenciales Wasabi (WASABI_* en `apps/api/.env`) para fotos reales — hoy usa placeholder.
 - Número de WhatsApp real del negocio (en Configuración del admin).
