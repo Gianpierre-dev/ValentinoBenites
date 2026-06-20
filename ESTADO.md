@@ -1,8 +1,12 @@
-# ESTADO — Ecommerce FABIOLA
+# ESTADO — Ecommerce Valentino Benites (proyecto interno: FABIOLA)
 
 ## Qué es
-Ecommerce de moda (carteras/accesorios) para una clienta. Referencia visual: paez.com.pe.
-Paleta minimalista neutra (blanco/negro/gris) tomada de esvalentinobenites.com.
+Ecommerce de moda (carteras/accesorios) para la marca **Valentino Benites**. Referencia
+visual/estructura: paez.com.pe. Marca y assets tomados de esvalentinobenites.com.
+- Logo oficial: `apps/web/public/logo-valentino.png` (emblema circular VB).
+- Paleta: base minimalista (blanco/slate) + **acento morado de marca `#7D2181`**
+  (magenta `#D64EDC` como variante), extraídos del sitio oficial. Tokens en `globals.css`.
+- "FABIOLA" es solo el nombre interno del proyecto, NO la marca pública.
 Desarrollo por fases (ver `C:\Users\User\.claude\plans\dale-armemos-el-alcance-steady-hoare.md`).
 
 ## Stack
