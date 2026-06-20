@@ -1,15 +1,18 @@
 @import "tailwindcss";
 
 /*
-  Tokens de la paleta FABIOLA (estilo minimalista, mucho blanco, la foto manda).
+  Tokens de la paleta Valentino Benites: base minimalista (mucho blanco, la foto
+  manda) con el morado de marca como acento. El morado (#7D2181) y el magenta
+  (#D64EDC) se extrajeron del sitio oficial esvalentinobenites.com.
   Cambiar el acento aqui se propaga a todo el sitio.
 */
 :root {
   --color-fondo: #ffffff;
-  --color-texto: #333333;
-  --color-texto-fuerte: #000000;
+  --color-texto: #334155;
+  --color-texto-fuerte: #111111;
   --color-borde: #e5e5e5;
-  --color-acento: #111111;
+  --color-acento: #7d2181;
+  --color-acento-claro: #d64edc;
   --color-acento-contraste: #ffffff;
   --color-oferta: #b91c1c;
 }
@@ -20,6 +23,7 @@
   --color-texto-fuerte: var(--color-texto-fuerte);
   --color-borde: var(--color-borde);
   --color-acento: var(--color-acento);
+  --color-acento-claro: var(--color-acento-claro);
   --color-acento-contraste: var(--color-acento-contraste);
   --color-oferta: var(--color-oferta);
 
