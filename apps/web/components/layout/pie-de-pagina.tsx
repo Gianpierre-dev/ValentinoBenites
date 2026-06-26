@@ -48,7 +48,7 @@ export function PieDePagina() {
           </div>
 
           <nav aria-label="Tienda">
-            <h2 className="text-sm font-semibold uppercase tracking-wide text-texto-fuerte">
+            <h2 className="titulo-ui text-sm font-semibold uppercase tracking-wide text-texto-fuerte">
               Tienda
             </h2>
             <ul className="mt-4 space-y-2">
@@ -66,7 +66,7 @@ export function PieDePagina() {
           </nav>
 
           <nav aria-label="Ayuda">
-            <h2 className="text-sm font-semibold uppercase tracking-wide text-texto-fuerte">
+            <h2 className="titulo-ui text-sm font-semibold uppercase tracking-wide text-texto-fuerte">
               Ayuda
             </h2>
             <ul className="mt-4 space-y-2">
@@ -84,7 +84,7 @@ export function PieDePagina() {
           </nav>
 
           <div>
-            <h2 className="text-sm font-semibold uppercase tracking-wide text-texto-fuerte">
+            <h2 className="titulo-ui text-sm font-semibold uppercase tracking-wide text-texto-fuerte">
               Siguenos
             </h2>
             <ul className="mt-4 flex items-center gap-4">

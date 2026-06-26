@@ -21,12 +21,12 @@ export function Newsletter() {
   return (
     <section
       aria-labelledby="titulo-newsletter"
-      className="border-t border-borde bg-black/[.02]"
+      className="border-t border-borde bg-gradient-to-b from-perla to-[#f3e8f6]"
     >
-      <div className="mx-auto max-w-2xl px-4 py-16 text-center sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-2xl px-4 py-20 text-center sm:px-6 lg:px-8">
         <h2
           id="titulo-newsletter"
-          className="text-2xl font-semibold tracking-tight text-texto-fuerte"
+          className="text-3xl font-extrabold sm:text-4xl"
         >
           Suscribete y entérate primero
         </h2>

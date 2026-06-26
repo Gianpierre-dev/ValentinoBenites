@@ -1,13 +1,15 @@
 @import "tailwindcss";
 
 /*
-  Tokens de la paleta Valentino Benites: base minimalista (mucho blanco, la foto
+  Tokens de la paleta Valentino Benites: base elegante (mucho blanco, la foto
   manda) con el morado de marca como acento. El morado (#7D2181) y el magenta
   (#D64EDC) se extrajeron del sitio oficial esvalentinobenites.com.
   Cambiar el acento aqui se propaga a todo el sitio.
 */
 :root {
   --color-fondo: #ffffff;
+  /* Perla violacea muy sutil para alternar secciones (no todo blanco plano). */
+  --color-perla: #faf7fb;
   --color-texto: #334155;
   --color-texto-fuerte: #111111;
   --color-borde: #e5e5e5;
@@ -19,6 +21,7 @@
 
 @theme inline {
   --color-fondo: var(--color-fondo);
+  --color-perla: var(--color-perla);
   --color-texto: var(--color-texto);
   --color-texto-fuerte: var(--color-texto-fuerte);
   --color-borde: var(--color-borde);
@@ -28,6 +31,7 @@
   --color-oferta: var(--color-oferta);
 
   --font-sans: var(--fuente-sans);
+  --font-display: var(--fuente-display);
 }
 
 body {
@@ -36,8 +40,37 @@ body {
   font-family: var(--font-sans), system-ui, -apple-system, sans-serif;
 }
 
+/*
+  Jerarquia tipografica: Fraunces (serif display) para titulares grandes h1/h2,
+  con tracking ligeramente negativo y peso alto para presencia editorial.
+  Los microtitulos de UI (labels uppercase) optan por .titulo-ui para volver a
+  Inter, ya que el serif no funciona en textos pequenos en mayusculas.
+  Se limita al storefront (.storefront) para no alterar el panel admin.
+*/
+.storefront h1,
+.storefront h2 {
+  font-family: var(--font-display), Georgia, "Times New Roman", serif;
+  letter-spacing: -0.02em;
+  color: var(--color-texto-fuerte);
+}
+
+.titulo-ui {
+  font-family: var(--font-sans), system-ui, -apple-system, sans-serif;
+  letter-spacing: normal;
+}
+
 /* Foco accesible visible y consistente con el acento */
 :focus-visible {
   outline: 2px solid var(--color-acento);
   outline-offset: 2px;
+}
+
+/* Respeta la preferencia de movimiento reducido del usuario. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
 }

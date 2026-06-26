@@ -153,7 +153,7 @@ export function FormularioCheckout({ configuracion }: PropsFormularioCheckout) {
       <section aria-labelledby="titulo-datos">
         <h2
           id="titulo-datos"
-          className="text-sm font-semibold uppercase tracking-wide text-texto-fuerte"
+          className="titulo-ui text-sm font-semibold uppercase tracking-wide text-texto-fuerte"
         >
           Tus datos
         </h2>
@@ -179,7 +179,7 @@ export function FormularioCheckout({ configuracion }: PropsFormularioCheckout) {
       <section aria-labelledby="titulo-metodo">
         <h2
           id="titulo-metodo"
-          className="text-sm font-semibold uppercase tracking-wide text-texto-fuerte"
+          className="titulo-ui text-sm font-semibold uppercase tracking-wide text-texto-fuerte"
         >
           Metodo de pago
         </h2>

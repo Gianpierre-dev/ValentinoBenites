@@ -8,10 +8,10 @@ export default function LayoutPublico({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <>
+    <div className="storefront contents">
       <Encabezado />
       <main className="flex-1">{children}</main>
       <PieDePagina />
-    </>
+    </div>
   );
 }

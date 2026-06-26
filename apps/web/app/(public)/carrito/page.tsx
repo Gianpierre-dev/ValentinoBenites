@@ -94,7 +94,7 @@ export default function PaginaCarrito() {
         </ul>
 
         <aside className="h-fit border border-borde p-6">
-          <h2 className="text-sm font-semibold uppercase tracking-wide text-texto-fuerte">
+          <h2 className="titulo-ui text-sm font-semibold uppercase tracking-wide text-texto-fuerte">
             Resumen
           </h2>
           <dl className="mt-4 space-y-2 text-sm">

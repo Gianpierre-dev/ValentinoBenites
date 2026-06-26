@@ -1,11 +1,20 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Fraunces, Inter } from "next/font/google";
 import "./globals.css";
 
+// Inter: cuerpo y UI. Fraunces: serif display para titulares grandes (h1/h2).
 const fuenteSans = Inter({
   variable: "--fuente-sans",
   subsets: ["latin"],
   display: "swap",
+});
+
+const fuenteDisplay = Fraunces({
+  variable: "--fuente-display",
+  subsets: ["latin"],
+  display: "swap",
+  weight: ["600", "700", "800", "900"],
+  axes: ["opsz"],
 });
 
 export const metadata: Metadata = {
@@ -30,7 +39,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="es" className={`${fuenteSans.variable} h-full antialiased`}>
+    <html
+      lang="es"
+      className={`${fuenteSans.variable} ${fuenteDisplay.variable} h-full antialiased`}
+    >
       <body className="flex min-h-full flex-col bg-fondo text-texto">{children}</body>
     </html>
   );
