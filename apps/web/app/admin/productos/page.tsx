@@ -100,18 +100,12 @@ export default function PaginaProductos() {
         titulo="Productos"
         descripcion="Gestiona el catalogo de tu tienda."
         acciones={
-          <Boton onClick={() => setCreando(true)} disabled={estado.tipo === "listo" && categorias.length === 0}>
+          <Boton onClick={() => setCreando(true)}>
             <IconPlus className="h-4 w-4" aria-hidden />
             Nuevo producto
           </Boton>
         }
       />
-
-      {estado.tipo === "listo" && categorias.length === 0 && (
-        <div role="alert" className="mb-4 border border-amber-500 bg-amber-500/[.06] p-3 text-sm text-texto-fuerte">
-          Crea al menos una categoria antes de agregar productos.
-        </div>
-      )}
 
       {estado.tipo === "cargando" && <VistaCargando etiqueta="Cargando productos" />}
       {estado.tipo === "error" && <VistaError mensaje={estado.mensaje} alReintentar={cargar} />}
@@ -240,5 +234,6 @@ function Miniatura({ producto }: { producto: Producto }) {
 
 function nombreCategoria(producto: Producto, categorias: Categoria[]): string {
   if (producto.categoria) return producto.categoria.nombre;
-  return categorias.find((categoria) => categoria.id === producto.categoriaId)?.nombre ?? "—";
+  if (!producto.categoriaId) return "Sin categoria";
+  return categorias.find((categoria) => categoria.id === producto.categoriaId)?.nombre ?? "Sin categoria";
 }

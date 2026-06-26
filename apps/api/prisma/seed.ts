@@ -116,11 +116,9 @@ async function limpiar(): Promise<void> {
   await prisma.categoria.deleteMany();
 }
 
-async function crearProductos(
-  defs: DefProducto[],
-  categoriaId: string,
-  desde: number,
-): Promise<number> {
+// Los productos se crean SIN categoria (catalogo plano). La admin crea las
+// familias y asigna productos desde el panel cuando lo decida.
+async function crearProductos(defs: DefProducto[], desde: number): Promise<number> {
   let i = desde;
   for (const def of defs) {
     i += 1;
@@ -134,7 +132,6 @@ async function crearProductos(
         stock: 15,
         destacado: def.destacado ?? false,
         activo: true,
-        categoriaId,
         imagenes: { create: [{ url: urlFoto(def.foto), orden: 0 }] },
       },
     });
@@ -171,18 +168,12 @@ async function main(): Promise<void> {
     });
   }
 
-  const bandoleras = await prisma.categoria.create({
-    data: { nombre: 'Bandoleras', slug: 'bandoleras', orden: 0 },
-  });
-  const carteras = await prisma.categoria.create({
-    data: { nombre: 'Carteras', slug: 'carteras', orden: 1 },
-  });
-
-  const tras = await crearProductos(BANDOLERAS, bandoleras.id, 0);
-  await crearProductos(CARTERAS, carteras.id, tras);
+  // Catalogo plano: sin categorias. La admin las crea cuando quiera.
+  const tras = await crearProductos(BANDOLERAS, 0);
+  await crearProductos(CARTERAS, tras);
 
   const total = BANDOLERAS.length + CARTERAS.length;
-  console.log(`Seed completada: 2 categorias, ${total} productos reales.`);
+  console.log(`Seed completada: ${total} productos reales (sin categoria, catalogo plano).`);
 }
 
 main()

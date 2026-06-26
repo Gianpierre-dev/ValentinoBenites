@@ -23,7 +23,8 @@ const esquemaProducto = z
     precio: z.coerce.number().positive("El precio debe ser mayor a 0"),
     precioOferta: numeroOpcional,
     stock: z.coerce.number().int("Debe ser un numero entero").min(0, "No puede ser negativo"),
-    categoriaId: z.string().min(1, "Selecciona una categoria"),
+    // Categoria opcional: el producto puede quedar sin clasificar.
+    categoriaId: z.string().optional(),
     activo: z.boolean(),
     destacado: z.boolean(),
   })
@@ -89,7 +90,7 @@ export function FormularioProducto({
       precio: datos.precio,
       precioOferta: datos.precioOferta ?? null,
       stock: datos.stock,
-      categoriaId: datos.categoriaId,
+      categoriaId: datos.categoriaId ? datos.categoriaId : null,
       activo: datos.activo,
       destacado: datos.destacado,
       imagenes: imagenes.map((imagen, orden) => ({ url: imagen.url, orden })),
@@ -147,26 +148,20 @@ export function FormularioProducto({
         />
         <div className="flex flex-col gap-1.5">
           <label htmlFor="campo-categoria" className="text-sm font-medium text-texto-fuerte">
-            Categoria
+            Categoria — opcional
           </label>
           <select
             id="campo-categoria"
-            aria-invalid={errors.categoriaId ? true : undefined}
-            className="h-11 w-full border border-borde bg-fondo px-3 text-sm text-texto-fuerte outline-none transition-colors focus:border-acento"
+            className="h-11 w-full rounded-lg border border-borde bg-fondo px-3 text-sm text-texto-fuerte outline-none transition-colors focus:border-acento"
             {...register("categoriaId")}
           >
-            <option value="">Selecciona una categoria</option>
+            <option value="">Sin categoria</option>
             {categorias.map((categoria) => (
               <option key={categoria.id} value={categoria.id}>
                 {categoria.nombre}
               </option>
             ))}
           </select>
-          {errors.categoriaId && (
-            <p role="alert" className="text-xs text-oferta">
-              {errors.categoriaId.message}
-            </p>
-          )}
         </div>
       </div>
 

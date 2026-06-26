@@ -17,17 +17,27 @@ interface PropsNavCategorias {
 export function NavCategorias({ categorias }: PropsNavCategorias) {
   const [abierto, setAbierto] = useState(false);
 
+  // Siempre se ofrece "Catalogo"; las categorias se agregan solo si existen.
+  const items = [
+    { clave: "catalogo", etiqueta: "Catalogo", href: "/catalogo" },
+    ...categorias.map((categoria) => ({
+      clave: categoria.id,
+      etiqueta: categoria.nombre,
+      href: `/catalogo?categoria=${categoria.slug}`,
+    })),
+  ];
+
   return (
     <>
       <nav aria-label="Categorias" className="hidden md:block">
         <ul className="flex items-center gap-6">
-          {categorias.map((categoria) => (
-            <li key={categoria.id}>
+          {items.map((item) => (
+            <li key={item.clave}>
               <Link
-                href={`/catalogo?categoria=${categoria.slug}`}
+                href={item.href}
                 className="text-sm uppercase tracking-wide text-texto transition-colors hover:text-acento"
               >
-                {categoria.nombre}
+                {item.etiqueta}
               </Link>
             </li>
           ))}
@@ -52,14 +62,14 @@ export function NavCategorias({ categorias }: PropsNavCategorias) {
       >
         <nav aria-label="Categorias" className="px-4 py-2">
           <ul className="flex flex-col">
-            {categorias.map((categoria) => (
-              <li key={categoria.id}>
+            {items.map((item) => (
+              <li key={item.clave}>
                 <Link
-                  href={`/catalogo?categoria=${categoria.slug}`}
+                  href={item.href}
                   onClick={() => setAbierto(false)}
                   className="block py-3 text-sm uppercase tracking-wide text-texto transition-colors hover:text-acento"
                 >
-                  {categoria.nombre}
+                  {item.etiqueta}
                 </Link>
               </li>
             ))}

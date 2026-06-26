@@ -58,9 +58,10 @@ export class CrearProductoDto {
   @IsBoolean()
   destacado?: boolean;
 
+  // Categoria opcional: el producto puede quedar sin clasificar.
+  @IsOptional()
   @IsString()
-  @IsNotEmpty({ message: 'La categoria es obligatoria.' })
-  categoriaId!: string;
+  categoriaId?: string | null;
 
   @IsOptional()
   @IsArray()

@@ -35,8 +35,8 @@ export interface Producto {
   stock: number;
   activo: boolean;
   destacado: boolean;
-  categoriaId: string;
-  categoria?: Categoria;
+  categoriaId: string | null;
+  categoria?: Categoria | null;
   imagenes: ImagenProducto[];
   creadoEn: string;
   actualizadoEn: string;
@@ -128,7 +128,7 @@ export interface ProductoEntrada {
   stock: number;
   activo: boolean;
   destacado: boolean;
-  categoriaId: string;
+  categoriaId?: string | null;
   imagenes?: { url: string; orden: number }[];
 }
 

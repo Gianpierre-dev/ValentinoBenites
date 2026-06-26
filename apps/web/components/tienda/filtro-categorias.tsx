@@ -21,6 +21,9 @@ export function FiltroCategorias({
   const router = useRouter();
   const parametros = useSearchParams();
 
+  // Sin categorias no hay nada que filtrar: el catalogo ya muestra todo.
+  if (categorias.length === 0) return null;
+
   const irA = (slug?: string) => {
     const params = new URLSearchParams(parametros.toString());
     if (slug) {

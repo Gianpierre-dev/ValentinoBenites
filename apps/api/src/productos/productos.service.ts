@@ -55,7 +55,9 @@ export class ProductosService {
   }
 
   async crear(dto: CrearProductoDto) {
-    await this.validarCategoria(dto.categoriaId);
+    if (dto.categoriaId) {
+      await this.validarCategoria(dto.categoriaId);
+    }
     const { imagenes, ...datos } = dto;
 
     try {

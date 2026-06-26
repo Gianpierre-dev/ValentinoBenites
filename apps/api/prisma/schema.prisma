@@ -46,8 +46,10 @@ model Producto {
   stock        Int              @default(0)
   activo       Boolean          @default(true)
   destacado    Boolean          @default(false)
-  categoriaId  String
-  categoria    Categoria        @relation(fields: [categoriaId], references: [id])
+  // Categoria OPCIONAL: un producto puede existir sin clasificar. La admin
+  // crea las familias y asigna productos cuando quiere (catalogo plano por defecto).
+  categoriaId  String?
+  categoria    Categoria?       @relation(fields: [categoriaId], references: [id], onDelete: SetNull)
   imagenes     ImagenProducto[]
   items        ItemPedido[]
   creadoEn     DateTime         @default(now())
