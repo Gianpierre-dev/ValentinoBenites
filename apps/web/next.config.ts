@@ -5,11 +5,6 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       // Imagenes de productos alojadas en Wasabi (S3-compatible).
       { protocol: "https", hostname: "*.wasabisys.com" },
-      // Placeholder temporal del hero (foto de stock). TODO: quitar al subir foto real.
-      { protocol: "https", hostname: "images.unsplash.com" },
-      // Imagenes de ejemplo del seed (datos de demostracion).
-      { protocol: "https", hostname: "picsum.photos" },
-      { protocol: "https", hostname: "fastly.picsum.photos" },
       // Placeholder local del backend cuando faltan credenciales WASABI_*.
       { protocol: "http", hostname: "localhost", port: "4024" },
     ],

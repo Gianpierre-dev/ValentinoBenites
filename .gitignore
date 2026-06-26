@@ -31,3 +31,7 @@ coverage/
 
 # Temp
 *.tmp
+
+# Fotos originales sin optimizar (las optimizadas viven en apps/web/public/productos)
+/fotos-productos/
+/comparativa-tipografias.html

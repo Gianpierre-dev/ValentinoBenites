@@ -24,97 +24,74 @@ function obtenerPasswordAdmin(): string {
     return desdeEnv;
   }
   if (desdeEnv && desdeEnv.length >= 8) return desdeEnv;
-  // Solo en desarrollo: contraseña de conveniencia para el entorno local.
   return 'admin123';
 }
 
-interface DefinicionCategoria {
+// Catálogo real de Valentino Benites. Las fotos viven en apps/web/public/productos
+// (foto-01.jpg .. foto-50.jpg). NOMBRES y PRECIOS son estimados/placeholder:
+// se ajustan desde el panel admin. foto 01-37 = bandoleras cruzadas; 38-50 = carteras grandes.
+interface DefProducto {
   nombre: string;
-  slug: string;
-  productos: string[];
+  foto: number; // índice de foto-NN.jpg
+  precio: number;
+  oferta?: number;
+  destacado?: boolean;
 }
 
-const CATEGORIAS: DefinicionCategoria[] = [
-  {
-    nombre: 'Carteras',
-    slug: 'carteras',
-    productos: [
-      'Cartera Tote Clásica',
-      'Cartera Bandolera Cuero',
-      'Cartera de Mano Elegante',
-      'Cartera Shopper Urbana',
-      'Cartera Satchel Premium',
-      'Cartera Hobo Casual',
-      'Cartera Estructurada Negra',
-      'Cartera Crossbody Mini',
-    ],
-  },
-  {
-    nombre: 'Billeteras',
-    slug: 'billeteras',
-    productos: [
-      'Billetera Larga Mujer',
-      'Billetera Compacta Cuero',
-      'Billetera con Cierre',
-      'Billetera Tarjetero Slim',
-      'Billetera Plegable Clásica',
-      'Billetera de Viaje',
-      'Billetera Minimalista',
-    ],
-  },
-  {
-    nombre: 'Monederos',
-    slug: 'monederos',
-    productos: [
-      'Monedero Redondo Cuero',
-      'Monedero con Llavero',
-      'Monedero Cierre Metálico',
-      'Monedero Pequeño Casual',
-      'Monedero Estampado',
-      'Monedero Doble Compartimento',
-      'Monedero Tipo Sobre',
-    ],
-  },
-  {
-    nombre: 'Correas',
-    slug: 'correas',
-    productos: [
-      'Correa Cuero Clásica',
-      'Correa Hebilla Dorada',
-      'Correa Delgada Mujer',
-      'Correa Reversible',
-      'Correa Trenzada',
-      'Correa Ancha Casual',
-      'Correa Elegante Negra',
-    ],
-  },
-  {
-    nombre: 'Mochilas',
-    slug: 'mochilas',
-    productos: [
-      'Mochila Urbana Cuero',
-      'Mochila Antirrobo',
-      'Mochila Compacta Mujer',
-      'Mochila Convertible',
-      'Mochila Casual Diaria',
-      'Mochila de Viaje Premium',
-      'Mochila Tipo Bolso',
-    ],
-  },
-  {
-    nombre: 'Accesorios',
-    slug: 'accesorios',
-    productos: [
-      'Llavero de Cuero',
-      'Estuche para Lentes',
-      'Porta Pasaporte',
-      'Organizador de Cartera',
-      'Pañuelo de Seda',
-      'Tarjetero Ejecutivo',
-      'Set de Cuidado de Cuero',
-      'Cinta para Cabello Premium',
-    ],
-  },
+const BANDOLERAS: DefProducto[] = [
+  { nombre: 'Bandolera Animal Print Gris', foto: 1, precio: 79.9, destacado: true },
+  { nombre: 'Bandolera Andina Multicolor', foto: 2, precio: 84.9, destacado: true },
+  { nombre: 'Bandolera Andina Vino', foto: 3, precio: 84.9 },
+  { nombre: 'Bandolera Étnica Rosa', foto: 4, precio: 82.9 },
+  { nombre: 'Bandolera Andina Fucsia', foto: 5, precio: 84.9, oferta: 69.9 },
+  { nombre: 'Bandolera Étnica Camel', foto: 6, precio: 82.9 },
+  { nombre: 'Bandolera Clásica Camel', foto: 7, precio: 75.9 },
+  { nombre: 'Bandolera Andina Turquesa', foto: 8, precio: 84.9, destacado: true },
+  { nombre: 'Bandolera Étnica Verde', foto: 9, precio: 82.9 },
+  { nombre: 'Bandolera Casual Beige', foto: 10, precio: 72.9 },
+  { nombre: 'Bandolera Andina Morada', foto: 11, precio: 84.9 },
+  { nombre: 'Bandolera Étnica Azul', foto: 12, precio: 82.9, oferta: 67.9 },
+  { nombre: 'Bandolera Clásica Negra', foto: 13, precio: 75.9, destacado: true },
+  { nombre: 'Bandolera Urbana Gris', foto: 14, precio: 74.9 },
+  { nombre: 'Bandolera Casual Marrón', foto: 15, precio: 72.9 },
+  { nombre: 'Bandolera Andina Coral', foto: 16, precio: 84.9 },
+  { nombre: 'Bandolera Clásica Azul Marino', foto: 17, precio: 75.9 },
+  { nombre: 'Bandolera Étnica Naranja', foto: 18, precio: 82.9 },
+  { nombre: 'Bandolera Casual Negra', foto: 19, precio: 72.9 },
+  { nombre: 'Bandolera Bicolor Azul Beige', foto: 20, precio: 78.9, destacado: true },
+  { nombre: 'Bandolera Andina Cielo', foto: 21, precio: 84.9 },
+  { nombre: 'Bandolera Clásica Camel II', foto: 22, precio: 75.9 },
+  { nombre: 'Bandolera Urbana Negra', foto: 23, precio: 74.9, oferta: 59.9 },
+  { nombre: 'Bandolera Casual Arena', foto: 24, precio: 72.9 },
+  { nombre: 'Bandolera Étnica Berenjena', foto: 25, precio: 82.9 },
+  { nombre: 'Bandolera Clásica Taupe', foto: 26, precio: 75.9 },
+  { nombre: 'Bandolera Bicolor Marrón', foto: 27, precio: 78.9 },
+  { nombre: 'Bandolera Casual Cemento', foto: 28, precio: 72.9 },
+  { nombre: 'Bandolera Urbana Camel', foto: 29, precio: 74.9 },
+  { nombre: 'Bandolera Clásica Arena', foto: 30, precio: 75.9 },
+  { nombre: 'Bandolera Casual Oliva', foto: 31, precio: 72.9 },
+  { nombre: 'Bandolera Urbana Marrón', foto: 32, precio: 74.9 },
+  { nombre: 'Bandolera Clásica Perla', foto: 33, precio: 75.9 },
+  { nombre: 'Bandolera Casual Café', foto: 34, precio: 72.9, oferta: 58.9 },
+  { nombre: 'Bandolera Urbana Beige', foto: 35, precio: 74.9 },
+  { nombre: 'Bandolera Clásica Chocolate', foto: 36, precio: 75.9 },
+  { nombre: 'Bandolera Casual Tabaco', foto: 37, precio: 72.9 },
+];
+
+const CARTERAS: DefProducto[] = [
+  { nombre: 'Cartera Tote Andina Grande', foto: 38, precio: 139.9, destacado: true },
+  { nombre: 'Cartera Tote Étnica Multicolor', foto: 39, precio: 139.9 },
+  { nombre: 'Cartera Shopper Andina', foto: 40, precio: 129.9, destacado: true },
+  { nombre: 'Cartera Tote Azteca', foto: 41, precio: 139.9 },
+  { nombre: 'Cartera Shopper Étnica', foto: 42, precio: 129.9, oferta: 109.9 },
+  { nombre: 'Cartera Tote Andina Vino', foto: 43, precio: 139.9 },
+  { nombre: 'Cartera Shopper Multicolor', foto: 44, precio: 129.9 },
+  { nombre: 'Cartera Tote Étnica Camel', foto: 45, precio: 139.9, destacado: true },
+  { nombre: 'Cartera Shopper Azteca', foto: 46, precio: 129.9 },
+  { nombre: 'Cartera Tote Andina Turquesa', foto: 47, precio: 139.9 },
+  { nombre: 'Cartera Shopper Andina Coral', foto: 48, precio: 129.9 },
+  { nombre: 'Cartera Tote Étnica Grande II', foto: 49, precio: 139.9, oferta: 115.9 },
+  { nombre: 'Cartera Shopper Étnica Azul', foto: 50, precio: 129.9 },
 ];
 
 function generarSlug(texto: string, indice: number): string {
@@ -127,10 +104,8 @@ function generarSlug(texto: string, indice: number): string {
   return `${base}-${indice}`;
 }
 
-function precioRealista(): number {
-  // Precios en soles entre 39.90 y 299.90
-  const base = 40 + Math.floor(Math.random() * 26) * 10;
-  return Number((base - 0.1).toFixed(2));
+function urlFoto(n: number): string {
+  return `/productos/foto-${String(n).padStart(2, '0')}.jpg`;
 }
 
 async function limpiar(): Promise<void> {
@@ -141,12 +116,36 @@ async function limpiar(): Promise<void> {
   await prisma.categoria.deleteMany();
 }
 
+async function crearProductos(
+  defs: DefProducto[],
+  categoriaId: string,
+  desde: number,
+): Promise<number> {
+  let i = desde;
+  for (const def of defs) {
+    i += 1;
+    await prisma.producto.create({
+      data: {
+        nombre: def.nombre,
+        slug: generarSlug(def.nombre, i),
+        descripcion: `${def.nombre} de Valentino Benites. Cuero sintético de alta calidad con acabados finos y herrajes metálicos. Diseño versátil para el día a día.`,
+        precio: new Prisma.Decimal(def.precio),
+        precioOferta: def.oferta ? new Prisma.Decimal(def.oferta) : null,
+        stock: 15,
+        destacado: def.destacado ?? false,
+        activo: true,
+        categoriaId,
+        imagenes: { create: [{ url: urlFoto(def.foto), orden: 0 }] },
+      },
+    });
+  }
+  return i;
+}
+
 async function main(): Promise<void> {
-  console.log('Iniciando seed de FABIOLA...');
+  console.log('Iniciando seed de Valentino Benites...');
   await limpiar();
 
-  // Usuario admin. Solo se crea si no existe; no se pisa la contraseña de un
-  // admin ya presente (evita resets accidentales).
   const adminExistente = await prisma.usuario.findUnique({
     where: { email: ADMIN_EMAIL },
   });
@@ -160,69 +159,30 @@ async function main(): Promise<void> {
     console.log(`Usuario admin ya existe: ${ADMIN_EMAIL} (sin cambios)`);
   }
 
-  // Configuracion inicial
+  // Configuración: no se pisa si ya existe (conserva redes/whatsapp reales).
   const configExistente = await prisma.configuracion.findFirst();
   if (!configExistente) {
     await prisma.configuracion.create({
       data: {
         whatsapp: WHATSAPP,
-        datosYape: 'Yape: 999 999 999 - FABIOLA',
-        datosPlin: 'Plin: 999 999 999 - FABIOLA',
+        instagram: 'valentinobenites.pe',
+        facebook: 'valentinobenites',
       },
     });
   }
 
-  // Categorias y productos
-  let contadorImagen = 1;
-  let totalProductos = 0;
+  const bandoleras = await prisma.categoria.create({
+    data: { nombre: 'Bandoleras', slug: 'bandoleras', orden: 0 },
+  });
+  const carteras = await prisma.categoria.create({
+    data: { nombre: 'Carteras', slug: 'carteras', orden: 1 },
+  });
 
-  for (let i = 0; i < CATEGORIAS.length; i += 1) {
-    const def = CATEGORIAS[i];
-    const categoria = await prisma.categoria.create({
-      data: { nombre: def.nombre, slug: def.slug, orden: i },
-    });
+  const tras = await crearProductos(BANDOLERAS, bandoleras.id, 0);
+  await crearProductos(CARTERAS, carteras.id, tras);
 
-    for (let j = 0; j < def.productos.length; j += 1) {
-      const nombre = def.productos[j];
-      const precio = precioRealista();
-      const conOferta = (totalProductos + 1) % 4 === 0;
-      const destacado = (totalProductos + 1) % 5 === 0;
-      const precioOferta = conOferta
-        ? Number((precio * 0.8).toFixed(2))
-        : null;
-
-      const cantidadImagenes = 1 + (j % 2);
-      const imagenes: Prisma.ImagenProductoCreateWithoutProductoInput[] = [];
-      for (let k = 0; k < cantidadImagenes; k += 1) {
-        imagenes.push({
-          url: `https://picsum.photos/seed/${contadorImagen}/600/600`,
-          orden: k,
-        });
-        contadorImagen += 1;
-      }
-
-      await prisma.producto.create({
-        data: {
-          nombre,
-          slug: generarSlug(nombre, totalProductos + 1),
-          descripcion: `${nombre} de FABIOLA. Cuero de alta calidad con acabados finos. Ideal para el uso diario y ocasiones especiales.`,
-          precio: new Prisma.Decimal(precio),
-          precioOferta:
-            precioOferta !== null ? new Prisma.Decimal(precioOferta) : null,
-          stock: 10 + Math.floor(Math.random() * 40),
-          destacado,
-          activo: true,
-          categoriaId: categoria.id,
-          imagenes: { create: imagenes },
-        },
-      });
-      totalProductos += 1;
-    }
-  }
-
-  console.log(
-    `Seed completada: ${CATEGORIAS.length} categorias, ${totalProductos} productos.`,
-  );
+  const total = BANDOLERAS.length + CARTERAS.length;
+  console.log(`Seed completada: 2 categorias, ${total} productos reales.`);
 }
 
 main()

@@ -48,9 +48,8 @@ async function cargarCategorias(): Promise<Categoria[]> {
   }
 }
 
-// TODO: reemplazar con foto real de producto (Wasabi). Placeholder de stock.
-const IMAGEN_HERO =
-  "https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=1200&q=80";
+// Foto real de producto Valentino Benites (catálogo en public/productos).
+const IMAGEN_HERO = "/productos/foto-40.jpg";
 
 function Hero() {
   return (
