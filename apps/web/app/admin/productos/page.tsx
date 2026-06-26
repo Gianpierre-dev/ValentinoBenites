@@ -159,7 +159,7 @@ export default function PaginaProductos() {
                 </Td>
                 <Td className="text-center">{producto.stock}</Td>
                 <Td className="text-center">
-                  <Etiqueta variante={producto.activo ? "exito" : "neutral"}>
+                  <Etiqueta variante={producto.activo ? "activo" : "neutral"}>
                     {producto.activo ? "Activo" : "Inactivo"}
                   </Etiqueta>
                 </Td>

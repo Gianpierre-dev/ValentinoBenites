@@ -41,16 +41,28 @@ body {
 }
 
 /*
-  Jerarquia tipografica: Fraunces (serif display) para titulares grandes h1/h2,
+  Jerarquia tipografica de marca: Fraunces (serif display) para titulares h1/h2,
   con tracking ligeramente negativo y peso alto para presencia editorial.
-  Los microtitulos de UI (labels uppercase) optan por .titulo-ui para volver a
-  Inter, ya que el serif no funciona en textos pequenos en mayusculas.
-  Se limita al storefront (.storefront) para no alterar el panel admin.
+  La MISMA familia se aplica en ambos contextos para homologar la identidad:
+  - .storefront: presencia editorial amplia (tracking -0.02em, tamanos grandes
+    definidos en cada pagina).
+  - .admin: misma serif pero mas sobria/compacta (tracking -0.01em), respetando
+    la densidad del panel (los tamanos chicos los fija cada vista, ej. text-2xl).
+  Los microtitulos de UI (labels uppercase) usan .titulo-ui para volver a Inter,
+  ya que el serif no funciona en textos pequenos en mayusculas; el :not(.titulo-ui)
+  garantiza que esos labels nunca hereden la serif aunque sean h1/h2.
 */
-.storefront h1,
-.storefront h2 {
+.storefront h1:not(.titulo-ui),
+.storefront h2:not(.titulo-ui) {
   font-family: var(--font-display), Georgia, "Times New Roman", serif;
   letter-spacing: -0.02em;
+  color: var(--color-texto-fuerte);
+}
+
+.admin h1:not(.titulo-ui),
+.admin h2:not(.titulo-ui) {
+  font-family: var(--font-display), Georgia, "Times New Roman", serif;
+  letter-spacing: -0.01em;
   color: var(--color-texto-fuerte);
 }
 

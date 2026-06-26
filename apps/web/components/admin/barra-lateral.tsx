@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
@@ -42,9 +43,19 @@ export function BarraLateral() {
       <div className="border-b border-borde px-6 py-5">
         <Link
           href="/admin"
-          className="text-base font-semibold uppercase tracking-[0.2em] text-texto-fuerte"
+          aria-label="Valentino Benites, ir al panel"
+          className="flex items-center gap-2.5 text-texto-fuerte"
         >
-          Valentino Benites
+          <Image
+            src="/logo-valentino.png"
+            alt=""
+            width={36}
+            height={36}
+            className="h-9 w-9 shrink-0 object-contain"
+          />
+          <span className="text-base font-semibold uppercase tracking-[0.2em]">
+            Valentino Benites
+          </span>
         </Link>
         <p className="mt-1 text-xs uppercase tracking-wide text-texto/60">Panel de gestion</p>
       </div>

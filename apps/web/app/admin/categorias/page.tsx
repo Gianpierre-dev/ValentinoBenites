@@ -118,7 +118,7 @@ export default function PaginaCategorias() {
                 <Td className="text-texto/70">{categoria.slug}</Td>
                 <Td className="text-center">{categoria.orden}</Td>
                 <Td className="text-center">
-                  <Etiqueta variante={categoria.activo ? "exito" : "neutral"}>
+                  <Etiqueta variante={categoria.activo ? "activo" : "neutral"}>
                     {categoria.activo ? "Activa" : "Inactiva"}
                   </Etiqueta>
                 </Td>

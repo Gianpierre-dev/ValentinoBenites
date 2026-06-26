@@ -35,7 +35,7 @@ export const Boton = forwardRef<HTMLButtonElement, PropsBoton>(function Boton(
       disabled={disabled || cargando}
       aria-busy={cargando}
       className={cn(
-        "inline-flex items-center justify-center gap-2 rounded-none font-medium tracking-wide transition-colors disabled:cursor-not-allowed",
+        "inline-flex items-center justify-center gap-2 rounded-full font-medium tracking-wide transition-colors disabled:cursor-not-allowed",
         VARIANTES[variante],
         TAMANOS[tamano],
         className,
