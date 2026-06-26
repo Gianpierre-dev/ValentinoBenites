@@ -10,12 +10,14 @@
 
 import { PrismaClient, Prisma } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
+import { readFile } from 'node:fs/promises';
 import {
   CATALOGO_INICIAL,
   CONFIGURACION_INICIAL,
-  urlFoto,
+  rutaFotoFuente,
   generarSlug,
 } from './data/catalogo-inicial';
+import { subirFotoAWasabi } from './data/wasabi';
 
 const prisma = new PrismaClient();
 
@@ -77,8 +79,10 @@ async function main(): Promise<void> {
   }
 
   // Catálogo plano: productos sin categoría. La admin crea familias cuando quiera.
+  // Las fotos se SUBEN a Wasabi (no viven en el repo); se guarda la URL del proxy.
   for (let i = 0; i < CATALOGO_INICIAL.length; i += 1) {
     const def = CATALOGO_INICIAL[i];
+    const urlFoto = await subirFotoAWasabi(await readFile(rutaFotoFuente(def.foto)));
     await prisma.producto.create({
       data: {
         nombre: def.nombre,
@@ -89,7 +93,7 @@ async function main(): Promise<void> {
         stock: 15,
         destacado: def.destacado ?? false,
         activo: true,
-        imagenes: { create: [{ url: urlFoto(def.foto), orden: 0 }] },
+        imagenes: { create: [{ url: urlFoto, orden: 0 }] },
       },
     });
   }

@@ -21,9 +21,14 @@ export default async function PaginaInicio() {
     cargarCategorias(),
   ]);
 
+  // El hero usa la foto de un producto destacado (sin imágenes hardcodeadas).
+  const imagenHero =
+    destacados.find((producto) => producto.imagenes.length > 0)?.imagenes[0]
+      ?.url ?? null;
+
   return (
     <>
-      <Hero />
+      <Hero imagenUrl={imagenHero} />
       <Beneficios />
       {categorias.length > 0 && <AtajosCategorias categorias={categorias} />}
       <ProductosDestacados productos={destacados} />
@@ -48,10 +53,7 @@ async function cargarCategorias(): Promise<Categoria[]> {
   }
 }
 
-// Foto real de producto Valentino Benites (catálogo en public/productos).
-const IMAGEN_HERO = "/productos/foto-40.jpg";
-
-function Hero() {
+function Hero({ imagenUrl }: { imagenUrl: string | null }) {
   return (
     <section className="relative overflow-hidden border-b border-borde bg-gradient-to-br from-white via-perla to-[#f3e8f6]">
       {/* Dots decorativos en magenta para dar vida sin recargar. */}
@@ -95,23 +97,25 @@ function Hero() {
           </Link>
         </div>
 
-        <div className="relative flex items-center justify-center lg:justify-end">
-          {/* Halo morado difuso detras de la imagen para dar profundidad. */}
-          <span
-            aria-hidden
-            className="absolute h-72 w-72 rounded-full bg-acento/25 blur-3xl sm:h-96 sm:w-96"
-          />
-          <div className="relative aspect-[4/5] w-full max-w-md overflow-hidden rounded-[2rem] shadow-2xl shadow-acento/20 ring-1 ring-black/5">
-            <Image
-              src={IMAGEN_HERO}
-              alt="Cartera de cuero Valentino Benites"
-              fill
-              priority
-              sizes="(min-width: 1024px) 28rem, 90vw"
-              className="object-cover"
+        {imagenUrl && (
+          <div className="relative flex items-center justify-center lg:justify-end">
+            {/* Halo morado difuso detras de la imagen para dar profundidad. */}
+            <span
+              aria-hidden
+              className="absolute h-72 w-72 rounded-full bg-acento/25 blur-3xl sm:h-96 sm:w-96"
             />
+            <div className="relative aspect-[4/5] w-full max-w-md overflow-hidden rounded-[2rem] shadow-2xl shadow-acento/20 ring-1 ring-black/5">
+              <Image
+                src={imagenUrl}
+                alt="Cartera de cuero Valentino Benites"
+                fill
+                priority
+                sizes="(min-width: 1024px) 28rem, 90vw"
+                className="object-cover"
+              />
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </section>
   );

@@ -75,8 +75,17 @@ export const CATALOGO_INICIAL: ProductoInicial[] = [
   { nombre: 'Cartera Shopper Étnica Azul', foto: 50, precio: 129.9 },
 ];
 
-export function urlFoto(n: number): string {
-  return `/productos/foto-${String(n).padStart(2, '0')}.jpg`;
+import { resolve } from 'node:path';
+
+// Ruta del archivo fuente de la foto (carpeta local, fuera del repo). Solo se usa
+// para la carga inicial: el script lee el archivo y lo SUBE a Wasabi. Las fotos
+// no viven en el repositorio.
+export function rutaFotoFuente(n: number): string {
+  return resolve(
+    process.cwd(),
+    '../../fotos-productos',
+    `foto-${String(n).padStart(2, '0')}.jpg`,
+  );
 }
 
 export function generarSlug(texto: string, indice: number): string {

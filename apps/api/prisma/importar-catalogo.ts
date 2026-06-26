@@ -11,12 +11,14 @@
 
 import { PrismaClient, Prisma } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
+import { readFile } from 'node:fs/promises';
 import {
   CATALOGO_INICIAL,
   CONFIGURACION_INICIAL,
-  urlFoto,
+  rutaFotoFuente,
   generarSlug,
 } from './data/catalogo-inicial';
+import { subirFotoAWasabi } from './data/wasabi';
 
 const prisma = new PrismaClient();
 
@@ -65,6 +67,8 @@ async function importarProductos(): Promise<{ creados: number; existentes: numbe
       continue; // se respeta lo que la clienta haya editado
     }
 
+    // Se sube la foto a Wasabi solo para los productos nuevos.
+    const urlFoto = await subirFotoAWasabi(await readFile(rutaFotoFuente(def.foto)));
     await prisma.producto.create({
       data: {
         nombre: def.nombre,
@@ -75,7 +79,7 @@ async function importarProductos(): Promise<{ creados: number; existentes: numbe
         stock: 15,
         destacado: def.destacado ?? false,
         activo: true,
-        imagenes: { create: [{ url: urlFoto(def.foto), orden: 0 }] },
+        imagenes: { create: [{ url: urlFoto, orden: 0 }] },
       },
     });
     creados += 1;
