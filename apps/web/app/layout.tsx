@@ -9,11 +9,12 @@ const fuenteSans = Inter({
   display: "swap",
 });
 
+// Fraunces es variable: con `axes` no se puede fijar `weight` (debe ser
+// variable). Se carga el rango completo y los pesos se aplican via CSS.
 const fuenteDisplay = Fraunces({
   variable: "--fuente-display",
   subsets: ["latin"],
   display: "swap",
-  weight: ["600", "700", "800", "900"],
   axes: ["opsz"],
 });
 
