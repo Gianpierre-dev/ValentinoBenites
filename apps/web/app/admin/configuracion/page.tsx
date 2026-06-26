@@ -19,6 +19,9 @@ interface FormularioConfig {
   whatsapp: string;
   datosYape: string;
   datosPlin: string;
+  instagram: string;
+  facebook: string;
+  tiktok: string;
   banners: Banner[];
 }
 
@@ -28,6 +31,9 @@ async function cargarFormulario(): Promise<FormularioConfig> {
     whatsapp: config.whatsapp ?? "",
     datosYape: config.datosYape ?? "",
     datosPlin: config.datosPlin ?? "",
+    instagram: config.instagram ?? "",
+    facebook: config.facebook ?? "",
+    tiktok: config.tiktok ?? "",
     banners: config.banners ?? [],
   };
 }
@@ -46,11 +52,15 @@ export default function PaginaConfiguracion() {
     if (estado.tipo !== "listo") return;
     setGuardando(true);
     try {
-      const { whatsapp, datosYape, datosPlin, banners } = estado.datos;
+      const { whatsapp, datosYape, datosPlin, instagram, facebook, tiktok, banners } =
+        estado.datos;
       await actualizarConfiguracion({
         whatsapp: whatsapp.trim() || null,
         datosYape: datosYape.trim() || null,
         datosPlin: datosPlin.trim() || null,
+        instagram: instagram.trim() || null,
+        facebook: facebook.trim() || null,
+        tiktok: tiktok.trim() || null,
         banners,
       });
       mostrarExito("Configuracion guardada.");
@@ -100,6 +110,34 @@ export default function PaginaConfiguracion() {
               placeholder="Nombre y numero asociado a Plin"
               value={estado.datos.datosPlin}
               onChange={(evento) => actualizarCampo("datosPlin", evento.target.value)}
+            />
+          </section>
+
+          <section className="flex flex-col gap-4">
+            <h2 className="border-b border-borde pb-2 text-sm font-semibold uppercase tracking-wide text-texto/70">
+              Redes sociales
+            </h2>
+            <p className="text-sm text-texto/60">
+              Escribe solo el usuario, sin la URL completa. Si dejas un campo
+              vacio, esa red no aparece en la tienda.
+            </p>
+            <Input
+              etiqueta="Instagram"
+              placeholder="valentinobenites.pe"
+              value={estado.datos.instagram}
+              onChange={(evento) => actualizarCampo("instagram", evento.target.value)}
+            />
+            <Input
+              etiqueta="Facebook"
+              placeholder="valentinobenites"
+              value={estado.datos.facebook}
+              onChange={(evento) => actualizarCampo("facebook", evento.target.value)}
+            />
+            <Input
+              etiqueta="TikTok"
+              placeholder="valentinobenites"
+              value={estado.datos.tiktok}
+              onChange={(evento) => actualizarCampo("tiktok", evento.target.value)}
             />
           </section>
 

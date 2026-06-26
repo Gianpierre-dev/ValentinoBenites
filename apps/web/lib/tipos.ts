@@ -78,6 +78,9 @@ export interface Configuracion {
   whatsapp: string | null;
   datosYape: string | null;
   datosPlin: string | null;
+  instagram: string | null;
+  facebook: string | null;
+  tiktok: string | null;
   banners: Banner[] | null;
   actualizadoEn: string;
 }

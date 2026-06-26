@@ -14,5 +14,17 @@ export class ActualizarConfiguracionDto {
   datosPlin?: string;
 
   @IsOptional()
+  @IsString()
+  instagram?: string;
+
+  @IsOptional()
+  @IsString()
+  facebook?: string;
+
+  @IsOptional()
+  @IsString()
+  tiktok?: string;
+
+  @IsOptional()
   banners?: unknown;
 }

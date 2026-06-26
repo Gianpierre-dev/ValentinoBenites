@@ -2,9 +2,12 @@ import Image from "next/image";
 import Link from "next/link";
 import {
   IconBrandInstagram,
+  IconBrandFacebook,
   IconBrandWhatsapp,
   IconBrandTiktok,
 } from "@tabler/icons-react";
+import type { ComponentType } from "react";
+import { obtenerConfiguracion } from "@/lib/api";
 
 const ANIO_ACTUAL = new Date().getFullYear();
 
@@ -20,11 +23,68 @@ const ENLACES_AYUDA = [
   { etiqueta: "Envios", href: "/catalogo" },
 ];
 
+interface RedSocial {
+  nombre: string;
+  url: string;
+  Icono: ComponentType<{ size?: number; stroke?: number; "aria-hidden"?: boolean }>;
+}
+
+/**
+ * Construye la lista de redes a partir de la configuracion (administrable desde
+ * el panel admin). Solo se incluyen las redes con un usuario/numero cargado.
+ * Se guarda el handle; aqui se arma la URL final.
+ */
+function construirRedes(config: {
+  instagram: string | null;
+  facebook: string | null;
+  tiktok: string | null;
+  whatsapp: string | null;
+}): RedSocial[] {
+  const redes: RedSocial[] = [];
+  if (config.instagram) {
+    redes.push({
+      nombre: "Instagram",
+      url: `https://instagram.com/${config.instagram}`,
+      Icono: IconBrandInstagram,
+    });
+  }
+  if (config.facebook) {
+    redes.push({
+      nombre: "Facebook",
+      url: `https://facebook.com/${config.facebook}`,
+      Icono: IconBrandFacebook,
+    });
+  }
+  if (config.tiktok) {
+    redes.push({
+      nombre: "TikTok",
+      url: `https://tiktok.com/@${config.tiktok}`,
+      Icono: IconBrandTiktok,
+    });
+  }
+  if (config.whatsapp) {
+    redes.push({
+      nombre: "WhatsApp",
+      url: `https://wa.me/${config.whatsapp.replace(/\D/g, "")}`,
+      Icono: IconBrandWhatsapp,
+    });
+  }
+  return redes;
+}
+
 /**
  * Footer multicolumna estilo paez: marca, navegacion, ayuda y redes.
- * Las redes son enlaces base; los datos reales se conectaran desde Configuracion.
+ * Las redes se leen de Configuracion; degrada sin romper si la API no responde.
  */
-export function PieDePagina() {
+export async function PieDePagina() {
+  let redes: RedSocial[] = [];
+  try {
+    const config = await obtenerConfiguracion();
+    redes = construirRedes(config);
+  } catch {
+    redes = [];
+  }
+
   return (
     <footer className="mt-16 border-t border-borde bg-fondo">
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
@@ -83,46 +143,28 @@ export function PieDePagina() {
             </ul>
           </nav>
 
-          <div>
-            <h2 className="titulo-ui text-sm font-semibold uppercase tracking-wide text-texto-fuerte">
-              Siguenos
-            </h2>
-            <ul className="mt-4 flex items-center gap-4">
-              <li>
-                <a
-                  href="https://instagram.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="Instagram"
-                  className="text-texto transition-colors hover:text-acento"
-                >
-                  <IconBrandInstagram size={22} stroke={1.5} aria-hidden />
-                </a>
-              </li>
-              <li>
-                <a
-                  href="https://tiktok.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="TikTok"
-                  className="text-texto transition-colors hover:text-acento"
-                >
-                  <IconBrandTiktok size={22} stroke={1.5} aria-hidden />
-                </a>
-              </li>
-              <li>
-                <a
-                  href="https://wa.me"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="WhatsApp"
-                  className="text-texto transition-colors hover:text-acento"
-                >
-                  <IconBrandWhatsapp size={22} stroke={1.5} aria-hidden />
-                </a>
-              </li>
-            </ul>
-          </div>
+          {redes.length > 0 && (
+            <div>
+              <h2 className="titulo-ui text-sm font-semibold uppercase tracking-wide text-texto-fuerte">
+                Siguenos
+              </h2>
+              <ul className="mt-4 flex items-center gap-4">
+                {redes.map(({ nombre, url, Icono }) => (
+                  <li key={nombre}>
+                    <a
+                      href={url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label={nombre}
+                      className="text-texto transition-colors hover:text-acento"
+                    >
+                      <Icono size={22} stroke={1.5} aria-hidden />
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
 
         <div className="mt-10 border-t border-borde pt-6">

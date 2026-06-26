@@ -30,6 +30,9 @@ export class ConfiguracionService {
         whatsapp: dto.whatsapp,
         datosYape: dto.datosYape,
         datosPlin: dto.datosPlin,
+        instagram: dto.instagram,
+        facebook: dto.facebook,
+        tiktok: dto.tiktok,
         banners: dto.banners as Prisma.InputJsonValue | undefined,
       },
     });
