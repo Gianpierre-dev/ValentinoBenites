@@ -15,6 +15,14 @@ export class ActualizarConfiguracionDto {
 
   @IsOptional()
   @IsString()
+  qrYape?: string;
+
+  @IsOptional()
+  @IsString()
+  qrPlin?: string;
+
+  @IsOptional()
+  @IsString()
   instagram?: string;
 
   @IsOptional()

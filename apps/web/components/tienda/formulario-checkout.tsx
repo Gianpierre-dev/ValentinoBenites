@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -358,6 +359,8 @@ function PagoDigital({
   alSubir,
 }: PropsPagoDigital) {
   const datos = metodoDigital === "YAPE" ? configuracion?.datosYape : configuracion?.datosPlin;
+  const qr = metodoDigital === "YAPE" ? configuracion?.qrYape : configuracion?.qrPlin;
+  const billetera = metodoDigital === "YAPE" ? "Yape" : "Plin";
 
   return (
     <div className="mt-5 rounded-xl border border-borde bg-perla p-5">
@@ -380,11 +383,32 @@ function PagoDigital({
         ))}
       </div>
 
-      <p className="mt-4 whitespace-pre-line rounded-lg border border-borde bg-fondo px-4 py-3 text-sm text-texto">
-        {datos
-          ? datos
-          : "La tienda aún no ha configurado estos datos de pago. Usa la opción de WhatsApp."}
-      </p>
+      {qr && (
+        <figure className="mt-4 flex flex-col items-center rounded-xl border border-borde bg-fondo p-4">
+          <Image
+            src={qr}
+            alt={`Código QR de ${billetera}`}
+            width={208}
+            height={208}
+            className="h-52 w-52 object-contain"
+          />
+          <figcaption className="mt-2 text-xs text-texto">
+            Escanea el QR con tu app de {billetera} para pagar.
+          </figcaption>
+        </figure>
+      )}
+
+      {datos && (
+        <p className="mt-4 whitespace-pre-line rounded-lg border border-borde bg-fondo px-4 py-3 text-sm text-texto">
+          {datos}
+        </p>
+      )}
+
+      {!qr && !datos && (
+        <p className="mt-4 rounded-lg border border-borde bg-fondo px-4 py-3 text-sm text-texto">
+          La tienda aún no ha configurado {billetera}. Usa la opción de WhatsApp.
+        </p>
+      )}
 
       <div className="mt-5">
         <label

@@ -108,6 +108,10 @@ model Configuracion {
   whatsapp  String?
   datosYape String?
   datosPlin String?
+  // QR de pago (URLs de imagen subidas a Wasabi). Se muestran al cliente en el
+  // checkout cuando elige Yape/Plin. Administrable desde el panel admin.
+  qrYape    String?
+  qrPlin    String?
   // Redes sociales: se guarda el usuario/handle (no la URL completa); el
   // frontend arma la URL final. Administrable desde el panel admin.
   instagram String?

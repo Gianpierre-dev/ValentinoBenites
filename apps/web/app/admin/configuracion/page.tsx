@@ -19,6 +19,8 @@ interface FormularioConfig {
   whatsapp: string;
   datosYape: string;
   datosPlin: string;
+  qrYape: string | null;
+  qrPlin: string | null;
   instagram: string;
   facebook: string;
   tiktok: string;
@@ -31,6 +33,8 @@ async function cargarFormulario(): Promise<FormularioConfig> {
     whatsapp: config.whatsapp ?? "",
     datosYape: config.datosYape ?? "",
     datosPlin: config.datosPlin ?? "",
+    qrYape: config.qrYape,
+    qrPlin: config.qrPlin,
     instagram: config.instagram ?? "",
     facebook: config.facebook ?? "",
     tiktok: config.tiktok ?? "",
@@ -52,12 +56,23 @@ export default function PaginaConfiguracion() {
     if (estado.tipo !== "listo") return;
     setGuardando(true);
     try {
-      const { whatsapp, datosYape, datosPlin, instagram, facebook, tiktok, banners } =
-        estado.datos;
+      const {
+        whatsapp,
+        datosYape,
+        datosPlin,
+        qrYape,
+        qrPlin,
+        instagram,
+        facebook,
+        tiktok,
+        banners,
+      } = estado.datos;
       await actualizarConfiguracion({
         whatsapp: whatsapp.trim() || null,
         datosYape: datosYape.trim() || null,
         datosPlin: datosPlin.trim() || null,
+        qrYape,
+        qrPlin,
         instagram: instagram.trim() || null,
         facebook: facebook.trim() || null,
         tiktok: tiktok.trim() || null,
@@ -111,6 +126,25 @@ export default function PaginaConfiguracion() {
               value={estado.datos.datosPlin}
               onChange={(evento) => actualizarCampo("datosPlin", evento.target.value)}
             />
+
+            <p className="text-sm text-texto/60">
+              Sube el QR de cada billetera. El cliente lo ve en el checkout para
+              escanear y pagar.
+            </p>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <CargadorQR
+                etiqueta="QR de Yape"
+                url={estado.datos.qrYape}
+                alCambiar={(url) => actualizarCampo("qrYape", url)}
+                alError={mostrarError}
+              />
+              <CargadorQR
+                etiqueta="QR de Plin"
+                url={estado.datos.qrPlin}
+                alCambiar={(url) => actualizarCampo("qrPlin", url)}
+                alError={mostrarError}
+              />
+            </div>
           </section>
 
           <section className="flex flex-col gap-4">
@@ -166,6 +200,93 @@ interface PropsEditorBanners {
 
 const TIPOS_IMAGEN = ["image/jpeg", "image/png", "image/webp", "image/avif"];
 const TAMANO_MAXIMO_BYTES = 5 * 1024 * 1024;
+
+interface PropsCargadorQR {
+  etiqueta: string;
+  url: string | null;
+  alCambiar: (url: string | null) => void;
+  alError: (mensaje: string) => void;
+}
+
+/** Sube/previsualiza una imagen de QR de pago (una sola, opcional). */
+function CargadorQR({ etiqueta, url, alCambiar, alError }: PropsCargadorQR) {
+  const refInput = useRef<HTMLInputElement>(null);
+  const [subiendo, setSubiendo] = useState(false);
+
+  async function subir(archivos: FileList | null) {
+    const archivo = archivos?.[0];
+    if (!archivo) return;
+    if (!TIPOS_IMAGEN.includes(archivo.type)) {
+      alError("El archivo no es una imagen valida.");
+      return;
+    }
+    if (archivo.size > TAMANO_MAXIMO_BYTES) {
+      alError("La imagen supera el limite de 5 MB.");
+      return;
+    }
+    setSubiendo(true);
+    try {
+      const subido = await subirArchivo(archivo);
+      alCambiar(subido.url);
+    } catch (error) {
+      alError(mensajeDeError(error));
+    } finally {
+      setSubiendo(false);
+      if (refInput.current) refInput.current.value = "";
+    }
+  }
+
+  return (
+    <div className="flex flex-col gap-2">
+      <span className="text-sm font-medium text-texto-fuerte">{etiqueta}</span>
+      <div className="flex items-center gap-3">
+        <div className="relative h-28 w-28 shrink-0 overflow-hidden rounded-lg border border-borde bg-black/[.02]">
+          {url ? (
+            <Image src={url} alt={etiqueta} fill sizes="112px" className="object-contain p-1" />
+          ) : (
+            <span className="flex h-full items-center justify-center text-xs text-texto/40">
+              Sin QR
+            </span>
+          )}
+        </div>
+        <div className="flex flex-col items-start gap-2">
+          <Boton
+            type="button"
+            variante="secundario"
+            tamano="sm"
+            onClick={() => refInput.current?.click()}
+            disabled={subiendo}
+          >
+            {subiendo ? (
+              <IconLoader2 className="h-4 w-4 animate-spin" aria-hidden />
+            ) : (
+              <IconUpload className="h-4 w-4" aria-hidden />
+            )}
+            {url ? "Cambiar" : "Subir QR"}
+          </Boton>
+          {url && (
+            <Boton
+              type="button"
+              variante="fantasma"
+              tamano="sm"
+              onClick={() => alCambiar(null)}
+            >
+              <IconTrash className="h-4 w-4 text-oferta" aria-hidden />
+              Quitar
+            </Boton>
+          )}
+        </div>
+      </div>
+      <input
+        ref={refInput}
+        type="file"
+        accept="image/*"
+        className="sr-only"
+        onChange={(evento) => subir(evento.target.files)}
+      />
+    </div>
+  );
+}
 
 function EditorBanners({ banners, alCambiar, alError }: PropsEditorBanners) {
   const refInput = useRef<HTMLInputElement>(null);

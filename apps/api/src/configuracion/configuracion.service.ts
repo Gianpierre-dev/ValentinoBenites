@@ -30,6 +30,8 @@ export class ConfiguracionService {
         whatsapp: dto.whatsapp,
         datosYape: dto.datosYape,
         datosPlin: dto.datosPlin,
+        qrYape: dto.qrYape,
+        qrPlin: dto.qrPlin,
         instagram: dto.instagram,
         facebook: dto.facebook,
         tiktok: dto.tiktok,
