@@ -1,4 +1,5 @@
 import { Encabezado, PieDePagina } from "@/components/layout";
+import { CarritoDrawer } from "@/components/tienda";
 
 /**
  * Layout del storefront publico: envuelve todas las rutas del grupo (public)
@@ -12,6 +13,7 @@ export default function LayoutPublico({
       <Encabezado />
       <main className="flex-1">{children}</main>
       <PieDePagina />
+      <CarritoDrawer />
     </div>
   );
 }

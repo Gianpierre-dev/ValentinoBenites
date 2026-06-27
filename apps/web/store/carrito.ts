@@ -22,10 +22,16 @@ export interface LineaCarrito {
 
 interface EstadoCarrito {
   lineas: LineaCarrito[];
+  /** Si el panel lateral (drawer) del carrito esta visible. No se persiste. */
+  abierto: boolean;
   agregar: (producto: Producto, cantidad?: number) => void;
   quitar: (productoId: string) => void;
   cambiarCantidad: (productoId: string, cantidad: number) => void;
   vaciar: () => void;
+  /** Abre el panel lateral del carrito. */
+  abrir: () => void;
+  /** Cierra el panel lateral del carrito. */
+  cerrar: () => void;
   /** Total monetario del carrito (referencial; el backend recalcula al crear el pedido). */
   total: () => number;
   /** Cantidad total de unidades (para el contador del header). */
@@ -44,6 +50,7 @@ export const useCarrito = create<EstadoCarrito>()(
   persist(
     (set, get) => ({
       lineas: [],
+      abierto: false,
 
       agregar: (producto, cantidad = 1) => {
         const precioUnitario = precioVigente(producto.precio, producto.precioOferta);
@@ -58,6 +65,7 @@ export const useCarrito = create<EstadoCarrito>()(
               producto.stock,
             );
             return {
+              abierto: true,
               lineas: estado.lineas.map((l) =>
                 l.productoId === producto.id ? { ...l, cantidad: nuevaCantidad } : l,
               ),
@@ -73,7 +81,7 @@ export const useCarrito = create<EstadoCarrito>()(
             stock: producto.stock,
             cantidad: recortarAlStock(cantidad, producto.stock),
           };
-          return { lineas: [...estado.lineas, nuevaLinea] };
+          return { abierto: true, lineas: [...estado.lineas, nuevaLinea] };
         });
       },
 
@@ -92,6 +100,10 @@ export const useCarrito = create<EstadoCarrito>()(
         })),
 
       vaciar: () => set({ lineas: [] }),
+
+      abrir: () => set({ abierto: true }),
+
+      cerrar: () => set({ abierto: false }),
 
       total: () =>
         get().lineas.reduce((suma, l) => suma + l.precioUnitario * l.cantidad, 0),

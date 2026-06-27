@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Etiqueta } from "@/components/ui";
 import type { Producto } from "@/lib/tipos";
 import { calcularDescuento, formatearPrecio } from "@/lib/utilidades";
+import { BotonAgregarRapido } from "./boton-agregar-rapido";
 
 interface PropsTarjetaProducto {
   producto: Producto;
@@ -10,7 +11,9 @@ interface PropsTarjetaProducto {
 
 /**
  * Tarjeta de producto del catalogo: foto protagonista, nombre, precio y, si hay
- * oferta, precio tachado + badge de descuento. Toda la tarjeta enlaza al detalle.
+ * oferta, precio tachado + badge de descuento. Usa el patron "stretched link":
+ * un enlace superpuesto cubre toda la tarjeta para navegar al detalle, y el boton
+ * de "Agregar" se renderiza por encima (z superior) como accion independiente.
  */
 export function TarjetaProducto({ producto }: PropsTarjetaProducto) {
   const imagen = producto.imagenes?.[0]?.url ?? null;
@@ -18,12 +21,8 @@ export function TarjetaProducto({ producto }: PropsTarjetaProducto) {
   const descuento = calcularDescuento(producto.precio, producto.precioOferta);
 
   return (
-    <article className="group h-full">
-      <Link
-        href={`/producto/${producto.slug}`}
-        className="flex h-full flex-col overflow-hidden rounded-2xl border border-borde bg-fondo shadow-[0_1px_3px_rgba(17,17,17,0.04)] transition-all duration-300 ease-out focus-visible:outline-none group-hover:-translate-y-1 group-hover:border-acento/30 group-hover:shadow-[0_18px_40px_-12px_rgba(125,33,129,0.28)]"
-        aria-label={producto.nombre}
-      >
+    <article className="group relative h-full">
+      <div className="flex h-full flex-col overflow-hidden rounded-2xl border border-borde bg-fondo shadow-[0_1px_3px_rgba(17,17,17,0.04)] transition-all duration-300 ease-out group-hover:-translate-y-1 group-hover:border-acento/30 group-hover:shadow-[0_18px_40px_-12px_rgba(125,33,129,0.28)]">
         <div className="relative aspect-[3/4] overflow-hidden bg-perla">
           {imagen ? (
             <Image
@@ -46,6 +45,7 @@ export function TarjetaProducto({ producto }: PropsTarjetaProducto) {
               -{descuento}%
             </Etiqueta>
           )}
+          <BotonAgregarRapido producto={producto} />
         </div>
 
         <div className="flex flex-1 flex-col gap-1.5 p-4">
@@ -69,6 +69,14 @@ export function TarjetaProducto({ producto }: PropsTarjetaProducto) {
             )}
           </div>
         </div>
+      </div>
+
+      <Link
+        href={`/producto/${producto.slug}`}
+        aria-label={producto.nombre}
+        className="absolute inset-0 z-10 rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-acento focus-visible:ring-offset-2"
+      >
+        <span className="sr-only">{producto.nombre}</span>
       </Link>
     </article>
   );
