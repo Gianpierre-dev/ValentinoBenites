@@ -9,13 +9,16 @@ import {
   IconQrcode,
   IconUpload,
   IconCheck,
+  IconLock,
+  IconUserCircle,
 } from "@tabler/icons-react";
 import { Boton, Input, Spinner } from "@/components/ui";
 import { useCarrito } from "@/store/carrito";
 import { useHidratado } from "@/store/usar-hidratado";
 import { crearPedido, subirArchivo, ErrorApi } from "@/lib/api";
 import type { Configuracion, MetodoPago } from "@/lib/tipos";
-import { formatearPrecio } from "@/lib/utilidades";
+import { cn } from "@/lib/utilidades";
+import { ResumenPedido } from "./resumen-pedido";
 import {
   construirEnlaceWhatsApp,
   construirMensajeWhatsApp,
@@ -34,6 +37,9 @@ type MetodoSeleccionado = "WHATSAPP" | "DIGITAL";
  * - WhatsApp: arma un mensaje pre-formateado con el pedido y abre wa.me del negocio.
  * - Yape/Plin: muestra los datos de pago, permite subir el comprobante y registra
  *   el pedido via POST /api/pedidos.
+ *
+ * Layout de dos columnas: datos + metodo de pago a la izquierda, resumen del
+ * pedido (con fotos) y confirmacion en una card sticky a la derecha.
  */
 export function FormularioCheckout({ configuracion }: PropsFormularioCheckout) {
   const hidratado = useHidratado();
@@ -71,11 +77,7 @@ export function FormularioCheckout({ configuracion }: PropsFormularioCheckout) {
   }
 
   if (lineas.length === 0) {
-    return (
-      <p className="border border-borde bg-black/[.02] px-4 py-6 text-center text-sm text-texto">
-        Tu carrito esta vacio. Agrega productos antes de continuar al pago.
-      </p>
-    );
+    return <CarritoVacioCheckout />;
   }
 
   const subirComprobante = async (
@@ -107,7 +109,7 @@ export function FormularioCheckout({ configuracion }: PropsFormularioCheckout) {
 
     if (!enlace) {
       setErrorEnvio(
-        "El numero de WhatsApp de la tienda no esta configurado. Intenta con Yape o Plin.",
+        "El número de WhatsApp de la tienda no está configurado. Intenta con Yape o Plin.",
       );
       return;
     }
@@ -149,99 +151,137 @@ export function FormularioCheckout({ configuracion }: PropsFormularioCheckout) {
   });
 
   return (
-    <form onSubmit={alEnviar} className="flex flex-col gap-8" noValidate>
-      <section aria-labelledby="titulo-datos">
-        <h2
-          id="titulo-datos"
-          className="titulo-ui text-sm font-semibold uppercase tracking-wide text-texto-fuerte"
+    <form
+      onSubmit={alEnviar}
+      noValidate
+      className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_minmax(340px,400px)] lg:items-start lg:gap-10"
+    >
+      <div className="flex flex-col gap-6">
+        <BloqueFormulario
+          icono={<IconUserCircle size={20} aria-hidden />}
+          titulo="Tus datos"
+          tituloId="titulo-datos"
         >
-          Tus datos
-        </h2>
-        <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <Input
-            etiqueta="Nombre completo"
-            placeholder="Ej. Maria Lopez"
-            autoComplete="name"
-            error={errors.nombreCliente?.message}
-            {...register("nombreCliente")}
-          />
-          <Input
-            etiqueta="Celular"
-            placeholder="9XXXXXXXX"
-            inputMode="numeric"
-            autoComplete="tel"
-            error={errors.telefono?.message}
-            {...register("telefono")}
-          />
-        </div>
-      </section>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <Input
+              etiqueta="Nombre completo"
+              placeholder="Ej. María López"
+              autoComplete="name"
+              error={errors.nombreCliente?.message}
+              {...register("nombreCliente")}
+            />
+            <Input
+              etiqueta="Celular"
+              placeholder="9XXXXXXXX"
+              inputMode="numeric"
+              autoComplete="tel"
+              error={errors.telefono?.message}
+              {...register("telefono")}
+            />
+          </div>
+        </BloqueFormulario>
 
-      <section aria-labelledby="titulo-metodo">
-        <h2
-          id="titulo-metodo"
-          className="titulo-ui text-sm font-semibold uppercase tracking-wide text-texto-fuerte"
+        <BloqueFormulario
+          icono={<IconLock size={20} aria-hidden />}
+          titulo="Método de pago"
+          tituloId="titulo-metodo"
         >
-          Metodo de pago
-        </h2>
-        <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
-          <OpcionMetodo
-            activa={metodo === "WHATSAPP"}
-            onClick={() => setMetodo("WHATSAPP")}
-            titulo="Coordinar por WhatsApp"
-            descripcion="Te llevamos a un chat con tu pedido listo para enviar."
-            icono={<IconBrandWhatsapp size={22} aria-hidden />}
-          />
-          <OpcionMetodo
-            activa={metodo === "DIGITAL"}
-            onClick={() => setMetodo("DIGITAL")}
-            titulo="Yape o Plin"
-            descripcion="Paga con QR y sube tu comprobante para confirmar."
-            icono={<IconQrcode size={22} aria-hidden />}
-          />
-        </div>
-      </section>
+          <div
+            role="radiogroup"
+            aria-labelledby="titulo-metodo"
+            className="grid grid-cols-1 gap-3 sm:grid-cols-2"
+          >
+            <OpcionMetodo
+              activa={metodo === "WHATSAPP"}
+              onClick={() => setMetodo("WHATSAPP")}
+              titulo="Coordinar por WhatsApp"
+              descripcion="Te llevamos a un chat con tu pedido listo para enviar."
+              icono={<IconBrandWhatsapp size={24} aria-hidden />}
+            />
+            <OpcionMetodo
+              activa={metodo === "DIGITAL"}
+              onClick={() => setMetodo("DIGITAL")}
+              titulo="Yape o Plin"
+              descripcion="Paga con QR y sube tu comprobante para confirmar."
+              icono={<IconQrcode size={24} aria-hidden />}
+            />
+          </div>
 
-      {metodo === "DIGITAL" && (
-        <PagoDigital
-          configuracion={configuracion}
-          metodoDigital={metodoDigital}
-          alElegirMetodo={setMetodoDigital}
-          comprobanteUrl={comprobanteUrl}
-          subiendo={subiendo}
-          errorComprobante={errorComprobante}
-          alSubir={subirComprobante}
-        />
-      )}
+          {metodo === "DIGITAL" && (
+            <PagoDigital
+              configuracion={configuracion}
+              metodoDigital={metodoDigital}
+              alElegirMetodo={setMetodoDigital}
+              comprobanteUrl={comprobanteUrl}
+              subiendo={subiendo}
+              errorComprobante={errorComprobante}
+              alSubir={subirComprobante}
+            />
+          )}
+        </BloqueFormulario>
+      </div>
 
-      <section className="border-t border-borde pt-6">
-        <div className="flex items-center justify-between">
-          <span className="text-sm font-semibold uppercase tracking-wide text-texto-fuerte">
-            Total
-          </span>
-          <span className="text-lg font-semibold text-texto-fuerte">
-            {formatearPrecio(total)}
-          </span>
-        </div>
-        <p className="mt-1 text-xs text-texto">
-          El monto final se confirma al validar tu pedido.
-        </p>
+      <aside className="lg:sticky lg:top-24">
+        <div className="flex flex-col gap-4">
+          <ResumenPedido lineas={lineas} total={total} />
 
-        {errorEnvio && (
-          <p role="alert" className="mt-4 text-sm text-oferta">
-            {errorEnvio}
+          {errorEnvio && (
+            <p
+              role="alert"
+              className="rounded-xl border border-oferta/30 bg-oferta/5 px-4 py-3 text-sm text-oferta"
+            >
+              {errorEnvio}
+            </p>
+          )}
+
+          <Boton type="submit" tamano="lg" cargando={isSubmitting} className="w-full">
+            {metodo === "WHATSAPP" ? (
+              <>
+                <IconBrandWhatsapp size={20} aria-hidden />
+                Enviar pedido por WhatsApp
+              </>
+            ) : (
+              "Confirmar pedido"
+            )}
+          </Boton>
+
+          <p className="flex items-center justify-center gap-1.5 text-xs text-texto">
+            <IconLock size={13} aria-hidden />
+            Tus datos se usan solo para coordinar tu pedido.
           </p>
-        )}
-
-        <Boton
-          type="submit"
-          tamano="lg"
-          cargando={isSubmitting}
-          className="mt-6 w-full"
-        >
-          {metodo === "WHATSAPP" ? "Enviar pedido por WhatsApp" : "Confirmar pedido"}
-        </Boton>
-      </section>
+        </div>
+      </aside>
     </form>
+  );
+}
+
+interface PropsBloqueFormulario {
+  icono: React.ReactNode;
+  titulo: string;
+  tituloId: string;
+  children: React.ReactNode;
+}
+
+/** Card de seccion del checkout con la misma profundidad que el resto del sitio. */
+function BloqueFormulario({ icono, titulo, tituloId, children }: PropsBloqueFormulario) {
+  return (
+    <section
+      aria-labelledby={tituloId}
+      className="rounded-2xl border border-borde bg-fondo p-6 shadow-[0_1px_3px_rgba(17,17,17,0.04)] sm:p-7"
+    >
+      <div className="mb-5 flex items-center gap-3">
+        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-acento/10 text-acento">
+          {icono}
+        </span>
+        <h2
+          id={tituloId}
+          className="titulo-ui text-sm font-semibold uppercase tracking-wide text-texto-fuerte"
+        >
+          {titulo}
+        </h2>
+      </div>
+      {children}
+    </section>
   );
 }
 
@@ -257,16 +297,42 @@ function OpcionMetodo({ activa, onClick, titulo, descripcion, icono }: PropsOpci
   return (
     <button
       type="button"
+      role="radio"
+      aria-checked={activa}
       onClick={onClick}
-      aria-pressed={activa}
-      className={`flex items-start gap-3 border p-4 text-left transition-colors ${
-        activa ? "border-acento" : "border-borde hover:border-texto/40"
-      }`}
+      className={cn(
+        "group flex items-start gap-3 rounded-xl border p-4 text-left transition-all duration-200",
+        activa
+          ? "border-acento bg-acento/[.04] shadow-[0_8px_24px_-12px_rgba(125,33,129,0.35)] ring-1 ring-acento"
+          : "border-borde hover:-translate-y-0.5 hover:border-acento/40 hover:shadow-[0_8px_20px_-14px_rgba(125,33,129,0.3)]",
+      )}
     >
-      <span className="mt-0.5 text-texto-fuerte">{icono}</span>
-      <span>
-        <span className="block text-sm font-medium text-texto-fuerte">{titulo}</span>
-        <span className="mt-1 block text-xs text-texto">{descripcion}</span>
+      <span
+        className={cn(
+          "flex h-11 w-11 shrink-0 items-center justify-center rounded-full transition-colors",
+          activa
+            ? "bg-acento text-acento-contraste"
+            : "bg-perla text-texto-fuerte group-hover:bg-acento/10 group-hover:text-acento",
+        )}
+      >
+        {icono}
+      </span>
+      <span className="flex-1">
+        <span className="flex items-center gap-2">
+          <span className="text-sm font-semibold text-texto-fuerte">{titulo}</span>
+          <span
+            aria-hidden
+            className={cn(
+              "ml-auto flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 transition-colors",
+              activa ? "border-acento bg-acento" : "border-borde",
+            )}
+          >
+            {activa && <IconCheck size={12} className="text-acento-contraste" />}
+          </span>
+        </span>
+        <span className="mt-1 block text-xs leading-relaxed text-texto">
+          {descripcion}
+        </span>
       </span>
     </button>
   );
@@ -294,49 +360,50 @@ function PagoDigital({
   const datos = metodoDigital === "YAPE" ? configuracion?.datosYape : configuracion?.datosPlin;
 
   return (
-    <section aria-labelledby="titulo-digital" className="border border-borde p-6">
-      <h3
-        id="titulo-digital"
-        className="text-sm font-semibold uppercase tracking-wide text-texto-fuerte"
-      >
-        Paga con Yape o Plin
-      </h3>
-
-      <div className="mt-4 flex gap-2" role="group" aria-label="Elegir billetera">
+    <div className="mt-5 rounded-xl border border-borde bg-perla p-5">
+      <div className="flex gap-2" role="group" aria-label="Elegir billetera">
         {(["YAPE", "PLIN"] as const).map((opcion) => (
           <button
             key={opcion}
             type="button"
             onClick={() => alElegirMetodo(opcion)}
             aria-pressed={metodoDigital === opcion}
-            className={`border px-4 py-2 text-sm uppercase tracking-wide transition-colors ${
+            className={cn(
+              "flex-1 rounded-lg border px-4 py-2.5 text-sm font-semibold uppercase tracking-wide transition-all",
               metodoDigital === opcion
-                ? "border-acento bg-acento text-acento-contraste"
-                : "border-borde text-texto hover:border-texto/40"
-            }`}
+                ? "border-acento bg-acento text-acento-contraste shadow-[0_8px_20px_-12px_rgba(125,33,129,0.5)]"
+                : "border-borde bg-fondo text-texto hover:border-acento/40 hover:text-acento",
+            )}
           >
             {opcion === "YAPE" ? "Yape" : "Plin"}
           </button>
         ))}
       </div>
 
-      <p className="mt-4 whitespace-pre-line text-sm text-texto">
+      <p className="mt-4 whitespace-pre-line rounded-lg border border-borde bg-fondo px-4 py-3 text-sm text-texto">
         {datos
           ? datos
-          : "La tienda aun no ha configurado estos datos de pago. Usa la opcion de WhatsApp."}
+          : "La tienda aún no ha configurado estos datos de pago. Usa la opción de WhatsApp."}
       </p>
 
-      <div className="mt-6">
+      <div className="mt-5">
         <label
           htmlFor="comprobante"
-          className="inline-flex cursor-pointer items-center gap-2 border border-borde px-4 py-2 text-sm text-texto-fuerte transition-colors hover:bg-black/[.04]"
+          className={cn(
+            "inline-flex cursor-pointer items-center gap-2 rounded-full border px-5 py-2.5 text-sm font-medium transition-colors",
+            comprobanteUrl
+              ? "border-acento/40 bg-acento/5 text-acento"
+              : "border-borde bg-fondo text-texto-fuerte hover:border-acento/40 hover:text-acento",
+          )}
         >
           {subiendo ? (
             <Spinner tamano="sm" etiqueta="Subiendo comprobante" />
+          ) : comprobanteUrl ? (
+            <IconCheck size={18} aria-hidden />
           ) : (
             <IconUpload size={18} aria-hidden />
           )}
-          {comprobanteUrl ? "Cambiar comprobante" : "Subir comprobante"}
+          {comprobanteUrl ? "Comprobante cargado · cambiar" : "Subir comprobante"}
         </label>
         <input
           id="comprobante"
@@ -347,36 +414,49 @@ function PagoDigital({
           className="sr-only"
         />
 
-        {comprobanteUrl && (
-          <p className="mt-3 inline-flex items-center gap-2 text-sm text-texto-fuerte">
-            <IconCheck size={16} aria-hidden className="text-green-600" />
-            Comprobante cargado
-          </p>
-        )}
-
         {errorComprobante && (
           <p role="alert" className="mt-3 text-sm text-oferta">
             {errorComprobante}
           </p>
         )}
       </div>
-    </section>
+    </div>
+  );
+}
+
+function CarritoVacioCheckout() {
+  const router = useRouter();
+  return (
+    <div className="mx-auto flex max-w-md flex-col items-center rounded-2xl border border-borde bg-fondo px-6 py-16 text-center shadow-[0_1px_3px_rgba(17,17,17,0.04)]">
+      <span className="flex h-14 w-14 items-center justify-center rounded-full bg-acento/10 text-acento">
+        <IconQrcode size={28} aria-hidden />
+      </span>
+      <h2 className="mt-6 text-2xl font-semibold tracking-tight text-texto-fuerte">
+        Tu carrito está vacío
+      </h2>
+      <p className="mt-2 text-texto">
+        Agrega productos antes de continuar al pago.
+      </p>
+      <Boton className="mt-6" onClick={() => router.push("/catalogo")}>
+        Ver catálogo
+      </Boton>
+    </div>
   );
 }
 
 function Confirmacion({ codigo }: { codigo: string }) {
   const router = useRouter();
   return (
-    <div className="flex flex-col items-center border border-borde py-16 text-center">
-      <span className="inline-flex h-14 w-14 items-center justify-center rounded-full bg-green-600 text-white">
-        <IconCheck size={28} aria-hidden />
+    <div className="mx-auto flex max-w-md flex-col items-center rounded-2xl border border-borde bg-fondo py-16 px-6 text-center shadow-[0_18px_50px_-20px_rgba(125,33,129,0.25)]">
+      <span className="inline-flex h-16 w-16 items-center justify-center rounded-full bg-green-600 text-white shadow-lg shadow-green-600/30">
+        <IconCheck size={32} aria-hidden />
       </span>
       <h2 className="mt-6 text-2xl font-semibold tracking-tight text-texto-fuerte">
         Pedido registrado
       </h2>
       <p className="mt-2 text-texto">
-        Tu codigo de pedido es{" "}
-        <span className="font-semibold text-texto-fuerte">{codigo}</span>.
+        Tu código de pedido es{" "}
+        <span className="font-semibold text-acento">{codigo}</span>.
       </p>
       <p className="mt-1 max-w-sm text-sm text-texto">
         Validaremos tu pago y nos pondremos en contacto contigo a la brevedad.

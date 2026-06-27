@@ -17,16 +17,26 @@ export default async function PaginaCheckout() {
   const configuracion = await cargarConfiguracion();
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6 lg:px-8">
-      <h1 className="text-3xl font-semibold tracking-tight text-texto-fuerte">
-        Finalizar compra
-      </h1>
-      <p className="mt-2 text-texto">
-        Completa tus datos y elige como quieres pagar.
-      </p>
+    <div className="relative overflow-hidden bg-gradient-to-b from-perla to-fondo">
+      {/* Halo morado difuso para dar profundidad sin recargar. */}
+      <span
+        aria-hidden
+        className="pointer-events-none absolute -left-24 top-0 h-72 w-72 rounded-full bg-acento/10 blur-3xl"
+      />
+      <div className="relative mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:py-14 lg:px-8">
+        <header className="max-w-xl">
+          <h1 className="text-3xl font-semibold tracking-tight text-texto-fuerte sm:text-4xl">
+            Finalizar compra
+          </h1>
+          <p className="mt-3 text-texto">
+            Completa tus datos y elige cómo quieres pagar. Revisa tu pedido en el
+            resumen antes de confirmar.
+          </p>
+        </header>
 
-      <div className="mt-10">
-        <FormularioCheckout configuracion={configuracion} />
+        <div className="mt-10">
+          <FormularioCheckout configuracion={configuracion} />
+        </div>
       </div>
     </div>
   );

@@ -20,7 +20,7 @@ export function GaleriaProducto({ imagenes, nombre }: PropsGaleriaProducto) {
 
   if (ordenadas.length === 0) {
     return (
-      <div className="flex aspect-[3/4] items-center justify-center border border-borde bg-black/[.02] text-xs uppercase tracking-wide text-texto/50">
+      <div className="flex aspect-[3/4] items-center justify-center rounded-2xl border border-borde bg-perla text-xs uppercase tracking-wide text-texto/50">
         Sin imagen
       </div>
     );
@@ -30,15 +30,22 @@ export function GaleriaProducto({ imagenes, nombre }: PropsGaleriaProducto) {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="relative aspect-[3/4] overflow-hidden border border-borde bg-black/[.02]">
-        <Image
-          src={principal.url}
-          alt={nombre}
-          fill
-          priority
-          sizes="(min-width: 1024px) 50vw, 100vw"
-          className="object-cover"
+      <div className="relative">
+        {/* Halo morado difuso para dar profundidad, como en el hero del home. */}
+        <span
+          aria-hidden
+          className="pointer-events-none absolute -inset-4 -z-10 rounded-[2.5rem] bg-acento/10 blur-2xl"
         />
+        <div className="relative aspect-[3/4] overflow-hidden rounded-[2rem] bg-perla shadow-2xl shadow-acento/15 ring-1 ring-black/5">
+          <Image
+            src={principal.url}
+            alt={nombre}
+            fill
+            priority
+            sizes="(min-width: 1024px) 50vw, 100vw"
+            className="object-cover"
+          />
+        </div>
       </div>
 
       {ordenadas.length > 1 && (
@@ -51,8 +58,10 @@ export function GaleriaProducto({ imagenes, nombre }: PropsGaleriaProducto) {
                 aria-label={`Ver imagen ${indice + 1} de ${nombre}`}
                 aria-pressed={indice === activa}
                 className={cn(
-                  "relative block aspect-square w-full overflow-hidden border bg-black/[.02] transition-colors",
-                  indice === activa ? "border-acento" : "border-borde hover:border-texto/40",
+                  "relative block aspect-square w-full overflow-hidden rounded-xl border-2 bg-perla transition-all",
+                  indice === activa
+                    ? "border-acento ring-2 ring-acento/20"
+                    : "border-transparent hover:border-acento/40",
                 )}
               >
                 <Image

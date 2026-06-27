@@ -9,3 +9,4 @@ export { Buscador } from "./buscador";
 export { FiltroCategorias } from "./filtro-categorias";
 export { Newsletter } from "./newsletter";
 export { FormularioCheckout } from "./formulario-checkout";
+export { ResumenPedido } from "./resumen-pedido";
