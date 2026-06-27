@@ -35,7 +35,7 @@ export default function PaginaCarrito() {
   const unidades = lineas.reduce((suma, linea) => suma + linea.cantidad, 0);
 
   return (
-    <div className="bg-gradient-to-b from-perla to-fondo">
+    <div className="bg-gradient-to-b from-rosa-fuerte to-fondo">
       <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:py-14 lg:px-8">
         <header className="flex items-baseline gap-3">
           <h1 className="text-3xl font-semibold tracking-tight text-texto-fuerte sm:text-4xl">

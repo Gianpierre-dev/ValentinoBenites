@@ -55,22 +55,32 @@ async function cargarCategorias(): Promise<Categoria[]> {
 
 function Hero({ imagenUrl }: { imagenUrl: string | null }) {
   return (
-    <section className="relative overflow-hidden border-b border-borde bg-gradient-to-br from-white via-perla to-[#f3e8f6]">
+    <section className="relative overflow-hidden border-b border-borde bg-gradient-to-br from-[#fdf3fb] via-[#fbe9f6] to-[#f1d9ef]">
+      {/* Capa de puntitos de marca, muy sutil, para textura calida. */}
+      <span
+        aria-hidden
+        className="fondo-puntos pointer-events-none absolute inset-0 opacity-60"
+      />
+      {/* Halo magenta calido a la izquierda para reforzar la temperatura. */}
+      <span
+        aria-hidden
+        className="pointer-events-none absolute -left-24 -top-24 h-80 w-80 rounded-full bg-acento-claro/20 blur-3xl"
+      />
       {/* Dots decorativos en magenta para dar vida sin recargar. */}
       <span
         aria-hidden
-        className="pointer-events-none absolute right-[8%] top-16 h-2.5 w-2.5 rounded-full bg-acento-claro/70"
+        className="pointer-events-none absolute right-[8%] top-16 h-2.5 w-2.5 rounded-full bg-acento-claro/80"
       />
       <span
         aria-hidden
-        className="pointer-events-none absolute right-[20%] top-32 h-1.5 w-1.5 rounded-full bg-acento/50"
+        className="pointer-events-none absolute right-[20%] top-32 h-1.5 w-1.5 rounded-full bg-acento/60"
       />
       <span
         aria-hidden
-        className="pointer-events-none absolute left-[6%] bottom-24 h-2 w-2 rounded-full bg-acento-claro/60"
+        className="pointer-events-none absolute left-[6%] bottom-24 h-2 w-2 rounded-full bg-acento-claro/70"
       />
 
-      <div className="mx-auto grid max-w-7xl items-center gap-12 px-4 py-16 sm:px-6 lg:grid-cols-2 lg:gap-8 lg:px-8 lg:py-24">
+      <div className="relative mx-auto grid max-w-7xl items-center gap-12 px-4 py-16 sm:px-6 lg:grid-cols-2 lg:gap-8 lg:px-8 lg:py-24">
         <div className="flex flex-col items-start gap-6">
           <p className="inline-flex items-center gap-2 rounded-full border border-acento/20 bg-white/70 px-4 py-1.5 text-xs font-medium uppercase tracking-[0.25em] text-acento backdrop-blur">
             Nueva temporada
@@ -168,9 +178,13 @@ function AtajosCategorias({ categorias }: { categorias: Categoria[] }) {
   return (
     <section
       aria-labelledby="titulo-categorias"
-      className="bg-perla"
+      className="relative overflow-hidden bg-rosa"
     >
-      <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
+      <span
+        aria-hidden
+        className="fondo-puntos pointer-events-none absolute inset-0 opacity-50"
+      />
+      <div className="relative mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
         <h2 id="titulo-categorias" className="text-3xl font-extrabold sm:text-4xl">
           Compra por categoría
         </h2>

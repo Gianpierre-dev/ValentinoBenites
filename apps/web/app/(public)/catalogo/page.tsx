@@ -27,33 +27,35 @@ export default async function PaginaCatalogo({
   ]);
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
-      <header className="flex flex-col gap-6">
-        <h1 className="text-3xl font-semibold tracking-tight text-texto-fuerte">
-          Catalogo
-        </h1>
-        <Suspense fallback={null}>
-          <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-            <FiltroCategorias
-              categorias={categorias}
-              categoriaActiva={categoriaSlug}
-            />
-            <Buscador />
-          </div>
-        </Suspense>
-      </header>
+    <div className="bg-rosa">
+      <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+        <header className="flex flex-col gap-6">
+          <h1 className="text-3xl font-semibold tracking-tight text-texto-fuerte">
+            Catalogo
+          </h1>
+          <Suspense fallback={null}>
+            <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+              <FiltroCategorias
+                categorias={categorias}
+                categoriaActiva={categoriaSlug}
+              />
+              <Buscador />
+            </div>
+          </Suspense>
+        </header>
 
-      <div className="mt-10">
-        {consulta && (
-          <p className="mb-6 text-sm text-texto">
-            Resultados para{" "}
-            <span className="font-medium text-texto-fuerte">{consulta}</span>
-          </p>
-        )}
-        <GrillaProductos
-          productos={productos}
-          mensajeVacio="No encontramos productos con esos criterios."
-        />
+        <div className="mt-10">
+          {consulta && (
+            <p className="mb-6 text-sm text-texto">
+              Resultados para{" "}
+              <span className="font-medium text-texto-fuerte">{consulta}</span>
+            </p>
+          )}
+          <GrillaProductos
+            productos={productos}
+            mensajeVacio="No encontramos productos con esos criterios."
+          />
+        </div>
       </div>
     </div>
   );

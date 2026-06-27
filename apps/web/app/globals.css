@@ -10,6 +10,15 @@
   --color-fondo: #ffffff;
   /* Perla violacea muy sutil para alternar secciones (no todo blanco plano). */
   --color-perla: #faf7fb;
+  /*
+    Rosa de marca para AMBIENTE (fondos de seccion y footer), inspirado en el
+    sitio oficial que usa rosados calidos en hero/footer. Mas perceptible que el
+    perla pero sin volverse chillon: el morado sigue siendo el acento de accion.
+    --color-rosa: base suave para secciones; --color-rosa-fuerte: footer/zonas
+    con mas presencia femenina.
+  */
+  --color-rosa: #fbf0fa;
+  --color-rosa-fuerte: #f7e4f4;
   --color-texto: #334155;
   --color-texto-fuerte: #111111;
   --color-borde: #e5e5e5;
@@ -22,6 +31,8 @@
 @theme inline {
   --color-fondo: var(--color-fondo);
   --color-perla: var(--color-perla);
+  --color-rosa: var(--color-rosa);
+  --color-rosa-fuerte: var(--color-rosa-fuerte);
   --color-texto: var(--color-texto);
   --color-texto-fuerte: var(--color-texto-fuerte);
   --color-borde: var(--color-borde);
@@ -75,6 +86,19 @@ body {
 :focus-visible {
   outline: 2px solid var(--color-acento);
   outline-offset: 2px;
+}
+
+/*
+  Patron de puntitos sutil de marca (guiño al sitio oficial). Se usa como capa
+  decorativa de fondo en secciones rosas; el color magenta va a baja opacidad
+  para que aporte textura sin recargar ni afectar la legibilidad del texto.
+*/
+.fondo-puntos {
+  background-image: radial-gradient(
+    rgba(214, 78, 220, 0.12) 1px,
+    transparent 1.4px
+  );
+  background-size: 22px 22px;
 }
 
 /* Respeta la preferencia de movimiento reducido del usuario. */

@@ -17,7 +17,7 @@ export default async function PaginaCheckout() {
   const configuracion = await cargarConfiguracion();
 
   return (
-    <div className="relative overflow-hidden bg-gradient-to-b from-perla to-fondo">
+    <div className="relative overflow-hidden bg-gradient-to-b from-rosa-fuerte to-fondo">
       {/* Halo morado difuso para dar profundidad sin recargar. */}
       <span
         aria-hidden
