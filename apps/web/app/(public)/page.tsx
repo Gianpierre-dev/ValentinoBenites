@@ -1,4 +1,3 @@
-import Image from "next/image";
 import Link from "next/link";
 import {
   IconArrowRight,
@@ -6,9 +5,13 @@ import {
   IconShieldLock,
   IconTruckDelivery,
 } from "@tabler/icons-react";
-import { GrillaProductos, Newsletter } from "@/components/tienda";
-import { listarCategorias, listarProductos } from "@/lib/api";
-import type { Categoria, Producto } from "@/lib/tipos";
+import { GrillaProductos, HeroSlider, Newsletter } from "@/components/tienda";
+import {
+  listarCategorias,
+  listarProductos,
+  obtenerConfiguracion,
+} from "@/lib/api";
+import type { Banner, Categoria, Producto } from "@/lib/tipos";
 
 /**
  * Home del storefront Valentino Benites: hero con producto protagonista, atajos
@@ -16,19 +19,20 @@ import type { Categoria, Producto } from "@/lib/tipos";
  * Server component; degrada sin romper si la API no responde.
  */
 export default async function PaginaInicio() {
-  const [destacados, categorias] = await Promise.all([
+  const [destacados, categorias, banners] = await Promise.all([
     cargarDestacados(),
     cargarCategorias(),
+    cargarBanners(),
   ]);
 
-  // El hero usa la foto de un producto destacado (sin imágenes hardcodeadas).
+  // Fallback del hero: foto de un producto destacado (sin imágenes hardcodeadas).
   const imagenHero =
     destacados.find((producto) => producto.imagenes.length > 0)?.imagenes[0]
       ?.url ?? null;
 
   return (
     <>
-      <Hero imagenUrl={imagenHero} />
+      <HeroSlider banners={banners} imagenUrlFallback={imagenHero} />
       <Beneficios />
       {categorias.length > 0 && <AtajosCategorias categorias={categorias} />}
       <ProductosDestacados productos={destacados} />
@@ -53,82 +57,13 @@ async function cargarCategorias(): Promise<Categoria[]> {
   }
 }
 
-function Hero({ imagenUrl }: { imagenUrl: string | null }) {
-  return (
-    <section className="relative overflow-hidden border-b border-borde bg-gradient-to-br from-[#fdf3fb] via-[#fbe9f6] to-[#f1d9ef]">
-      {/* Capa de puntitos de marca, muy sutil, para textura calida. */}
-      <span
-        aria-hidden
-        className="fondo-puntos pointer-events-none absolute inset-0 opacity-60"
-      />
-      {/* Halo magenta calido a la izquierda para reforzar la temperatura. */}
-      <span
-        aria-hidden
-        className="pointer-events-none absolute -left-24 -top-24 h-80 w-80 rounded-full bg-acento-claro/20 blur-3xl"
-      />
-      {/* Dots decorativos en magenta para dar vida sin recargar. */}
-      <span
-        aria-hidden
-        className="pointer-events-none absolute right-[8%] top-16 h-2.5 w-2.5 rounded-full bg-acento-claro/80"
-      />
-      <span
-        aria-hidden
-        className="pointer-events-none absolute right-[20%] top-32 h-1.5 w-1.5 rounded-full bg-acento/60"
-      />
-      <span
-        aria-hidden
-        className="pointer-events-none absolute left-[6%] bottom-24 h-2 w-2 rounded-full bg-acento-claro/70"
-      />
-
-      <div className="relative mx-auto grid max-w-7xl items-center gap-12 px-4 py-16 sm:px-6 lg:grid-cols-2 lg:gap-8 lg:px-8 lg:py-24">
-        <div className="flex flex-col items-start gap-6">
-          <p className="inline-flex items-center gap-2 rounded-full border border-acento/20 bg-white/70 px-4 py-1.5 text-xs font-medium uppercase tracking-[0.25em] text-acento backdrop-blur">
-            Nueva temporada
-          </p>
-          <h1 className="max-w-xl text-4xl font-black leading-[1.05] text-texto-fuerte sm:text-5xl lg:text-6xl">
-            Moda que te <span className="text-acento">acompaña</span> todos los
-            días
-          </h1>
-          <p className="max-w-md text-lg leading-relaxed text-texto">
-            Carteras y accesorios de cuero para mujer. Piezas elegantes, hechas
-            para durar y pensadas para tu día a día.
-          </p>
-          <Link
-            href="/catalogo"
-            className="group inline-flex items-center gap-2 rounded-full bg-acento px-7 py-3.5 text-base font-medium text-acento-contraste shadow-lg shadow-acento/30 transition-all hover:-translate-y-0.5 hover:bg-acento/90 hover:shadow-xl hover:shadow-acento/40"
-          >
-            Ver catálogo
-            <IconArrowRight
-              size={18}
-              stroke={2}
-              aria-hidden
-              className="transition-transform group-hover:translate-x-1"
-            />
-          </Link>
-        </div>
-
-        {imagenUrl && (
-          <div className="relative flex items-center justify-center lg:justify-end">
-            {/* Halo morado difuso detras de la imagen para dar profundidad. */}
-            <span
-              aria-hidden
-              className="absolute h-72 w-72 rounded-full bg-acento/25 blur-3xl sm:h-96 sm:w-96"
-            />
-            <div className="relative aspect-[4/5] w-full max-w-md overflow-hidden rounded-[2rem] shadow-2xl shadow-acento/20 ring-1 ring-black/5">
-              <Image
-                src={imagenUrl}
-                alt="Cartera de cuero Valentino Benites"
-                fill
-                priority
-                sizes="(min-width: 1024px) 28rem, 90vw"
-                className="object-cover"
-              />
-            </div>
-          </div>
-        )}
-      </div>
-    </section>
-  );
+async function cargarBanners(): Promise<Banner[]> {
+  try {
+    const configuracion = await obtenerConfiguracion();
+    return configuracion.banners ?? [];
+  } catch {
+    return [];
+  }
 }
 
 const BENEFICIOS = [

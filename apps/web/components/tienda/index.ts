@@ -8,5 +8,6 @@ export { AccionesProducto } from "./acciones-producto";
 export { Buscador } from "./buscador";
 export { FiltroCategorias } from "./filtro-categorias";
 export { Newsletter } from "./newsletter";
+export { HeroSlider } from "./hero-slider";
 export { FormularioCheckout } from "./formulario-checkout";
 export { ResumenPedido } from "./resumen-pedido";
