@@ -157,6 +157,8 @@ model ItemPedido {
   subtotal       Decimal   @db.Decimal(10, 2)
 
   @@index([pedidoId])
+  @@index([productoId])
+  @@index([varianteId])
   @@map("items_pedido")
 }
 
