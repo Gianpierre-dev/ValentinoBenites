@@ -3,6 +3,8 @@ import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { CrearPedidoDto } from './dto/crear-pedido.dto';
 import { ActualizarEstadoDto } from './dto/actualizar-estado.dto';
+import { precioEfectivoVariante } from '../variantes/variantes.helpers';
+import { transicionPermitida } from './maquina-estados';
 
 const INCLUIR_ITEMS = {
   items: { include: { producto: { include: { imagenes: true } } } },
@@ -10,7 +12,9 @@ const INCLUIR_ITEMS = {
 
 interface LineaCalculada {
   productoId: string;
+  varianteId: string;
   nombreProducto: string;
+  colorElegido: string;
   precioUnitario: Prisma.Decimal;
   cantidad: number;
   subtotal: Prisma.Decimal;
@@ -36,6 +40,7 @@ export class PedidosService {
         metodoPago: dto.metodoPago,
         comprobanteUrl: dto.comprobanteUrl,
         total,
+        // El estado inicial (PENDIENTE_PAGO) lo fija el default del schema.
         items: { create: lineas },
       },
       include: INCLUIR_ITEMS,
@@ -54,6 +59,11 @@ export class PedidosService {
     if (!pedido) {
       throw new BadRequestException('El pedido no existe.');
     }
+    if (!transicionPermitida(pedido.estado, dto.estado)) {
+      throw new BadRequestException(
+        `No se puede pasar de ${pedido.estado} a ${dto.estado}.`,
+      );
+    }
     return this.prisma.pedido.update({
       where: { id },
       data: { estado: dto.estado },
@@ -62,30 +72,38 @@ export class PedidosService {
   }
 
   /**
-   * Construye las lineas del pedido leyendo precios reales de la base.
-   * Usa precioOferta cuando esta definido. Nunca confia en montos del cliente.
+   * Construye las lineas del pedido leyendo la Variante (unidad comprable) y su
+   * producto (modelo). El precio efectivo se resuelve del lado del servidor y se
+   * captura un snapshot inmutable (nombre del modelo + color elegido). Modelo
+   * hecho a pedido: NO hay validacion ni descuento de inventario.
    */
   private async calcularLineas(dto: CrearPedidoDto): Promise<LineaCalculada[]> {
-    const ids = dto.items.map((item) => item.productoId);
-    const productos = await this.prisma.producto.findMany({
+    const ids = dto.items.map((item) => item.varianteId);
+    const variantes = await this.prisma.variante.findMany({
       where: { id: { in: ids }, activo: true },
+      include: { producto: true },
     });
-    const porId = new Map(productos.map((p) => [p.id, p]));
+    const porId = new Map(variantes.map((v) => [v.id, v]));
 
     return dto.items.map((item) => {
-      const producto = porId.get(item.productoId);
-      if (!producto) {
+      const variante = porId.get(item.varianteId);
+      if (!variante) {
         throw new BadRequestException(
-          `El producto ${item.productoId} no esta disponible.`,
+          `La variante ${item.varianteId} no esta disponible.`,
         );
       }
 
-      const precioUnitario = producto.precioOferta ?? producto.precio;
+      const precioUnitario = precioEfectivoVariante(
+        variante,
+        variante.producto,
+      );
       const subtotal = precioUnitario.mul(item.cantidad);
 
       return {
-        productoId: producto.id,
-        nombreProducto: producto.nombre,
+        productoId: variante.productoId,
+        varianteId: variante.id,
+        nombreProducto: variante.producto.nombre,
+        colorElegido: variante.color,
         precioUnitario,
         cantidad: item.cantidad,
         subtotal,

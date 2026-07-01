@@ -5,6 +5,7 @@ import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './auth/auth.module';
 import { ProductosModule } from './productos/productos.module';
+import { VariantesModule } from './variantes/variantes.module';
 import { CategoriasModule } from './categorias/categorias.module';
 import { PedidosModule } from './pedidos/pedidos.module';
 import { ConfiguracionModule } from './configuracion/configuracion.module';
@@ -18,6 +19,7 @@ import { StorageModule } from './storage/storage.module';
     PrismaModule,
     AuthModule,
     ProductosModule,
+    VariantesModule,
     CategoriasModule,
     PedidosModule,
     ConfiguracionModule,

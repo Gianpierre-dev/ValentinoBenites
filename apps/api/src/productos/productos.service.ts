@@ -9,10 +9,16 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CrearProductoDto } from './dto/crear-producto.dto';
 import { ActualizarProductoDto } from './dto/actualizar-producto.dto';
 import { FiltrarProductosDto } from './dto/filtrar-productos.dto';
+import { serializarProductoPublico } from './productos.serializer';
 
 const INCLUIR_RELACIONES = {
   categoria: true,
   imagenes: { orderBy: { orden: 'asc' as const } },
+  variantes: {
+    where: { activo: true },
+    orderBy: { orden: 'asc' as const },
+    include: { imagenes: { orderBy: { orden: 'asc' as const } } },
+  },
 };
 
 @Injectable()
@@ -51,7 +57,7 @@ export class ProductosService {
       throw new NotFoundException('El producto no existe.');
     }
 
-    return producto;
+    return serializarProductoPublico(producto);
   }
 
   async crear(dto: CrearProductoDto) {

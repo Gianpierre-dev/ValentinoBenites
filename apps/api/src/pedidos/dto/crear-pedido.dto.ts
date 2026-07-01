@@ -15,9 +15,10 @@ import {
 import { MetodoPago } from '@prisma/client';
 
 export class ItemPedidoDto {
+  // La unidad comprable es la Variante (color), no el Producto (modelo).
   @IsString()
-  @IsNotEmpty({ message: 'El producto es obligatorio.' })
-  productoId!: string;
+  @IsNotEmpty({ message: 'La variante es obligatoria.' })
+  varianteId!: string;
 
   @IsInt()
   @Min(1, { message: 'La cantidad debe ser al menos 1.' })
