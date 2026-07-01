@@ -118,6 +118,13 @@ model Configuracion {
   facebook  String?
   tiktok    String?
   banners   Json?
+  // Texto del hero de la home, administrable desde el panel admin. En heroTitulo
+  // se puede resaltar UNA palabra envolviendola en asteriscos, ej:
+  // "Moda que te *acompana* todos los dias" -> "acompana" se pinta con el acento.
+  heroTitulo     String?
+  heroSubtitulo  String?
+  // true = texto claro (blanco) para banners oscuros; false = texto oscuro.
+  heroTextoClaro Boolean @default(true)
   actualizadoEn DateTime @updatedAt
 
   @@map("configuracion")

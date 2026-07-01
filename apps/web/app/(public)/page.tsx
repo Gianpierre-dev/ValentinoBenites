@@ -13,16 +13,24 @@ import {
 } from "@/lib/api";
 import type { Banner, Categoria, Producto } from "@/lib/tipos";
 
+/** Datos del hero que la clienta administra desde el panel. */
+interface ContenidoHero {
+  banners: Banner[];
+  titulo: string | null;
+  subtitulo: string | null;
+  textoClaro: boolean;
+}
+
 /**
  * Home del storefront Valentino Benites: hero con producto protagonista, atajos
  * por categoria, prueba de confianza, grilla de destacados y newsletter.
  * Server component; degrada sin romper si la API no responde.
  */
 export default async function PaginaInicio() {
-  const [destacados, categorias, banners] = await Promise.all([
+  const [destacados, categorias, hero] = await Promise.all([
     cargarDestacados(),
     cargarCategorias(),
-    cargarBanners(),
+    cargarHero(),
   ]);
 
   // Fallback del hero: foto de un producto destacado (sin imágenes hardcodeadas).
@@ -32,7 +40,13 @@ export default async function PaginaInicio() {
 
   return (
     <>
-      <HeroSlider banners={banners} imagenUrlFallback={imagenHero} />
+      <HeroSlider
+        banners={hero.banners}
+        imagenUrlFallback={imagenHero}
+        titulo={hero.titulo}
+        subtitulo={hero.subtitulo}
+        textoClaro={hero.textoClaro}
+      />
       <Beneficios />
       {categorias.length > 0 && <AtajosCategorias categorias={categorias} />}
       <ProductosDestacados productos={destacados} />
@@ -57,12 +71,18 @@ async function cargarCategorias(): Promise<Categoria[]> {
   }
 }
 
-async function cargarBanners(): Promise<Banner[]> {
+async function cargarHero(): Promise<ContenidoHero> {
   try {
     const configuracion = await obtenerConfiguracion();
-    return configuracion.banners ?? [];
+    return {
+      banners: configuracion.banners ?? [],
+      titulo: configuracion.heroTitulo,
+      subtitulo: configuracion.heroSubtitulo,
+      textoClaro: configuracion.heroTextoClaro,
+    };
   } catch {
-    return [];
+    // Sin API: degrada al hero con degradado de marca y textos por defecto.
+    return { banners: [], titulo: null, subtitulo: null, textoClaro: true };
   }
 }
 

@@ -24,6 +24,9 @@ interface FormularioConfig {
   instagram: string;
   facebook: string;
   tiktok: string;
+  heroTitulo: string;
+  heroSubtitulo: string;
+  heroTextoClaro: boolean;
   banners: Banner[];
 }
 
@@ -38,6 +41,9 @@ async function cargarFormulario(): Promise<FormularioConfig> {
     instagram: config.instagram ?? "",
     facebook: config.facebook ?? "",
     tiktok: config.tiktok ?? "",
+    heroTitulo: config.heroTitulo ?? "",
+    heroSubtitulo: config.heroSubtitulo ?? "",
+    heroTextoClaro: config.heroTextoClaro,
     banners: config.banners ?? [],
   };
 }
@@ -65,6 +71,9 @@ export default function PaginaConfiguracion() {
         instagram,
         facebook,
         tiktok,
+        heroTitulo,
+        heroSubtitulo,
+        heroTextoClaro,
         banners,
       } = estado.datos;
       await actualizarConfiguracion({
@@ -76,6 +85,9 @@ export default function PaginaConfiguracion() {
         instagram: instagram.trim() || null,
         facebook: facebook.trim() || null,
         tiktok: tiktok.trim() || null,
+        heroTitulo: heroTitulo.trim() || null,
+        heroSubtitulo: heroSubtitulo.trim() || null,
+        heroTextoClaro,
         banners,
       });
       mostrarExito("Configuracion guardada.");
@@ -173,6 +185,52 @@ export default function PaginaConfiguracion() {
               value={estado.datos.tiktok}
               onChange={(evento) => actualizarCampo("tiktok", evento.target.value)}
             />
+          </section>
+
+          <section className="flex flex-col gap-4">
+            <h2 className="border-b border-borde pb-2 text-sm font-semibold uppercase tracking-wide text-texto/70">
+              Hero / Portada
+            </h2>
+            <Input
+              etiqueta="Titulo del hero"
+              placeholder="Moda que te *acompaña* todos los días"
+              value={estado.datos.heroTitulo}
+              onChange={(evento) => actualizarCampo("heroTitulo", evento.target.value)}
+            />
+            <p className="text-sm text-texto/60">
+              Usa *asteriscos* para resaltar una palabra en color, ej: Moda que
+              te *acompaña* todos los días
+            </p>
+            <div className="flex w-full flex-col gap-1.5">
+              <label
+                htmlFor="hero-subtitulo"
+                className="text-sm font-medium text-texto-fuerte"
+              >
+                Subtitulo del hero
+              </label>
+              <textarea
+                id="hero-subtitulo"
+                rows={3}
+                placeholder="Carteras y accesorios de cuero para mujer..."
+                value={estado.datos.heroSubtitulo}
+                onChange={(evento) => actualizarCampo("heroSubtitulo", evento.target.value)}
+                className="w-full rounded-lg border border-borde bg-fondo px-3 py-2 text-sm text-texto-fuerte outline-none transition-colors placeholder:text-texto/50 focus:border-acento"
+              />
+            </div>
+            <label className="flex items-center gap-3 text-sm text-texto-fuerte">
+              <input
+                type="checkbox"
+                checked={estado.datos.heroTextoClaro}
+                onChange={(evento) => actualizarCampo("heroTextoClaro", evento.target.checked)}
+                className="h-4 w-4 rounded border-borde text-acento focus:ring-acento"
+              />
+              <span>
+                Texto claro (para banners oscuros)
+                <span className="block text-xs font-normal text-texto/60">
+                  Actívalo si tus banners son oscuros; desactívalo si son claros.
+                </span>
+              </span>
+            </label>
           </section>
 
           <EditorBanners

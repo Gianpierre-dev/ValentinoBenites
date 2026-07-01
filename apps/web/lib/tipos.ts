@@ -84,6 +84,9 @@ export interface Configuracion {
   facebook: string | null;
   tiktok: string | null;
   banners: Banner[] | null;
+  heroTitulo: string | null;
+  heroSubtitulo: string | null;
+  heroTextoClaro: boolean;
   actualizadoEn: string;
 }
 

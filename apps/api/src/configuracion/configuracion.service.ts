@@ -35,6 +35,9 @@ export class ConfiguracionService {
         instagram: dto.instagram,
         facebook: dto.facebook,
         tiktok: dto.tiktok,
+        heroTitulo: dto.heroTitulo,
+        heroSubtitulo: dto.heroSubtitulo,
+        heroTextoClaro: dto.heroTextoClaro,
         banners: dto.banners as Prisma.InputJsonValue | undefined,
       },
     });

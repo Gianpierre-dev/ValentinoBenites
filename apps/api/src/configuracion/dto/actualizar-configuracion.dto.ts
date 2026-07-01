@@ -1,4 +1,4 @@
-import { IsOptional, IsString } from 'class-validator';
+import { IsBoolean, IsOptional, IsString } from 'class-validator';
 
 export class ActualizarConfiguracionDto {
   @IsOptional()
@@ -32,6 +32,18 @@ export class ActualizarConfiguracionDto {
   @IsOptional()
   @IsString()
   tiktok?: string;
+
+  @IsOptional()
+  @IsString()
+  heroTitulo?: string;
+
+  @IsOptional()
+  @IsString()
+  heroSubtitulo?: string;
+
+  @IsOptional()
+  @IsBoolean()
+  heroTextoClaro?: boolean;
 
   @IsOptional()
   banners?: unknown;

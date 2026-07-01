@@ -13,11 +13,41 @@ import type { Banner } from "@/lib/tipos";
 /** Tiempo entre transiciones automáticas del carrusel. */
 const INTERVALO_AUTOPLAY_MS = 5500;
 
+/** Texto por defecto del hero si la clienta aún no configuró el suyo. */
+const TITULO_FALLBACK = "Moda que te *acompaña* todos los días";
+const SUBTITULO_FALLBACK =
+  "Carteras y accesorios de cuero para mujer. Piezas elegantes, hechas para durar y pensadas para tu día a día.";
+
 interface HeroSliderProps {
   /** Banners administrados por la clienta (Configuración → Banners de la home). */
   banners: Banner[];
   /** Foto de producto destacado, usada como fondo si no hay banners. */
   imagenUrlFallback: string | null;
+  /** Título del hero; una palabra entre *asteriscos* se pinta con el acento. */
+  titulo?: string | null;
+  /** Párrafo subtítulo del hero. */
+  subtitulo?: string | null;
+  /** true = texto claro (blanco) para banners oscuros; false = texto oscuro. */
+  textoClaro?: boolean;
+}
+
+/** Segmento del título: texto plano o palabra resaltada (entre asteriscos). */
+interface SegmentoTitulo {
+  texto: string;
+  resaltado: boolean;
+}
+
+/**
+ * Divide el título en segmentos usando un par de asteriscos para marcar la
+ * palabra/frase a resaltar. Ej: `Moda que te *acompaña* hoy` produce tres
+ * segmentos, el del medio con `resaltado: true`. Si no hay asteriscos, devuelve
+ * un único segmento sin resaltar.
+ */
+function parsearTitulo(titulo: string): SegmentoTitulo[] {
+  return titulo
+    .split(/\*([^*]+)\*/)
+    .map((texto, indice) => ({ texto, resaltado: indice % 2 === 1 }))
+    .filter((segmento) => segmento.texto.length > 0);
 }
 
 /**
@@ -25,7 +55,26 @@ interface HeroSliderProps {
  * el texto y el CTA permanecen fijos superpuestos. Si no hay banners, degrada a
  * un hero estático con el degradado rosa/violáceo de marca (o la foto fallback).
  */
-export function HeroSlider({ banners, imagenUrlFallback }: HeroSliderProps) {
+export function HeroSlider({
+  banners,
+  imagenUrlFallback,
+  titulo,
+  subtitulo,
+  textoClaro = true,
+}: HeroSliderProps) {
+  const segmentosTitulo = parsearTitulo(
+    (titulo?.trim() ? titulo : TITULO_FALLBACK).trim(),
+  );
+  const textoSubtitulo = subtitulo?.trim() ? subtitulo : SUBTITULO_FALLBACK;
+
+  // El color se aplica inline para ganarle a la regla de globals.css que fuerza
+  // color oscuro a los h1/h2 dentro de .storefront (un estilo inline vence a
+  // cualquier selector de clase y conserva la fuente Fraunces).
+  const colorTexto = textoClaro ? "#ffffff" : "var(--color-texto-fuerte)";
+  const colorAcento = textoClaro
+    ? "var(--color-acento-claro)"
+    : "var(--color-acento)";
+
   const imagenes = banners
     .map((banner) => banner.imagenUrl)
     .filter((url): url is string => Boolean(url));
@@ -100,8 +149,9 @@ export function HeroSlider({ banners, imagenUrlFallback }: HeroSliderProps) {
         )}
       </div>
 
-      {/* Scrim: degradado oscuro/violáceo de izquierda a abajo para legibilidad. */}
-      {hayFoto && (
+      {/* Scrim: degradado oscuro para legibilidad del texto claro sobre la foto.
+          Solo aplica cuando hay foto y el texto es claro (banner oscuro). */}
+      {hayFoto && textoClaro && (
         <span
           aria-hidden
           className="absolute inset-0 -z-10 bg-gradient-to-r from-black/70 via-black/45 to-transparent"
@@ -114,7 +164,7 @@ export function HeroSlider({ banners, imagenUrlFallback }: HeroSliderProps) {
         <div className="flex max-w-xl flex-col items-start gap-6">
           <p
             className={`inline-flex items-center gap-2 rounded-full border px-4 py-1.5 text-xs font-medium uppercase tracking-[0.25em] backdrop-blur ${
-              hayFoto
+              textoClaro
                 ? "border-white/40 bg-white/15 text-white"
                 : "border-acento/20 bg-white/70 text-acento"
             }`}
@@ -122,23 +172,23 @@ export function HeroSlider({ banners, imagenUrlFallback }: HeroSliderProps) {
             Nueva temporada
           </p>
           <h1
-            className={`text-4xl font-black leading-[1.05] sm:text-5xl lg:text-6xl ${
-              hayFoto ? "text-white" : "text-texto-fuerte"
-            }`}
+            className="text-4xl font-black leading-[1.05] sm:text-5xl lg:text-6xl"
+            style={{ color: colorTexto }}
           >
-            Moda que te{" "}
-            <span className={hayFoto ? "text-acento-claro" : "text-acento"}>
-              acompaña
-            </span>{" "}
-            todos los días
+            {segmentosTitulo.map((segmento, indice) => (
+              <span
+                key={`${indice}-${segmento.texto}`}
+                style={segmento.resaltado ? { color: colorAcento } : undefined}
+              >
+                {segmento.texto}
+              </span>
+            ))}
           </h1>
           <p
-            className={`max-w-md text-lg leading-relaxed ${
-              hayFoto ? "text-white/90" : "text-texto"
-            }`}
+            className="max-w-md text-lg leading-relaxed"
+            style={{ color: colorTexto, opacity: textoClaro ? 0.9 : 1 }}
           >
-            Carteras y accesorios de cuero para mujer. Piezas elegantes, hechas
-            para durar y pensadas para tu día a día.
+            {textoSubtitulo}
           </p>
           <Link
             href="/catalogo"
