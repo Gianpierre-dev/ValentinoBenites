@@ -8,6 +8,8 @@ import { ProductosModule } from './productos/productos.module';
 import { VariantesModule } from './variantes/variantes.module';
 import { CategoriasModule } from './categorias/categorias.module';
 import { PedidosModule } from './pedidos/pedidos.module';
+import { PagosModule } from './pagos/pagos.module';
+import { MigracionModule } from './migracion/migracion.module';
 import { ConfiguracionModule } from './configuracion/configuracion.module';
 import { StorageModule } from './storage/storage.module';
 
@@ -22,6 +24,8 @@ import { StorageModule } from './storage/storage.module';
     VariantesModule,
     CategoriasModule,
     PedidosModule,
+    PagosModule,
+    MigracionModule,
     ConfiguracionModule,
     StorageModule,
   ],
