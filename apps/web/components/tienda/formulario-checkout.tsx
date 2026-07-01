@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
@@ -56,6 +56,10 @@ export function FormularioCheckout({ configuracion }: PropsFormularioCheckout) {
   const [errorEnvio, setErrorEnvio] = useState<string | null>(null);
   const [codigoPedido, setCodigoPedido] = useState<string | null>(null);
 
+  // Pestana reservada de forma sincrona para WhatsApp (fix del popup en movil):
+  // se abre dentro del gesto del usuario ANTES del await de creacion del pedido.
+  const ventanaWhatsAppRef = useRef<Window | null>(null);
+
   const {
     register,
     handleSubmit,
@@ -100,22 +104,62 @@ export function FormularioCheckout({ configuracion }: PropsFormularioCheckout) {
   };
 
   const itemsPedido = lineas.map((linea) => ({
-    productoId: linea.productoId,
+    varianteId: linea.varianteId,
     cantidad: linea.cantidad,
   }));
 
-  const enviarPorWhatsApp = (datos: DatosCheckout) => {
-    const mensaje = construirMensajeWhatsApp(datos, lineas, total);
-    const enlace = construirEnlaceWhatsApp(configuracion?.whatsapp ?? null, mensaje);
+  // Se ejecuta en el onClick del boton (gesto del usuario), sincronamente, antes
+  // de cualquier await. Reserva la pestana de WhatsApp para que el navegador movil
+  // no la bloquee cuando luego navegamos tras crear el pedido.
+  const reservarVentanaWhatsApp = () => {
+    if (metodo !== "WHATSAPP") return;
+    ventanaWhatsAppRef.current = window.open("about:blank", "_blank");
+  };
 
-    if (!enlace) {
+  const enviarPorWhatsApp = async (datos: DatosCheckout) => {
+    const ventana = ventanaWhatsAppRef.current;
+    ventanaWhatsAppRef.current = null;
+
+    const numero = configuracion?.whatsapp ?? null;
+    const mensajeBase = construirMensajeWhatsApp(datos, lineas, total);
+    const enlacePreliminar = construirEnlaceWhatsApp(numero, mensajeBase);
+
+    if (!enlacePreliminar) {
+      ventana?.close();
       setErrorEnvio(
         "El número de WhatsApp de la tienda no está configurado. Intenta con Yape o Plin.",
       );
       return;
     }
 
-    window.open(enlace, "_blank", "noopener,noreferrer");
+    try {
+      // WhatsApp ahora crea un Pedido real (PENDIENTE_PAGO) antes de abrir el chat.
+      const pedido = await crearPedido({
+        nombreCliente: datos.nombreCliente,
+        telefono: datos.telefono,
+        items: itemsPedido,
+        metodoPago: "WHATSAPP",
+      });
+
+      const mensaje = `${mensajeBase}\n\nCódigo de pedido: ${pedido.codigo}`;
+      const enlace = construirEnlaceWhatsApp(numero, mensaje) ?? enlacePreliminar;
+
+      vaciar();
+
+      if (ventana && !ventana.closed) {
+        ventana.location.href = enlace;
+      } else {
+        // La pestana reservada fue bloqueada o cerrada: fallback dentro del flujo.
+        window.open(enlace, "_blank", "noopener,noreferrer");
+      }
+
+      setCodigoPedido(pedido.codigo);
+    } catch (error) {
+      ventana?.close();
+      setErrorEnvio(
+        mensajeError(error, "No pudimos registrar tu pedido. Intenta nuevamente."),
+      );
+    }
   };
 
   const registrarPedidoDigital = async (datos: DatosCheckout) => {
@@ -142,14 +186,25 @@ export function FormularioCheckout({ configuracion }: PropsFormularioCheckout) {
     }
   };
 
-  const alEnviar = handleSubmit((datos) => {
-    setErrorEnvio(null);
-    if (metodo === "WHATSAPP") {
-      enviarPorWhatsApp(datos);
-      return;
-    }
-    return registrarPedidoDigital(datos);
-  });
+  // El manejador se arma dentro del evento (no en render) para que el acceso al
+  // ref de la pestana ocurra en tiempo de evento y no dispare la regla de refs.
+  const alEnviar = (evento: React.FormEvent<HTMLFormElement>) => {
+    void handleSubmit(
+      (datos) => {
+        setErrorEnvio(null);
+        if (metodo === "WHATSAPP") {
+          return enviarPorWhatsApp(datos);
+        }
+        return registrarPedidoDigital(datos);
+      },
+      () => {
+        // Validacion fallida: cerramos la pestana reservada en el onClick para no
+        // dejar un about:blank huerfano.
+        ventanaWhatsAppRef.current?.close();
+        ventanaWhatsAppRef.current = null;
+      },
+    )(evento);
+  };
 
   return (
     <form
@@ -235,7 +290,13 @@ export function FormularioCheckout({ configuracion }: PropsFormularioCheckout) {
             </p>
           )}
 
-          <Boton type="submit" tamano="lg" cargando={isSubmitting} className="w-full">
+          <Boton
+            type="submit"
+            tamano="lg"
+            cargando={isSubmitting}
+            onClick={reservarVentanaWhatsApp}
+            className="w-full"
+          >
             {metodo === "WHATSAPP" ? (
               <>
                 <IconBrandWhatsapp size={20} aria-hidden />

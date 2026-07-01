@@ -34,18 +34,20 @@ export function construirMensajeWhatsApp(
   const detalle = lineas
     .map(
       (linea) =>
-        `• ${linea.nombre} x${linea.cantidad} — ${formatearPrecio(
+        `• ${linea.nombre} (${linea.color}) x${linea.cantidad} — ${formatearPrecio(
           linea.precioUnitario * linea.cantidad,
         )}`,
     )
     .join("\n");
 
   return [
-    "Hola, quiero hacer un pedido:",
+    "*Hola, quiero hacer un pedido:*",
     "",
     detalle,
     "",
-    `Total: ${formatearPrecio(total)}`,
+    `*Total:* ${formatearPrecio(total)}`,
+    "",
+    "_Productos hechos a pedido, listos en ~24 h._",
     "",
     `Nombre: ${datos.nombreCliente}`,
     `Celular: ${datos.telefono}`,

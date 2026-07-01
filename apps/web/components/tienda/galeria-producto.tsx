@@ -2,11 +2,11 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import type { ImagenProducto } from "@/lib/tipos";
+import type { ImagenEfectiva } from "@/lib/tipos";
 import { cn } from "@/lib/utilidades";
 
 interface PropsGaleriaProducto {
-  imagenes: ImagenProducto[];
+  imagenes: ImagenEfectiva[];
   nombre: string;
 }
 

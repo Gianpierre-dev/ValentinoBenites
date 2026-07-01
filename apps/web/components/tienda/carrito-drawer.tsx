@@ -139,7 +139,7 @@ export function CarritoDrawer() {
           <>
             <ul className="flex-1 divide-y divide-borde overflow-y-auto px-5">
               {lineas.map((linea) => (
-                <li key={linea.productoId} className="flex gap-4 py-4">
+                <li key={linea.varianteId} className="flex gap-4 py-4">
                   <Link
                     href={`/producto/${linea.slug}`}
                     onClick={cerrar}
@@ -162,17 +162,22 @@ export function CarritoDrawer() {
 
                   <div className="flex flex-1 flex-col justify-between">
                     <div className="flex items-start justify-between gap-3">
-                      <Link
-                        href={`/producto/${linea.slug}`}
-                        onClick={cerrar}
-                        className="text-sm font-medium leading-snug text-texto-fuerte transition-colors hover:text-acento"
-                      >
-                        {linea.nombre}
-                      </Link>
+                      <div>
+                        <Link
+                          href={`/producto/${linea.slug}`}
+                          onClick={cerrar}
+                          className="text-sm font-medium leading-snug text-texto-fuerte transition-colors hover:text-acento"
+                        >
+                          {linea.nombre}
+                        </Link>
+                        <p className="mt-0.5 text-xs text-texto">
+                          Color: {linea.color}
+                        </p>
+                      </div>
                       <button
                         type="button"
-                        onClick={() => quitar(linea.productoId)}
-                        aria-label={`Quitar ${linea.nombre} del carrito`}
+                        onClick={() => quitar(linea.varianteId)}
+                        aria-label={`Quitar ${linea.nombre} (${linea.color}) del carrito`}
                         className="shrink-0 text-texto/60 transition-colors hover:text-oferta"
                       >
                         <IconTrash size={18} aria-hidden />
@@ -183,9 +188,8 @@ export function CarritoDrawer() {
                       <SelectorCantidad
                         cantidad={linea.cantidad}
                         alCambiar={(cantidad) =>
-                          cambiarCantidad(linea.productoId, cantidad)
+                          cambiarCantidad(linea.varianteId, cantidad)
                         }
-                        maximo={linea.stock}
                       />
                       <span className="text-sm font-semibold text-texto-fuerte">
                         {formatearPrecio(linea.precioUnitario * linea.cantidad)}

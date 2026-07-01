@@ -28,7 +28,7 @@ async function cargarConteos(): Promise<Conteos> {
     productos: productos.length,
     categorias: categorias.length,
     pedidos: pedidos.length,
-    pedidosPendientes: pedidos.filter((pedido) => pedido.estado === "PENDIENTE").length,
+    pedidosPendientes: pedidos.filter((pedido) => pedido.estado === "PENDIENTE_PAGO").length,
   };
 }
 

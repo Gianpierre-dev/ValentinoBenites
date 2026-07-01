@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { IconShoppingBag } from "@tabler/icons-react";
+import { IconShoppingBag, IconClockHour4 } from "@tabler/icons-react";
 import type { LineaCarrito } from "@/store/carrito";
 import { formatearPrecio } from "@/lib/utilidades";
 
@@ -32,7 +32,7 @@ export function ResumenPedido({ lineas, total }: PropsResumenPedido) {
 
       <ul className="divide-y divide-borde px-6">
         {lineas.map((linea) => (
-          <li key={linea.productoId} className="flex gap-4 py-4">
+          <li key={linea.varianteId} className="flex gap-4 py-4">
             <div className="relative h-20 w-16 shrink-0 overflow-hidden rounded-xl border border-borde bg-perla">
               {linea.imagenUrl ? (
                 <Image
@@ -59,6 +59,7 @@ export function ResumenPedido({ lineas, total }: PropsResumenPedido) {
               <p className="text-sm font-medium leading-snug text-texto-fuerte">
                 {linea.nombre}
               </p>
+              <p className="text-xs text-texto">Color: {linea.color}</p>
               <p className="text-xs text-texto">
                 {linea.cantidad} × {formatearPrecio(linea.precioUnitario)}
               </p>
@@ -88,6 +89,10 @@ export function ResumenPedido({ lineas, total }: PropsResumenPedido) {
         </div>
         <p className="text-xs text-texto">
           El monto final se confirma al validar tu pedido.
+        </p>
+        <p className="flex items-center gap-1.5 text-xs font-medium text-acento">
+          <IconClockHour4 size={13} aria-hidden />
+          Hecho a pedido, listo en ~24 h
         </p>
       </div>
     </div>

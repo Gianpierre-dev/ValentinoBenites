@@ -4,9 +4,15 @@
  * (el backend los convierte en sus respuestas).
  */
 
-export type MetodoPago = "WHATSAPP" | "YAPE" | "PLIN";
+export type MetodoPago = "WHATSAPP" | "YAPE" | "PLIN" | "IZIPAY";
 
-export type EstadoPedido = "PENDIENTE" | "VALIDADO" | "RECHAZADO";
+export type EstadoPedido =
+  | "PENDIENTE_PAGO"
+  | "PAGADO"
+  | "EN_PRODUCCION"
+  | "ENVIADO"
+  | "CANCELADO"
+  | "RECHAZADO";
 
 export interface Categoria {
   id: string;
@@ -25,6 +31,48 @@ export interface ImagenProducto {
   productoId: string;
 }
 
+export interface ImagenVariante {
+  id: string;
+  url: string;
+  orden: number;
+  varianteId: string;
+}
+
+/**
+ * Imagen resuelta que el backend expone como `imagenesEfectivas`: puede provenir
+ * de la variante o del producto (fallback). Comparten la forma minima id/url/orden.
+ */
+export interface ImagenEfectiva {
+  id: string;
+  url: string;
+  orden: number;
+}
+
+/**
+ * Variante de color de un producto: es la unidad comprable (hecho a pedido).
+ * El backend resuelve y expone los campos "efectivos" (imagenes con fallback al
+ * modelo y precio segun la regla de override), para que el front no duplique la
+ * cadena de fallback.
+ */
+export interface Variante {
+  id: string;
+  productoId: string;
+  color: string;
+  colorHex: string | null;
+  /** Override opcional del precio de la variante; si es null hereda del modelo. */
+  precio: number | null;
+  precioOferta: number | null;
+  activo: boolean;
+  orden: number;
+  imagenes: ImagenVariante[];
+  /** Fotos resueltas: propias de la variante o, si no tiene, las del modelo. */
+  imagenesEfectivas: ImagenEfectiva[];
+  /** Precio final a cobrar (override de la variante -> precio base del modelo). */
+  precioEfectivo: number;
+  /** Precio de oferta resuelto; null cuando no hay oferta vigente. */
+  precioOfertaEfectivo: number | null;
+}
+
 export interface Producto {
   id: string;
   nombre: string;
@@ -32,12 +80,18 @@ export interface Producto {
   descripcion: string | null;
   precio: number;
   precioOferta: number | null;
-  stock: number;
+  /**
+   * @deprecated Legado. El modelo es hecho-a-pedido: el backend ya no expone
+   * `stock`. Se conserva opcional solo para que el admin compile hasta que el
+   * Batch 4 lo elimine de sus formularios/tablas. El storefront lo ignora.
+   */
+  stock?: number;
   activo: boolean;
   destacado: boolean;
   categoriaId: string | null;
   categoria?: Categoria | null;
   imagenes: ImagenProducto[];
+  variantes: Variante[];
   creadoEn: string;
   actualizadoEn: string;
 }
@@ -46,7 +100,9 @@ export interface ItemPedido {
   id: string;
   pedidoId: string;
   productoId: string;
+  varianteId: string | null;
   nombreProducto: string;
+  colorElegido: string | null;
   precioUnitario: number;
   cantidad: number;
   subtotal: number;
@@ -104,7 +160,8 @@ export interface RespuestaLogin {
 
 /** Payload para crear un pedido (lo calcula el backend; aqui solo se envia el detalle). */
 export interface ItemPedidoEntrada {
-  productoId: string;
+  /** La variante (color) es la unidad comprable; el backend resuelve el precio. */
+  varianteId: string;
   cantidad: number;
 }
 

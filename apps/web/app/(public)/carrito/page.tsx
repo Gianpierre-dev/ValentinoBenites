@@ -50,7 +50,7 @@ export default function PaginaCarrito() {
           <ul className="flex flex-col gap-4 lg:col-span-2">
             {lineas.map((linea) => (
               <li
-                key={linea.productoId}
+                key={linea.varianteId}
                 className="flex gap-4 rounded-2xl border border-borde bg-fondo p-4 shadow-[0_1px_3px_rgba(17,17,17,0.04)] transition-shadow hover:shadow-[0_14px_36px_-18px_rgba(125,33,129,0.25)] sm:gap-5 sm:p-5"
               >
                 <Link
@@ -82,13 +82,16 @@ export default function PaginaCarrito() {
                         {linea.nombre}
                       </Link>
                       <p className="mt-1 text-sm text-texto">
+                        Color: {linea.color}
+                      </p>
+                      <p className="mt-0.5 text-sm text-texto">
                         {formatearPrecio(linea.precioUnitario)} c/u
                       </p>
                     </div>
                     <button
                       type="button"
-                      onClick={() => quitar(linea.productoId)}
-                      aria-label={`Quitar ${linea.nombre} del carrito`}
+                      onClick={() => quitar(linea.varianteId)}
+                      aria-label={`Quitar ${linea.nombre} (${linea.color}) del carrito`}
                       className="flex h-9 w-9 items-center justify-center rounded-full text-texto/60 transition-colors hover:bg-oferta/10 hover:text-oferta"
                     >
                       <IconTrash size={18} aria-hidden />
@@ -99,9 +102,8 @@ export default function PaginaCarrito() {
                     <SelectorCantidad
                       cantidad={linea.cantidad}
                       alCambiar={(cantidad) =>
-                        cambiarCantidad(linea.productoId, cantidad)
+                        cambiarCantidad(linea.varianteId, cantidad)
                       }
-                      maximo={linea.stock}
                     />
                     <span className="text-base font-semibold text-texto-fuerte">
                       {formatearPrecio(linea.precioUnitario * linea.cantidad)}

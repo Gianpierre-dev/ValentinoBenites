@@ -26,6 +26,7 @@ const ETIQUETA_METODO: Record<MetodoPago, string> = {
   WHATSAPP: "WhatsApp",
   YAPE: "Yape",
   PLIN: "Plin",
+  IZIPAY: "Izipay",
 };
 
 export default function PaginaPedidos() {
@@ -78,14 +79,20 @@ export default function PaginaPedidos() {
 }
 
 const ETIQUETA_ESTADO: Record<EstadoPedido, string> = {
-  PENDIENTE: "Pendiente",
-  VALIDADO: "Validado",
+  PENDIENTE_PAGO: "Pendiente de pago",
+  PAGADO: "Pagado",
+  EN_PRODUCCION: "En producción",
+  ENVIADO: "Enviado",
+  CANCELADO: "Cancelado",
   RECHAZADO: "Rechazado",
 };
 
 const VARIANTE_ESTADO: Record<EstadoPedido, "advertencia" | "exito" | "oferta"> = {
-  PENDIENTE: "advertencia",
-  VALIDADO: "exito",
+  PENDIENTE_PAGO: "advertencia",
+  PAGADO: "exito",
+  EN_PRODUCCION: "advertencia",
+  ENVIADO: "exito",
+  CANCELADO: "oferta",
   RECHAZADO: "oferta",
 };
 
@@ -154,17 +161,17 @@ function TarjetaPedido({ pedido, actualizando, alCambiarEstado }: PropsTarjetaPe
             variante="secundario"
             tamano="sm"
             cargando={actualizando}
-            disabled={pedido.estado === "VALIDADO"}
-            onClick={() => alCambiarEstado(pedido, "VALIDADO")}
+            disabled={pedido.estado !== "PENDIENTE_PAGO"}
+            onClick={() => alCambiarEstado(pedido, "PAGADO")}
           >
             <IconCheck className="h-4 w-4" aria-hidden />
-            Validar
+            Marcar pagado
           </Boton>
           <Boton
             variante="secundario"
             tamano="sm"
             cargando={actualizando}
-            disabled={pedido.estado === "RECHAZADO"}
+            disabled={pedido.estado !== "PENDIENTE_PAGO"}
             onClick={() => alCambiarEstado(pedido, "RECHAZADO")}
           >
             <IconX className="h-4 w-4 text-oferta" aria-hidden />
