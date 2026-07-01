@@ -90,7 +90,6 @@ async function main(): Promise<void> {
         descripcion: `${def.nombre} de Valentino Benites. Cuero sintético de alta calidad con acabados finos y herrajes metálicos. Diseño versátil para el día a día.`,
         precio: new Prisma.Decimal(def.precio),
         precioOferta: def.oferta ? new Prisma.Decimal(def.oferta) : null,
-        stock: 15,
         destacado: def.destacado ?? false,
         activo: true,
         imagenes: { create: [{ url: urlFoto, orden: 0 }] },

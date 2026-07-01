@@ -46,11 +46,6 @@ export class CrearProductoDto {
   precioOferta?: number;
 
   @IsOptional()
-  @IsInt()
-  @Min(0)
-  stock?: number;
-
-  @IsOptional()
   @IsBoolean()
   activo?: boolean;
 
