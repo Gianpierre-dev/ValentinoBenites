@@ -30,21 +30,44 @@ export class PedidosService {
       (acumulado, linea) => acumulado.plus(linea.subtotal),
       new Prisma.Decimal(0),
     );
-    const codigo = await this.generarCodigoUnico();
 
-    return this.prisma.pedido.create({
-      data: {
-        codigo,
-        nombreCliente: dto.nombreCliente,
-        telefono: dto.telefono,
-        metodoPago: dto.metodoPago,
-        comprobanteUrl: dto.comprobanteUrl,
-        total,
-        // El estado inicial (PENDIENTE_PAGO) lo fija el default del schema.
-        items: { create: lineas },
-      },
-      include: INCLUIR_ITEMS,
-    });
+    // SUG-01: el codigo unico se genera con una ventana de carrera entre el
+    // chequeo de existencia y el create. Ante una colision real (P2002 sobre
+    // `codigo`) reintentamos con un codigo nuevo en vez de propagar un 500 opaco.
+    for (let intento = 0; intento < 5; intento += 1) {
+      const codigo = await this.generarCodigoUnico();
+      try {
+        return await this.prisma.pedido.create({
+          data: {
+            codigo,
+            nombreCliente: dto.nombreCliente,
+            telefono: dto.telefono,
+            metodoPago: dto.metodoPago,
+            comprobanteUrl: dto.comprobanteUrl,
+            total,
+            // El estado inicial (PENDIENTE_PAGO) lo fija el default del schema.
+            items: { create: lineas },
+          },
+          include: INCLUIR_ITEMS,
+        });
+      } catch (error) {
+        if (this.esColisionDeCodigo(error) && intento < 4) {
+          continue;
+        }
+        throw error;
+      }
+    }
+    // Inalcanzable en la practica: el loop retorna o lanza antes de agotarse.
+    throw new BadRequestException(
+      'No se pudo generar un codigo de pedido unico. Intenta nuevamente.',
+    );
+  }
+
+  private esColisionDeCodigo(error: unknown): boolean {
+    return (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === 'P2002'
+    );
   }
 
   listar() {

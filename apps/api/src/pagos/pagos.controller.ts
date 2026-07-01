@@ -14,7 +14,11 @@ export class PagosController {
   }
 
   // Callback/IPN del proveedor. Marca el pedido como PAGADO.
-  // En la integracion real se valida la firma del IPN dentro del servicio.
+  // ENGANCHE INTEGRACIÓN REAL: para validar la firma KR-Hash/HMAC de Izipay se
+  // necesita el BODY CRUDO (rawBody) tal cual llego, no el DTO ya parseado.
+  // Habilitar `rawBody: true` en el bootstrap de Nest y verificar la firma sobre
+  // ese buffer ANTES de delegar al servicio. Hoy el servicio queda protegido por
+  // el flag fail-closed IZIPAY_STUB_HABILITADO.
   @Post('callback')
   procesarCallback(@Body() dto: CallbackIzipayDto) {
     return this.pagosService.procesarCallback(dto);

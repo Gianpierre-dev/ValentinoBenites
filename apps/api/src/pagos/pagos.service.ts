@@ -1,5 +1,10 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
-import { EstadoPedido, Prisma } from '@prisma/client';
+import {
+  BadRequestException,
+  Injectable,
+  ServiceUnavailableException,
+} from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { EstadoPedido, MetodoPago, Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { transicionPermitida } from '../pedidos/maquina-estados';
 import { GenerarTokenDto } from './dto/generar-token.dto';
@@ -12,6 +17,11 @@ const PROVEEDOR_IZIPAY = 'IZIPAY';
  * servicio es el unico que conoce al proveedor y solo muta el estado del pedido
  * a traves de la maquina de estados existente.
  *
+ * FAIL-CLOSED: en este cambio la integracion real NO existe. Para que un stub
+ * sin validacion de firma NUNCA pueda marcar pedidos como pagados en un entorno
+ * publico, ambos endpoints exigen el flag explicito `IZIPAY_STUB_HABILITADO`.
+ * Si el flag no esta en 'true' se responde 503 (ServiceUnavailable).
+ *
  * PUNTO DE ENGANCHE (integracion real, NO implementado en este cambio):
  *  - generarToken(): reemplazar el token stub por la llamada real a la API de
  *    Izipay (POST Charge/CreatePayment) usando las credenciales de `.env`
@@ -23,9 +33,14 @@ const PROVEEDOR_IZIPAY = 'IZIPAY';
  */
 @Injectable()
 export class PagosService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly config: ConfigService,
+  ) {}
 
   async generarToken(dto: GenerarTokenDto) {
+    this.asegurarStubHabilitado();
+
     const pedido = await this.obtenerPedidoOFallar(dto.pedidoId);
     if (pedido.estado !== EstadoPedido.PENDIENTE_PAGO) {
       throw new BadRequestException(
@@ -42,9 +57,35 @@ export class PagosService {
   }
 
   async procesarCallback(dto: CallbackIzipayDto) {
-    // PUNTO DE ENGANCHE: validar la firma del IPN aqui antes de continuar.
+    this.asegurarStubHabilitado();
+
+    // ENGANCHE INTEGRACIÓN REAL: validar aqui la firma del IPN (KR-Hash/HMAC de
+    // Izipay) sobre el BODY CRUDO recibido, ANTES de leer o mutar Prisma. Si la
+    // firma no coincide -> 401/400 y cortar. Precondicion pendiente explicita:
+    // hoy solo protege el flag fail-closed; falta la verificacion criptografica.
     const pedido = await this.obtenerPedidoOFallar(dto.pedidoId);
 
+    // WARN-01: el callback de Izipay solo puede tocar pedidos cuyo metodo de
+    // pago sea IZIPAY. Un pedido Yape/Plin/WhatsApp jamas debe marcarse pagado
+    // por esta via.
+    if (pedido.metodoPago !== MetodoPago.IZIPAY) {
+      throw new BadRequestException(
+        'El pedido no corresponde a un pago por Izipay.',
+      );
+    }
+
+    // WARN-02: idempotencia ante reintento del IPN. Si ya esta PAGADO con la
+    // MISMA referencia, respondemos no-op (200) sin volver a mutar.
+    if (
+      pedido.estado === EstadoPedido.PAGADO &&
+      pedido.referenciaTransaccion === dto.referenciaTransaccion
+    ) {
+      return pedido;
+    }
+
+    // Cualquier otro caso terminal o PAGADO con otra referencia es una
+    // transicion invalida (la maquina de estados no permite PAGADO->PAGADO ni
+    // volver desde EN_PRODUCCION/ENVIADO/CANCELADO/RECHAZADO).
     if (!transicionPermitida(pedido.estado, EstadoPedido.PAGADO)) {
       throw new BadRequestException(
         `No se puede marcar como PAGADO un pedido en estado ${pedido.estado}.`,
@@ -60,6 +101,19 @@ export class PagosService {
         rawPago: dto as unknown as Prisma.InputJsonValue,
       },
     });
+  }
+
+  /**
+   * FAIL-CLOSED: el stub solo opera si el entorno lo habilita explicitamente.
+   * En cualquier entorno donde el flag no sea 'true' se responde 503, evitando
+   * que un stub sin firma marque pedidos como pagados.
+   */
+  private asegurarStubHabilitado(): void {
+    if (this.config.get<string>('IZIPAY_STUB_HABILITADO') !== 'true') {
+      throw new ServiceUnavailableException(
+        'El pago con Izipay no esta disponible en este momento.',
+      );
+    }
   }
 
   private async obtenerPedidoOFallar(pedidoId: string) {

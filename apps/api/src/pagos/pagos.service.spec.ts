@@ -1,4 +1,7 @@
-import { BadRequestException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ServiceUnavailableException,
+} from '@nestjs/common';
 import { EstadoPedido, MetodoPago } from '@prisma/client';
 import { PagosService } from './pagos.service';
 
@@ -28,13 +31,52 @@ const crearPrismaMock = (): PrismaMock => ({
   },
 });
 
+type ConfigMock = { get: jest.Mock };
+
+const crearConfigMock = (stubHabilitado: boolean): ConfigMock => ({
+  get: jest.fn((clave: string) =>
+    clave === 'IZIPAY_STUB_HABILITADO'
+      ? stubHabilitado
+        ? 'true'
+        : 'false'
+      : undefined,
+  ),
+});
+
 describe('PagosService (Izipay STUB)', () => {
   let prisma: PrismaMock;
   let service: PagosService;
 
   beforeEach(() => {
     prisma = crearPrismaMock();
-    service = new PagosService(prisma as never);
+    service = new PagosService(prisma as never, crearConfigMock(true) as never);
+  });
+
+  describe('fail-closed (stub deshabilitado)', () => {
+    beforeEach(() => {
+      service = new PagosService(
+        prisma as never,
+        crearConfigMock(false) as never,
+      );
+    });
+
+    it('generarToken lanza 503 si el stub no esta habilitado', async () => {
+      await expect(
+        service.generarToken({ pedidoId: 'ped-1' }),
+      ).rejects.toBeInstanceOf(ServiceUnavailableException);
+      expect(prisma.pedido.findUnique).not.toHaveBeenCalled();
+    });
+
+    it('procesarCallback lanza 503 si el stub no esta habilitado', async () => {
+      await expect(
+        service.procesarCallback({
+          pedidoId: 'ped-1',
+          referenciaTransaccion: 'IZI-TX-1',
+        }),
+      ).rejects.toBeInstanceOf(ServiceUnavailableException);
+      expect(prisma.pedido.findUnique).not.toHaveBeenCalled();
+      expect(prisma.pedido.update).not.toHaveBeenCalled();
+    });
   });
 
   describe('generarToken', () => {
@@ -117,17 +159,69 @@ describe('PagosService (Izipay STUB)', () => {
       expect(prisma.pedido.update).not.toHaveBeenCalled();
     });
 
-    it('rechaza el callback si la transicion no es valida (pedido ya PAGADO)', async () => {
+    it('WARN-01 rechaza el callback si el pedido no es IZIPAY (metodoPago=YAPE)', async () => {
       prisma.pedido.findUnique.mockResolvedValue({
         id: 'ped-1',
-        estado: EstadoPedido.PAGADO,
-        metodoPago: MetodoPago.IZIPAY,
+        estado: EstadoPedido.PENDIENTE_PAGO,
+        metodoPago: MetodoPago.YAPE,
       });
 
       await expect(
         service.procesarCallback({
           pedidoId: 'ped-1',
-          referenciaTransaccion: 'IZI-TX-2',
+          referenciaTransaccion: 'IZI-TX-3',
+        }),
+      ).rejects.toBeInstanceOf(BadRequestException);
+      expect(prisma.pedido.update).not.toHaveBeenCalled();
+    });
+
+    it('WARN-02 es idempotente: mismo callback (misma referencia) sobre pedido ya PAGADO devuelve no-op', async () => {
+      const pedidoPagado = {
+        id: 'ped-1',
+        estado: EstadoPedido.PAGADO,
+        metodoPago: MetodoPago.IZIPAY,
+        referenciaTransaccion: 'IZI-TX-9999',
+      };
+      prisma.pedido.findUnique.mockResolvedValue(pedidoPagado);
+
+      const resultado = await service.procesarCallback({
+        pedidoId: 'ped-1',
+        referenciaTransaccion: 'IZI-TX-9999',
+      });
+
+      expect(resultado).toBe(pedidoPagado);
+      expect(prisma.pedido.update).not.toHaveBeenCalled();
+    });
+
+    it('WARN-02 rechaza el callback si el pedido esta PAGADO con OTRA referencia', async () => {
+      prisma.pedido.findUnique.mockResolvedValue({
+        id: 'ped-1',
+        estado: EstadoPedido.PAGADO,
+        metodoPago: MetodoPago.IZIPAY,
+        referenciaTransaccion: 'IZI-TX-9999',
+      });
+
+      await expect(
+        service.procesarCallback({
+          pedidoId: 'ped-1',
+          referenciaTransaccion: 'IZI-TX-OTRA',
+        }),
+      ).rejects.toBeInstanceOf(BadRequestException);
+      expect(prisma.pedido.update).not.toHaveBeenCalled();
+    });
+
+    it('WARN-02 rechaza el callback sobre un estado terminal distinto (EN_PRODUCCION)', async () => {
+      prisma.pedido.findUnique.mockResolvedValue({
+        id: 'ped-1',
+        estado: EstadoPedido.EN_PRODUCCION,
+        metodoPago: MetodoPago.IZIPAY,
+        referenciaTransaccion: 'IZI-TX-9999',
+      });
+
+      await expect(
+        service.procesarCallback({
+          pedidoId: 'ped-1',
+          referenciaTransaccion: 'IZI-TX-9999',
         }),
       ).rejects.toBeInstanceOf(BadRequestException);
       expect(prisma.pedido.update).not.toHaveBeenCalled();

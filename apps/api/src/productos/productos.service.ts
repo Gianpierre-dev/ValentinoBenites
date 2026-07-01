@@ -25,7 +25,7 @@ const INCLUIR_RELACIONES = {
 export class ProductosService {
   constructor(private readonly prisma: PrismaService) {}
 
-  listar(filtros: FiltrarProductosDto) {
+  async listar(filtros: FiltrarProductosDto) {
     const where: Prisma.ProductoWhereInput = { activo: true };
 
     if (filtros.categoria) {
@@ -40,11 +40,15 @@ export class ProductosService {
       where.nombre = { contains: filtros.q, mode: 'insensitive' };
     }
 
-    return this.prisma.producto.findMany({
+    const productos = await this.prisma.producto.findMany({
       where,
       include: INCLUIR_RELACIONES,
       orderBy: { creadoEn: 'desc' },
     });
+
+    // Contrato simetrico con la ficha: el catalogo tambien trae
+    // imagenesEfectivas + precioEfectivo resueltos por el serializer.
+    return productos.map((producto) => serializarProductoPublico(producto));
   }
 
   async obtenerPorSlug(slug: string) {

@@ -127,6 +127,28 @@ describe('PedidosService', () => {
       expect(data.metodoPago).toBe(MetodoPago.WHATSAPP);
     });
 
+    it('SUG-01 reintenta con un codigo nuevo si choca la unicidad (P2002) y no propaga 500', async () => {
+      prisma.variante.findMany.mockResolvedValue([varianteVino]);
+      const colision = new Prisma.PrismaClientKnownRequestError(
+        'Unique constraint failed',
+        { code: 'P2002', clientVersion: 'test' },
+      );
+      // Primer intento choca por codigo duplicado; el segundo tiene exito.
+      prisma.pedido.create
+        .mockRejectedValueOnce(colision)
+        .mockImplementationOnce(({ data }) => data);
+
+      const data = await service.crear({
+        nombreCliente: 'Ana',
+        telefono: '999',
+        metodoPago: MetodoPago.YAPE,
+        items: [{ varianteId: 'var-vino', cantidad: 1 }],
+      });
+
+      expect(prisma.pedido.create).toHaveBeenCalledTimes(2);
+      expect(data.total.toNumber()).toBe(120);
+    });
+
     it('falla si alguna variante no existe o esta inactiva', async () => {
       // La variante solicitada no vuelve en el findMany (filtrado por activo).
       prisma.variante.findMany.mockResolvedValue([]);

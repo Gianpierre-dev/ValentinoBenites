@@ -1,10 +1,15 @@
+import { Prisma } from '@prisma/client';
 import { serializarProductoPublico } from './productos.serializer';
+
+const dec = (valor: number) => new Prisma.Decimal(valor);
 
 describe('serializarProductoPublico', () => {
   const base = {
     id: 'prod-1',
     nombre: 'Bandolera Andina',
     slug: 'bandolera-andina',
+    precio: dec(120),
+    precioOferta: null,
     imagenes: [{ url: 'modelo-1.jpg', orden: 0 }],
   };
 
@@ -16,12 +21,16 @@ describe('serializarProductoPublico', () => {
           id: 'var-1',
           color: 'Vino',
           activo: true,
+          precio: dec(150),
+          precioOferta: null,
           imagenes: [{ url: 'vino-1.jpg', orden: 0 }],
         },
         {
           id: 'var-2',
           color: 'Rosa',
           activo: true,
+          precio: null,
+          precioOferta: null,
           imagenes: [],
         },
       ],
@@ -38,12 +47,57 @@ describe('serializarProductoPublico', () => {
     ]);
   });
 
+  it('WARN-03 expone precioEfectivo por variante (override propio o herencia del modelo)', () => {
+    const producto = {
+      ...base,
+      variantes: [
+        {
+          id: 'var-1',
+          color: 'Vino',
+          activo: true,
+          precio: dec(150),
+          precioOferta: null,
+          imagenes: [],
+        },
+        {
+          id: 'var-2',
+          color: 'Rosa',
+          activo: true,
+          precio: null,
+          precioOferta: null,
+          imagenes: [],
+        },
+      ],
+    };
+
+    const resultado = serializarProductoPublico(producto);
+
+    // Vino tiene precio propio -> 150
+    expect(resultado.variantes[0].precioEfectivo.toNumber()).toBe(150);
+    // Rosa sin precio propio -> hereda el del modelo (120)
+    expect(resultado.variantes[1].precioEfectivo.toNumber()).toBe(120);
+  });
+
   it('excluye las variantes inactivas del catalogo publico', () => {
     const producto = {
       ...base,
       variantes: [
-        { id: 'var-1', color: 'Vino', activo: true, imagenes: [] },
-        { id: 'var-2', color: 'Rosa', activo: false, imagenes: [] },
+        {
+          id: 'var-1',
+          color: 'Vino',
+          activo: true,
+          precio: null,
+          precioOferta: null,
+          imagenes: [],
+        },
+        {
+          id: 'var-2',
+          color: 'Rosa',
+          activo: false,
+          precio: null,
+          precioOferta: null,
+          imagenes: [],
+        },
       ],
     };
 
