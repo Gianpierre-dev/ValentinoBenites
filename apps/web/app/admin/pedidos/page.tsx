@@ -7,6 +7,9 @@ import {
   IconExternalLink,
   IconCheck,
   IconX,
+  IconTool,
+  IconTruck,
+  IconBan,
 } from "@tabler/icons-react";
 import { listarPedidos, cambiarEstadoPedido } from "@/lib/api";
 import type { EstadoPedido, MetodoPago, Pedido } from "@/lib/tipos";
@@ -96,6 +99,34 @@ const VARIANTE_ESTADO: Record<EstadoPedido, "advertencia" | "exito" | "oferta"> 
   RECHAZADO: "oferta",
 };
 
+// Espeja la maquina de estados del backend (apps/api/src/pedidos/maquina-estados.ts).
+// Las acciones visibles se derivan del estado actual del pedido; los estados
+// terminales (ENVIADO, CANCELADO, RECHAZADO) no ofrecen transiciones.
+const TRANSICIONES: Record<EstadoPedido, readonly EstadoPedido[]> = {
+  PENDIENTE_PAGO: ["PAGADO", "RECHAZADO", "CANCELADO"],
+  PAGADO: ["EN_PRODUCCION", "CANCELADO"],
+  EN_PRODUCCION: ["ENVIADO", "CANCELADO"],
+  ENVIADO: [],
+  CANCELADO: [],
+  RECHAZADO: [],
+};
+
+interface AccionEstado {
+  etiqueta: string;
+  Icono: typeof IconCheck;
+  variante: "secundario" | "peligro";
+  destructivo?: boolean;
+}
+
+const ACCION_POR_ESTADO: Record<EstadoPedido, AccionEstado> = {
+  PAGADO: { etiqueta: "Marcar pagado", Icono: IconCheck, variante: "secundario" },
+  EN_PRODUCCION: { etiqueta: "Pasar a produccion", Icono: IconTool, variante: "secundario" },
+  ENVIADO: { etiqueta: "Marcar enviado", Icono: IconTruck, variante: "secundario" },
+  RECHAZADO: { etiqueta: "Rechazar", Icono: IconX, variante: "peligro", destructivo: true },
+  CANCELADO: { etiqueta: "Cancelar", Icono: IconBan, variante: "peligro", destructivo: true },
+  PENDIENTE_PAGO: { etiqueta: "Volver a pendiente", Icono: IconCheck, variante: "secundario" },
+};
+
 interface PropsTarjetaPedido {
   pedido: Pedido;
   actualizando: boolean;
@@ -135,6 +166,9 @@ function TarjetaPedido({ pedido, actualizando, alCambiarEstado }: PropsTarjetaPe
           <li key={item.id} className="flex items-center justify-between py-2">
             <span className="text-texto">
               {item.cantidad} × {item.nombreProducto}
+              {item.colorElegido && (
+                <span className="text-texto/60"> · Color: {item.colorElegido}</span>
+              )}
             </span>
             <span className="text-texto-fuerte">{formatearPrecio(item.subtotal)}</span>
           </li>
@@ -156,27 +190,27 @@ function TarjetaPedido({ pedido, actualizando, alCambiarEstado }: PropsTarjetaPe
           <span className="text-sm text-texto/50">Sin comprobante adjunto</span>
         )}
 
-        <div className="flex gap-2">
-          <Boton
-            variante="secundario"
-            tamano="sm"
-            cargando={actualizando}
-            disabled={pedido.estado !== "PENDIENTE_PAGO"}
-            onClick={() => alCambiarEstado(pedido, "PAGADO")}
-          >
-            <IconCheck className="h-4 w-4" aria-hidden />
-            Marcar pagado
-          </Boton>
-          <Boton
-            variante="secundario"
-            tamano="sm"
-            cargando={actualizando}
-            disabled={pedido.estado !== "PENDIENTE_PAGO"}
-            onClick={() => alCambiarEstado(pedido, "RECHAZADO")}
-          >
-            <IconX className="h-4 w-4 text-oferta" aria-hidden />
-            Rechazar
-          </Boton>
+        <div className="flex flex-wrap gap-2">
+          {TRANSICIONES[pedido.estado].length === 0 ? (
+            <span className="text-sm text-texto/50">Pedido finalizado</span>
+          ) : (
+            TRANSICIONES[pedido.estado].map((destino) => {
+              const accion = ACCION_POR_ESTADO[destino];
+              const Icono = accion.Icono;
+              return (
+                <Boton
+                  key={destino}
+                  variante={accion.variante}
+                  tamano="sm"
+                  cargando={actualizando}
+                  onClick={() => alCambiarEstado(pedido, destino)}
+                >
+                  <Icono className="h-4 w-4" aria-hidden />
+                  {accion.etiqueta}
+                </Boton>
+              );
+            })
+          )}
         </div>
       </div>
     </Tarjeta>

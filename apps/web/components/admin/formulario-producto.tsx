@@ -22,7 +22,6 @@ const esquemaProducto = z
     descripcion: z.string().optional(),
     precio: z.coerce.number().positive("El precio debe ser mayor a 0"),
     precioOferta: numeroOpcional,
-    stock: z.coerce.number().int("Debe ser un numero entero").min(0, "No puede ser negativo"),
     // Categoria opcional: el producto puede quedar sin clasificar.
     categoriaId: z.string().optional(),
     activo: z.boolean(),
@@ -69,7 +68,6 @@ export function FormularioProducto({
       descripcion: producto?.descripcion ?? "",
       precio: producto?.precio ?? undefined,
       precioOferta: producto?.precioOferta ?? undefined,
-      stock: producto?.stock ?? 0,
       categoriaId: producto?.categoriaId ?? "",
       activo: producto?.activo ?? true,
       destacado: producto?.destacado ?? false,
@@ -89,7 +87,6 @@ export function FormularioProducto({
       descripcion: datos.descripcion?.trim() ? datos.descripcion.trim() : null,
       precio: datos.precio,
       precioOferta: datos.precioOferta ?? null,
-      stock: datos.stock,
       categoriaId: datos.categoriaId ? datos.categoriaId : null,
       activo: datos.activo,
       destacado: datos.destacado,
@@ -138,31 +135,22 @@ export function FormularioProducto({
         />
       </div>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <Input
-          etiqueta="Stock"
-          type="number"
-          min={0}
-          error={errors.stock?.message}
-          {...register("stock")}
-        />
-        <div className="flex flex-col gap-1.5">
-          <label htmlFor="campo-categoria" className="text-sm font-medium text-texto-fuerte">
-            Categoria — opcional
-          </label>
-          <select
-            id="campo-categoria"
-            className="h-11 w-full rounded-lg border border-borde bg-fondo px-3 text-sm text-texto-fuerte outline-none transition-colors focus:border-acento"
-            {...register("categoriaId")}
-          >
-            <option value="">Sin categoria</option>
-            {categorias.map((categoria) => (
-              <option key={categoria.id} value={categoria.id}>
-                {categoria.nombre}
-              </option>
-            ))}
-          </select>
-        </div>
+      <div className="flex flex-col gap-1.5">
+        <label htmlFor="campo-categoria" className="text-sm font-medium text-texto-fuerte">
+          Categoria — opcional
+        </label>
+        <select
+          id="campo-categoria"
+          className="h-11 w-full rounded-lg border border-borde bg-fondo px-3 text-sm text-texto-fuerte outline-none transition-colors focus:border-acento"
+          {...register("categoriaId")}
+        >
+          <option value="">Sin categoria</option>
+          {categorias.map((categoria) => (
+            <option key={categoria.id} value={categoria.id}>
+              {categoria.nombre}
+            </option>
+          ))}
+        </select>
       </div>
 
       <CargadorImagenes imagenes={imagenes} alCambiar={setImagenes} />

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { IconPlus, IconPencil, IconTrash, IconPhoto } from "@tabler/icons-react";
+import { IconPlus, IconPencil, IconTrash, IconPhoto, IconPalette } from "@tabler/icons-react";
 import {
   listarProductos,
   listarCategorias,
@@ -29,6 +29,7 @@ import {
   mensajeDeError,
 } from "@/components/admin";
 import { FormularioProducto } from "@/components/admin/formulario-producto";
+import { GestorVariantes } from "@/components/admin/gestor-variantes";
 import { Boton, Etiqueta } from "@/components/ui";
 
 interface DatosVista {
@@ -49,11 +50,16 @@ export default function PaginaProductos() {
   const [enviando, setEnviando] = useState(false);
   const [aEliminar, setAEliminar] = useState<Producto | null>(null);
   const [eliminando, setEliminando] = useState(false);
+  const [gestionandoColores, setGestionandoColores] = useState<Producto | null>(null);
 
   const cargar = recargar;
 
   const formularioAbierto = creando || editando !== null;
   const categorias = estado.tipo === "listo" ? estado.datos.categorias : [];
+  const productoColores =
+    gestionandoColores && estado.tipo === "listo"
+      ? estado.datos.productos.find((p) => p.id === gestionandoColores.id) ?? null
+      : null;
 
   function cerrarFormulario() {
     setCreando(false);
@@ -121,7 +127,7 @@ export default function PaginaProductos() {
               <Th>Producto</Th>
               <Th>Categoria</Th>
               <Th className="text-right">Precio</Th>
-              <Th className="text-center">Stock</Th>
+              <Th className="text-center">Colores</Th>
               <Th className="text-center">Estado</Th>
               <Th className="text-right">Acciones</Th>
             </tr>
@@ -151,7 +157,9 @@ export default function PaginaProductos() {
                     </span>
                   )}
                 </Td>
-                <Td className="text-center">{producto.stock}</Td>
+                <Td className="text-center">
+                  {producto.variantes.filter((v) => v.activo).length}
+                </Td>
                 <Td className="text-center">
                   <Etiqueta variante={producto.activo ? "activo" : "neutral"}>
                     {producto.activo ? "Activo" : "Inactivo"}
@@ -159,6 +167,14 @@ export default function PaginaProductos() {
                 </Td>
                 <Td className="text-right">
                   <div className="flex justify-end gap-1">
+                    <Boton
+                      variante="fantasma"
+                      tamano="sm"
+                      aria-label={`Gestionar colores de ${producto.nombre}`}
+                      onClick={() => setGestionandoColores(producto)}
+                    >
+                      <IconPalette className="h-4 w-4" aria-hidden />
+                    </Boton>
                     <Boton
                       variante="fantasma"
                       tamano="sm"
@@ -206,6 +222,17 @@ export default function PaginaProductos() {
         alConfirmar={confirmarEliminar}
         alCancelar={() => setAEliminar(null)}
       />
+
+      <Modal
+        abierto={gestionandoColores !== null}
+        titulo={`Colores de "${gestionandoColores?.nombre ?? ""}"`}
+        alCerrar={() => setGestionandoColores(null)}
+        anchoMaximo="max-w-2xl"
+      >
+        {productoColores && (
+          <GestorVariantes producto={productoColores} alCambiar={cargar} />
+        )}
+      </Modal>
     </>
   );
 }

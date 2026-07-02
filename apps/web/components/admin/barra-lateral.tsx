@@ -10,6 +10,7 @@ import {
   IconReceipt,
   IconSettings,
   IconLogout,
+  IconArrowMerge,
 } from "@tabler/icons-react";
 import { cerrarSesion } from "@/lib/api";
 import { cn } from "@/lib/utilidades";
@@ -25,6 +26,7 @@ const ENLACES: readonly EnlaceNav[] = [
   { href: "/admin/productos", etiqueta: "Productos", Icono: IconShoppingBag },
   { href: "/admin/categorias", etiqueta: "Categorias", Icono: IconCategory },
   { href: "/admin/pedidos", etiqueta: "Pedidos", Icono: IconReceipt },
+  { href: "/admin/migracion", etiqueta: "Migracion", Icono: IconArrowMerge },
   { href: "/admin/configuracion", etiqueta: "Configuracion", Icono: IconSettings },
 ];
 

@@ -7,16 +7,22 @@
  */
 
 import type {
+  AplicarGrupoEntrada,
   Categoria,
   CategoriaEntrada,
   Configuracion,
   CrearPedidoEntrada,
   EstadoPedido,
   FiltrosProductos,
+  GrupoPropuesto,
+  ImagenVarianteEntrada,
   Pedido,
   Producto,
   ProductoEntrada,
+  ResultadoAplicacion,
   RespuestaLogin,
+  Variante,
+  VarianteEntrada,
 } from "./tipos";
 
 export const URL_BASE_API =
@@ -181,6 +187,77 @@ export function actualizarProducto(
 export function eliminarProducto(id: string): Promise<void> {
   return peticion<void>(`/productos/${id}`, {
     metodo: "DELETE",
+    autenticado: true,
+  });
+}
+
+/* ---------------------------------------------------------------- */
+/* Variantes de color (admin)                                       */
+/* ---------------------------------------------------------------- */
+
+export function crearVariante(
+  productoId: string,
+  datos: VarianteEntrada,
+): Promise<Variante> {
+  return peticion<Variante>(`/admin/productos/${productoId}/variantes`, {
+    metodo: "POST",
+    cuerpo: datos,
+    autenticado: true,
+  });
+}
+
+export function actualizarVariante(
+  id: string,
+  datos: Partial<VarianteEntrada>,
+): Promise<Variante> {
+  return peticion<Variante>(`/admin/variantes/${id}`, {
+    metodo: "PATCH",
+    cuerpo: datos,
+    autenticado: true,
+  });
+}
+
+export function eliminarVariante(id: string): Promise<Variante> {
+  return peticion<Variante>(`/admin/variantes/${id}`, {
+    metodo: "DELETE",
+    autenticado: true,
+  });
+}
+
+export function agregarImagenVariante(
+  id: string,
+  datos: ImagenVarianteEntrada,
+): Promise<Variante> {
+  return peticion<Variante>(`/admin/variantes/${id}/imagenes`, {
+    metodo: "POST",
+    cuerpo: datos,
+    autenticado: true,
+  });
+}
+
+export function eliminarImagenVariante(imagenId: string): Promise<void> {
+  return peticion<void>(`/admin/variantes/imagenes/${imagenId}`, {
+    metodo: "DELETE",
+    autenticado: true,
+  });
+}
+
+/* ---------------------------------------------------------------- */
+/* Migracion M2 (agrupacion revisable)                              */
+/* ---------------------------------------------------------------- */
+
+export function obtenerPropuestaMigracion(): Promise<GrupoPropuesto[]> {
+  return peticion<GrupoPropuesto[]>("/admin/migracion/propuesta", {
+    autenticado: true,
+  });
+}
+
+export function aplicarGrupoMigracion(
+  grupo: AplicarGrupoEntrada,
+): Promise<ResultadoAplicacion> {
+  return peticion<ResultadoAplicacion>("/admin/migracion/aplicar", {
+    metodo: "POST",
+    cuerpo: grupo,
     autenticado: true,
   });
 }

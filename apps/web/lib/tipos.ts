@@ -80,12 +80,6 @@ export interface Producto {
   descripcion: string | null;
   precio: number;
   precioOferta: number | null;
-  /**
-   * @deprecated Legado. El modelo es hecho-a-pedido: el backend ya no expone
-   * `stock`. Se conserva opcional solo para que el admin compile hasta que el
-   * Batch 4 lo elimine de sus formularios/tablas. El storefront lo ignora.
-   */
-  stock?: number;
   activo: boolean;
   destacado: boolean;
   categoriaId: string | null;
@@ -187,11 +181,62 @@ export interface ProductoEntrada {
   descripcion?: string | null;
   precio: number;
   precioOferta?: number | null;
-  stock: number;
   activo: boolean;
   destacado: boolean;
   categoriaId?: string | null;
   imagenes?: { url: string; orden: number }[];
+}
+
+/** Datos editables de una variante de color (crear/actualizar desde el admin). */
+export interface VarianteEntrada {
+  color: string;
+  colorHex?: string | null;
+  /** Override opcional del precio del modelo; si se omite, hereda del producto. */
+  precio?: number | null;
+  precioOferta?: number | null;
+  activo?: boolean;
+  orden?: number;
+  imagenes?: { url: string; orden?: number }[];
+}
+
+/** Imagen a agregar a una variante existente. */
+export interface ImagenVarianteEntrada {
+  url: string;
+  orden?: number;
+}
+
+/* ---- Migracion M2 (agrupacion revisable modelo + colores) ---- */
+
+/** Una variante propuesta por el parser dentro de un grupo. */
+export interface VariantePropuesta {
+  productoId: string;
+  nombreOriginal: string;
+  color: string;
+  requiereRevision: boolean;
+}
+
+/** Grupo de productos que el parser propone fusionar en un solo modelo. */
+export interface GrupoPropuesto {
+  modelo: string;
+  requiereRevision: boolean;
+  variantes: VariantePropuesta[];
+}
+
+/** Payload para aplicar (fusionar) un grupo revisado por la admin. */
+export interface AplicarGrupoEntrada {
+  cabeceraProductoId: string;
+  modelo: string;
+  requiereRevision?: boolean;
+  variantes: { productoId: string; color: string; colorHex?: string }[];
+}
+
+/** Resultado de aplicar un grupo (M2). */
+export interface ResultadoAplicacion {
+  cabeceraProductoId: string;
+  modelo: string;
+  variantesCreadas: number;
+  variantesExistentes: number;
+  productosAbsorbidos: string[];
 }
 
 /** Datos editables de una categoria (crear/actualizar desde el admin). */
