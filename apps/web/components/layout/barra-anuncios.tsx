@@ -1,7 +1,16 @@
 "use client";
 
+import { useEffect, useRef } from "react";
+
 /** Mensaje mostrado si la clienta aun no configuro ninguno. */
 const MENSAJE_FALLBACK = "Envíos gratis a todo el Perú";
+
+/**
+ * Velocidad del desplazamiento en px/seg (medida del scrolling_promotion de
+ * paez.com.pe). La duracion se calcula segun el ancho real de la tira, asi el
+ * ritmo es constante sin importar cuantos mensajes configure la clienta.
+ */
+const VELOCIDAD_PX_SEG = 10;
 
 /** Separador visual entre mensajes dentro de la tira. */
 const SEPARADOR = "•";
@@ -26,6 +35,28 @@ export function BarraAnuncios({ mensajes, activa }: BarraAnunciosProps) {
     .filter((mensaje) => mensaje.length > 0);
   const aMostrar = limpios.length > 0 ? limpios : [MENSAJE_FALLBACK];
 
+  const trackRef = useRef<HTMLDivElement>(null);
+  const claveMensajes = aMostrar.join("|");
+
+  // La tira recorre el 50% de su ancho por ciclo (esta duplicada). Duracion =
+  // distancia / velocidad, seteada como CSS var sobre el propio elemento para
+  // no re-renderizar. Se recalcula si cambian los mensajes o el viewport.
+  useEffect(() => {
+    const track = trackRef.current;
+    if (!track) return;
+    const ajustar = () => {
+      const distancia = track.scrollWidth / 2;
+      track.style.setProperty(
+        "--duracion-anuncios",
+        `${Math.max(10, Math.round(distancia / VELOCIDAD_PX_SEG))}s`,
+      );
+    };
+    ajustar();
+    const observador = new ResizeObserver(ajustar);
+    observador.observe(track);
+    return () => observador.disconnect();
+  }, [claveMensajes]);
+
   // Apagada desde el admin: no ocupa espacio ni se anuncia.
   if (!activa) return null;
 
@@ -34,7 +65,7 @@ export function BarraAnuncios({ mensajes, activa }: BarraAnunciosProps) {
       aria-label="Anuncios de la tienda"
       className="group w-full overflow-hidden border-b border-acento/10 bg-rosa-fuerte py-2 text-xs font-semibold uppercase tracking-[0.2em] text-acento"
     >
-      <div className="marquee-anuncios flex w-max whitespace-nowrap">
+      <div ref={trackRef} className="marquee-anuncios flex w-max whitespace-nowrap">
         <Tira mensajes={aMostrar} />
         {/* Copia duplicada para un loop continuo sin cortes; oculta a lectores. */}
         <Tira mensajes={aMostrar} aria-hidden />
@@ -46,7 +77,7 @@ export function BarraAnuncios({ mensajes, activa }: BarraAnunciosProps) {
           to { transform: translateX(-50%); }
         }
         .marquee-anuncios {
-          animation: desplazar-anuncios 60s linear infinite;
+          animation: desplazar-anuncios var(--duracion-anuncios, 90s) linear infinite;
         }
         .group:hover .marquee-anuncios {
           animation-play-state: paused;
