@@ -1,50 +1,66 @@
 # ESTADO — Ecommerce Valentino Benites (proyecto interno: FABIOLA)
 
 ## Qué es
-Ecommerce de moda (carteras/accesorios) para la marca **Valentino Benites**. Referencia
-visual/estructura: paez.com.pe. Marca y assets tomados de esvalentinobenites.com.
+Ecommerce de moda (carteras/accesorios de cuero para mujer) de la marca **Valentino Benites**,
+mercado Perú. Referencia visual/estructura: paez.com.pe. Marca/paleta de esvalentinobenites.com.
 - Logo oficial: `apps/web/public/logo-valentino.png` (emblema circular VB).
-- Paleta: base minimalista (blanco/slate) + **acento morado de marca `#7D2181`**
-  (magenta `#D64EDC` como variante), extraídos del sitio oficial. Tokens en `globals.css`.
-- "FABIOLA" es solo el nombre interno del proyecto, NO la marca pública.
-Desarrollo por fases (ver `C:\Users\User\.claude\plans\dale-armemos-el-alcance-steady-hoare.md`).
+- Paleta: acento morado `#7D2181` + magenta `#D64EDC`. Tokens en `apps/web/app/globals.css`.
+- "FABIOLA" es el nombre interno del proyecto, NO la marca pública.
+
+## Modelo de negocio (importante)
+**Hecho a pedido, SIN stock.** La clienta muestra los colores disponibles; cuando entra un
+pedido de un color, lo fabrica (artesanal, ~24 h). No hay inventario ni "agotado".
 
 ## Stack
-Monorepo pnpm. `apps/api` (NestJS + Prisma 6 + PostgreSQL 17 + JWT) · `apps/web` (Next 16 App Router + Tailwind v4 + zustand).
-Node 24 vía nvm. Base de datos local: `fabiola` (postgres / sql @ localhost:5432).
+Monorepo pnpm. `apps/api` (NestJS 11 + Prisma 6 + PostgreSQL + JWT) · `apps/web` (Next 16 App
+Router + React 19 + Tailwind v4 + zustand). Node 24 vía nvm. DB local: `fabiola` @ localhost:5432.
+Storage: Wasabi S3 (bucket privado servido por proxy del backend).
 
-## Fase 1 — COMPLETADA (branch `feat/fase1-ecommerce`)
-- Backend: auth JWT, módulos productos/categorías/pedidos/configuración, storage Wasabi (tolerante a credenciales vacías).
-- Seed: 44 productos, 6 categorías, 64 imágenes (picsum placeholder), admin.
-- Storefront: home, catálogo, producto, carrito, checkout dual (WhatsApp + Yape manual).
-- Admin: login, CRUD productos/categorías, pedidos, configuración.
-- Verificado: tsc backend OK, eslint + tsc frontend OK, contrato API alineado.
+## Estado actual — EN PRODUCCIÓN
+Fase 1 (storefront + mini-panel) y el **rediseño transaccional** están desplegados y andando.
 
-## Cómo levantarlo (local)
-1. API:  `cd apps/api && pnpm start:dev`  (puerto 4024)
-2. Web:  `cd apps/web && pnpm dev`         (puerto 3024)
-   O ambos desde la raíz: `pnpm dev`
-- Storefront: http://localhost:3024
-- Admin: http://localhost:3024/admin/login  →  admin@fabiola.pe / admin123
-  (en dev la contraseña sale de SEED_ADMIN_PASSWORD o cae a 'admin123')
+### Rediseño transaccional (mergeado a `main`, desplegado)
+- **Variantes de color**: `Producto` (modelo) 1→N `Variante` (color), foto y precio opcionales
+  por variante (fallback al modelo). Unidad comprable = la variante. Selector de color estilo
+  Paez en la ficha (aparece con 2+ colores).
+- **Pedido transaccional**: todo cierre crea un `Pedido` real. Estados
+  `PENDIENTE_PAGO → PAGADO → EN_PRODUCCION → ENVIADO` (+ CANCELADO/RECHAZADO), máquina de
+  estados con transiciones validadas. `ItemPedido` guarda `colorElegido` (qué fabricar).
+- **Izipay pre-enchufado (STUB)**: endpoints token + callback, **fail-closed** (503 salvo que
+  `IZIPAY_STUB_HABILITADO=true`; NO seteado en prod). La integración real es trabajo aparte.
+- **WhatsApp** ahora crea pedido real (con fix del popup móvil).
+- **Migración de datos**: M1 backfill 1:1 corrida en prod (50 variantes). La agrupación por
+  modelo (M2) la hace la clienta desde **Admin → Migración** (revisable, no destructiva).
+- 61 tests de backend (Jest) + web tsc/lint limpios.
 
-## Producción (Railway) — DESPLEGADO
-Proyecto Railway: `fabiola` (workspace stigold-code's Projects). 3 servicios: Postgres + api + web.
+### Administrable desde el panel (Admin → Configuración)
+Hero (título/subtítulo/color), banners de la home, redes sociales, QR Yape/Plin,
+**barra de anuncios** (marquee superior estilo Paez: toggle + lista de mensajes editables).
+
+## Producción (Railway) — proyecto `fabiola`, 3 servicios (Postgres + api + web)
 - **Storefront**: https://web-production-77a4c.up.railway.app
 - **API**: https://api-production-2c9f.up.railway.app/api
 - **Admin**: https://web-production-77a4c.up.railway.app/admin/login
-  - admin@fabiola.pe / `Fabiola-82d493d51d`  (CAMBIAR esta contraseña)
-- DB sembrada en prod: 44 productos, 6 categorías.
-- Config monorepo: cada servicio con Root Directory `/` + Config Path `apps/{api,web}/railway.json`
-  (se setea por API GraphQL de Railway, no por CLI; ver memoria fabiola-deploy-railway).
-- Deploy por CLI: `railway up --service api --ci` / `--service web --ci`.
+  - Usuario: admin@fabiola.pe · contraseña: ver Railway (variable del servicio api). NO se
+    documenta acá (repo público).
+- **Auto-deploy roto**: el repo se renombró a `ValentinoBenites` y se rompió el webhook de
+  GitHub→Railway. Desplegar a mano con `railway up --service api --detach` y
+  `railway up --service web --detach`.
+- **Migraciones/scripts contra prod**: usar `DATABASE_PUBLIC_URL` del servicio Postgres
+  (`thomas.proxy.rlwy.net`), no la interna. `prisma migrate deploy` con esa URL.
 
-## Pendientes reales
-- Credenciales Wasabi (WASABI_* en `apps/api/.env`) para fotos reales — hoy usa placeholder.
-- Número de WhatsApp real del negocio (en Configuración del admin).
-- Color de acento de marca (hoy negro sobrio) + logo de la tienda.
-- Probar flujos end-to-end levantando las apps.
+## Cómo levantarlo (local)
+`pnpm dev` desde la raíz (web 3024 / api 4024). Solo Gian abre puertos.
+- Backfill de variantes en local: `pnpm --filter api db:backfill-variantes`.
+
+## Pendientes (lado clienta / negocio — no técnico)
+- Agrupar sus modelos por color desde **Admin → Migración** (ej: "Bandolera Andina" ya quedó
+  hecha como ejemplo con 7 colores).
+- Revisar los 7 productos marcados "Único" (nombres sin color reconocible).
+- Cargar precios reales, número de WhatsApp real, y los QR reales de Yape/Plin.
+- Rotar/definir `SEED_ADMIN_PASSWORD` del admin de prod (repo público).
 
 ## Fases futuras
-- Fase 2: inventario real (kardex entradas/salidas/stock) + reportes.
-- Fase 3: pasarela de pago automática (Izipay/Culqi con Yape/Plin).
+- **Izipay real**: integrar la pasarela sobre el stub ya preparado (modalidad redirect vs
+  embedded a definir; el schema ya soporta `referenciaTransaccion`/`proveedorPago`/`rawPago`).
+- Inventario/kardex y reportes (si el negocio lo pide; hoy es hecho-a-pedido sin stock).
