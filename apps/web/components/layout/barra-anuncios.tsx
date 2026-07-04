@@ -46,7 +46,7 @@ export function BarraAnuncios({ mensajes, activa }: BarraAnunciosProps) {
           to { transform: translateX(-50%); }
         }
         .marquee-anuncios {
-          animation: desplazar-anuncios 30s linear infinite;
+          animation: desplazar-anuncios 60s linear infinite;
         }
         .group:hover .marquee-anuncios {
           animation-play-state: paused;
