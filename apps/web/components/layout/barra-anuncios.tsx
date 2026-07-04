@@ -10,7 +10,7 @@ const MENSAJE_FALLBACK = "Envíos gratis a todo el Perú";
  * paez.com.pe). La duracion se calcula segun el ancho real de la tira, asi el
  * ritmo es constante sin importar cuantos mensajes configure la clienta.
  */
-const VELOCIDAD_PX_SEG = 6;
+const VELOCIDAD_PX_SEG = 3;
 
 /** Separador visual entre mensajes dentro de la tira. */
 const SEPARADOR = "•";
