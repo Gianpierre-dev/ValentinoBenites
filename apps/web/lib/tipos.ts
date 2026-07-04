@@ -137,6 +137,10 @@ export interface Configuracion {
   heroTitulo: string | null;
   heroSubtitulo: string | null;
   heroTextoClaro: boolean;
+  /** Prende/apaga la barra de anuncios (marquee) sobre el encabezado. */
+  barraActiva: boolean;
+  /** Mensajes que se desplazan en la barra superior; null o vacio usa el fallback. */
+  barraAnuncios: string[] | null;
   actualizadoEn: string;
 }
 

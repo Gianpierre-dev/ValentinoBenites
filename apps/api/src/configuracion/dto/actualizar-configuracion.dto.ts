@@ -1,4 +1,4 @@
-import { IsBoolean, IsOptional, IsString } from 'class-validator';
+import { IsArray, IsBoolean, IsOptional, IsString } from 'class-validator';
 
 export class ActualizarConfiguracionDto {
   @IsOptional()
@@ -47,4 +47,13 @@ export class ActualizarConfiguracionDto {
 
   @IsOptional()
   banners?: unknown;
+
+  @IsOptional()
+  @IsBoolean()
+  barraActiva?: boolean;
+
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  barraAnuncios?: string[];
 }

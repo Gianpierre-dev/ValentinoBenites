@@ -184,6 +184,11 @@ model Configuracion {
   heroSubtitulo  String?
   // true = texto claro (blanco) para banners oscuros; false = texto oscuro.
   heroTextoClaro Boolean @default(true)
+  // Barra de anuncios (marquee) sobre el encabezado. barraActiva prende/apaga la
+  // tira; barraAnuncios guarda la lista de mensajes (array de strings) que se
+  // desplazan en loop. Administrable desde el panel admin.
+  barraActiva   Boolean @default(true)
+  barraAnuncios Json?
   actualizadoEn DateTime @updatedAt
 
   @@map("configuracion")

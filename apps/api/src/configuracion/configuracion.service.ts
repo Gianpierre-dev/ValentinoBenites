@@ -39,6 +39,8 @@ export class ConfiguracionService {
         heroSubtitulo: dto.heroSubtitulo,
         heroTextoClaro: dto.heroTextoClaro,
         banners: dto.banners as Prisma.InputJsonValue | undefined,
+        barraActiva: dto.barraActiva,
+        barraAnuncios: dto.barraAnuncios,
       },
     });
   }

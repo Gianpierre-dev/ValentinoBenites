@@ -28,6 +28,8 @@ interface FormularioConfig {
   heroSubtitulo: string;
   heroTextoClaro: boolean;
   banners: Banner[];
+  barraActiva: boolean;
+  barraAnuncios: string[];
 }
 
 async function cargarFormulario(): Promise<FormularioConfig> {
@@ -45,6 +47,8 @@ async function cargarFormulario(): Promise<FormularioConfig> {
     heroSubtitulo: config.heroSubtitulo ?? "",
     heroTextoClaro: config.heroTextoClaro,
     banners: config.banners ?? [],
+    barraActiva: config.barraActiva,
+    barraAnuncios: config.barraAnuncios ?? [],
   };
 }
 
@@ -75,6 +79,8 @@ export default function PaginaConfiguracion() {
         heroSubtitulo,
         heroTextoClaro,
         banners,
+        barraActiva,
+        barraAnuncios,
       } = estado.datos;
       await actualizarConfiguracion({
         whatsapp: whatsapp.trim() || null,
@@ -89,6 +95,10 @@ export default function PaginaConfiguracion() {
         heroSubtitulo: heroSubtitulo.trim() || null,
         heroTextoClaro,
         banners,
+        barraActiva,
+        barraAnuncios: barraAnuncios
+          .map((mensaje) => mensaje.trim())
+          .filter((mensaje) => mensaje.length > 0),
       });
       mostrarExito("Configuracion guardada.");
     } catch (error) {
@@ -233,6 +243,25 @@ export default function PaginaConfiguracion() {
             </label>
           </section>
 
+          <section className="flex flex-col gap-4">
+            <h2 className="border-b border-borde pb-2 text-sm font-semibold uppercase tracking-wide text-texto/70">
+              Barra de anuncios
+            </h2>
+            <label className="flex items-center gap-3 text-sm text-texto-fuerte">
+              <input
+                type="checkbox"
+                checked={estado.datos.barraActiva}
+                onChange={(evento) => actualizarCampo("barraActiva", evento.target.checked)}
+                className="h-4 w-4 rounded border-borde text-acento focus:ring-acento"
+              />
+              <span>Mostrar barra de anuncios</span>
+            </label>
+            <EditorAnuncios
+              mensajes={estado.datos.barraAnuncios}
+              alCambiar={(mensajes) => actualizarCampo("barraAnuncios", mensajes)}
+            />
+          </section>
+
           <EditorBanners
             banners={estado.datos.banners}
             alCambiar={(banners) => actualizarCampo("banners", banners)}
@@ -342,6 +371,71 @@ function CargadorQR({ etiqueta, url, alCambiar, alError }: PropsCargadorQR) {
         className="sr-only"
         onChange={(evento) => subir(evento.target.files)}
       />
+    </div>
+  );
+}
+
+interface PropsEditorAnuncios {
+  mensajes: string[];
+  alCambiar: (mensajes: string[]) => void;
+}
+
+/** Editor de la lista de mensajes que se desplazan en la barra superior. */
+function EditorAnuncios({ mensajes, alCambiar }: PropsEditorAnuncios) {
+  function actualizarMensaje(indice: number, valor: string) {
+    alCambiar(mensajes.map((mensaje, posicion) => (posicion === indice ? valor : mensaje)));
+  }
+
+  function quitar(indice: number) {
+    alCambiar(mensajes.filter((_, posicion) => posicion !== indice));
+  }
+
+  return (
+    <div className="flex flex-col gap-3">
+      <p className="text-sm text-texto/60">
+        Estos mensajes se desplazan en la barra superior del sitio.
+      </p>
+
+      {mensajes.length === 0 && (
+        <p className="text-sm text-texto/60">
+          Aun no hay mensajes. Agrega el primero.
+        </p>
+      )}
+
+      <div className="flex flex-col gap-2">
+        {mensajes.map((mensaje, indice) => (
+          <div key={indice} className="flex items-center gap-2">
+            <div className="flex-1">
+              <Input
+                aria-label={`Mensaje ${indice + 1}`}
+                placeholder="Envíos gratis a todo el Perú"
+                value={mensaje}
+                onChange={(evento) => actualizarMensaje(indice, evento.target.value)}
+              />
+            </div>
+            <Boton
+              type="button"
+              variante="fantasma"
+              tamano="sm"
+              aria-label={`Quitar mensaje ${indice + 1}`}
+              onClick={() => quitar(indice)}
+            >
+              <IconTrash className="h-4 w-4 text-oferta" aria-hidden />
+            </Boton>
+          </div>
+        ))}
+      </div>
+
+      <div>
+        <Boton
+          type="button"
+          variante="secundario"
+          onClick={() => alCambiar([...mensajes, ""])}
+        >
+          <IconPlus className="h-4 w-4" aria-hidden />
+          Agregar mensaje
+        </Boton>
+      </div>
     </div>
   );
 }
