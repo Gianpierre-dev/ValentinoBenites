@@ -3,6 +3,7 @@ import Link from "next/link";
 import { listarCategorias } from "@/lib/api";
 import type { Categoria } from "@/lib/tipos";
 import { IconoCarrito } from "./icono-carrito";
+import { IconoFavoritos } from "./icono-favoritos";
 import { NavCategorias } from "./nav-categorias";
 
 /**
@@ -41,7 +42,8 @@ export async function Encabezado() {
 
         <NavCategorias categorias={categorias} />
 
-        <div className="flex items-center">
+        <div className="flex items-center gap-1">
+          <IconoFavoritos />
           <IconoCarrito />
         </div>
       </div>

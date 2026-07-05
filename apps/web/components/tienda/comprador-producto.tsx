@@ -6,6 +6,7 @@ import { Etiqueta } from "@/components/ui";
 import type { Producto, Variante } from "@/lib/tipos";
 import { formatearPrecio, precioMostrableVariante } from "@/lib/utilidades";
 import { AccionesProducto } from "./acciones-producto";
+import { BotonFavorito } from "./boton-favorito";
 import { GaleriaProducto } from "./galeria-producto";
 import { SelectorColor } from "./selector-color";
 
@@ -117,9 +118,16 @@ function EncabezadoProducto({ producto }: { producto: Producto }) {
           {producto.categoria.nombre}
         </p>
       )}
-      <h1 className="mt-3 text-4xl font-semibold leading-tight tracking-tight text-texto-fuerte sm:text-5xl">
-        {producto.nombre}
-      </h1>
+      <div className="mt-3 flex items-start justify-between gap-4">
+        <h1 className="text-4xl font-semibold leading-tight tracking-tight text-texto-fuerte sm:text-5xl">
+          {producto.nombre}
+        </h1>
+        {/* El favorito es a nivel modelo (no variante) y funciona incluso sin variantes activas. */}
+        <BotonFavorito
+          producto={producto}
+          className="mt-2 shrink-0 border border-borde bg-fondo hover:border-acento/40"
+        />
+      </div>
     </div>
   );
 }

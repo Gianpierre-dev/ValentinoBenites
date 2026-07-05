@@ -4,6 +4,7 @@ import { Etiqueta } from "@/components/ui";
 import type { Producto } from "@/lib/tipos";
 import { calcularDescuento, formatearPrecio } from "@/lib/utilidades";
 import { BotonAgregarRapido } from "./boton-agregar-rapido";
+import { BotonFavorito } from "./boton-favorito";
 
 interface PropsTarjetaProducto {
   producto: Producto;
@@ -45,6 +46,10 @@ export function TarjetaProducto({ producto }: PropsTarjetaProducto) {
               -{descuento}%
             </Etiqueta>
           )}
+          <BotonFavorito
+            producto={producto}
+            className="absolute right-3 top-3 z-20 bg-fondo/90 shadow-sm backdrop-blur-sm"
+          />
           <BotonAgregarRapido producto={producto} />
         </div>
 
