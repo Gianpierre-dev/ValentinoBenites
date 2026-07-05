@@ -52,6 +52,7 @@ export function GestorVariantes({ producto, alCambiar }: PropsGestorVariantes) {
   const [creando, setCreando] = useState(false);
   const [borrador, setBorrador] = useState<BorradorVariante>(borradorDesde(null));
   const [errorColor, setErrorColor] = useState<string | undefined>();
+  const [errorHex, setErrorHex] = useState<string | undefined>();
   const [enviando, setEnviando] = useState(false);
   const [aEliminar, setAEliminar] = useState<Variante | null>(null);
   const [eliminando, setEliminando] = useState(false);
@@ -63,6 +64,7 @@ export function GestorVariantes({ producto, alCambiar }: PropsGestorVariantes) {
     setEditando(null);
     setBorrador(borradorDesde(null));
     setErrorColor(undefined);
+    setErrorHex(undefined);
     setCreando(true);
   }
 
@@ -71,12 +73,14 @@ export function GestorVariantes({ producto, alCambiar }: PropsGestorVariantes) {
     setEditando(variante);
     setBorrador(borradorDesde(variante));
     setErrorColor(undefined);
+    setErrorHex(undefined);
   }
 
   function cerrarFormulario() {
     setCreando(false);
     setEditando(null);
     setErrorColor(undefined);
+    setErrorHex(undefined);
   }
 
   function construirEntrada(): VarianteEntrada {
@@ -97,6 +101,17 @@ export function GestorVariantes({ producto, alCambiar }: PropsGestorVariantes) {
   async function guardar() {
     if (borrador.color.trim() === "") {
       setErrorColor("El color es obligatorio.");
+      return;
+    }
+    // La tienda dibuja la bolita del selector con este hex; sin el, la bolita
+    // cae a la primera foto de la variante (y sin fotos quedaria vacia).
+    const hex = borrador.colorHex.trim();
+    if (hex === "") {
+      setErrorHex("El codigo hex es obligatorio: pinta la bolita del color en la tienda.");
+      return;
+    }
+    if (!/^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(hex)) {
+      setErrorHex('Formato invalido: usa "#" y 3 o 6 digitos, ej. #7D2181.');
       return;
     }
     const precioTexto = borrador.precio.trim();
@@ -226,12 +241,14 @@ export function GestorVariantes({ producto, alCambiar }: PropsGestorVariantes) {
               }}
             />
             <Input
-              etiqueta="Codigo de color (hex, opcional)"
+              etiqueta="Codigo de color (hex)"
               placeholder="#7D2181"
               value={borrador.colorHex}
-              onChange={(evento) =>
-                setBorrador((actual) => ({ ...actual, colorHex: evento.target.value }))
-              }
+              error={errorHex}
+              onChange={(evento) => {
+                setBorrador((actual) => ({ ...actual, colorHex: evento.target.value }));
+                setErrorHex(undefined);
+              }}
             />
             <Input
               etiqueta="Precio propio (opcional)"

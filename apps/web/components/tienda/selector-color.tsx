@@ -1,9 +1,9 @@
 "use client";
 
 import { useRef } from "react";
-import Image from "next/image";
 import type { Variante } from "@/lib/tipos";
 import { cn } from "@/lib/utilidades";
+import { RellenoBolita } from "./bolitas-color";
 
 interface PropsSelectorColor {
   variantes: Variante[];
@@ -12,10 +12,11 @@ interface PropsSelectorColor {
 }
 
 /**
- * Selector de color estilo Paez: fila de miniaturas, una por variante (color).
- * La miniatura usa la foto efectiva de la variante (con fallback a la del modelo);
- * la seleccionada lleva borde marcado. Modelo hecho-a-pedido: nunca hay "agotado",
- * todas las variantes estan siempre disponibles.
+ * Selector de color del detalle: fila de bolitas, una por variante (color).
+ * La bolita se pinta con el hex de la variante (fallback: recorte de su primera
+ * foto); la seleccionada lleva anillo marcado y el nombre se muestra arriba.
+ * Modelo hecho-a-pedido: nunca hay "agotado", todas las variantes estan
+ * siempre disponibles.
  *
  * Accesibilidad: `radiogroup` con roving tabindex y navegacion por flechas.
  */
@@ -75,7 +76,6 @@ export function SelectorColor({
       >
         {variantes.map((variante, indice) => {
           const activa = variante.id === varianteSeleccionadaId;
-          const foto = variante.imagenesEfectivas?.[0]?.url ?? null;
 
           return (
             <button
@@ -87,40 +87,17 @@ export function SelectorColor({
               role="radio"
               aria-checked={activa}
               aria-label={variante.color}
+              title={variante.color}
               tabIndex={activa || (indiceActual < 0 && indice === 0) ? 0 : -1}
               onClick={() => alSeleccionar(variante)}
               className={cn(
-                "relative block h-16 w-16 overflow-hidden rounded-xl border-2 bg-perla transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-acento focus-visible:ring-offset-2",
+                "relative block h-8 w-8 overflow-hidden rounded-full bg-perla shadow-[inset_0_0_0_1px_rgba(0,0,0,0.15)] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-acento focus-visible:ring-offset-2 motion-reduce:transition-none",
                 activa
-                  ? "border-acento ring-2 ring-acento/20"
-                  : "border-transparent hover:border-acento/40",
+                  ? "ring-2 ring-acento ring-offset-2"
+                  : "hover:scale-110",
               )}
             >
-              {foto ? (
-                <Image
-                  src={foto}
-                  alt=""
-                  fill
-                  sizes="64px"
-                  className="object-cover"
-                />
-              ) : (
-                <span
-                  aria-hidden
-                  className="flex h-full w-full items-center justify-center"
-                  style={
-                    variante.colorHex
-                      ? { backgroundColor: variante.colorHex }
-                      : undefined
-                  }
-                >
-                  {!variante.colorHex && (
-                    <span className="text-[9px] uppercase text-texto/50">
-                      {variante.color}
-                    </span>
-                  )}
-                </span>
-              )}
+              <RellenoBolita variante={variante} />
             </button>
           );
         })}
