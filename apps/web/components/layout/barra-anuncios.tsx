@@ -10,7 +10,7 @@ const SEPARADOR = "•";
  * mensajes y queda impresa en el HTML: no depende de JavaScript en el navegador,
  * asi el ritmo es identico desde el primer frame en cualquier maquina.
  */
-const VELOCIDAD_PX_SEG = 3;
+const VELOCIDAD_PX_SEG = 5;
 
 /** Ancho estimado por caracter (text-xs uppercase con tracking amplio). */
 const PX_POR_CARACTER = 9;
