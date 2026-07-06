@@ -6,7 +6,7 @@ import Link from "next/link";
 import { Etiqueta } from "@/components/ui";
 import type { Producto } from "@/lib/tipos";
 import { calcularDescuento, formatearPrecio } from "@/lib/utilidades";
-import { BotonAgregarRapido } from "./boton-agregar-rapido";
+import { ControlCarritoTarjeta } from "./control-carrito-tarjeta";
 import { BotonFavorito } from "./boton-favorito";
 import { BolitasColor } from "./bolitas-color";
 
@@ -38,7 +38,7 @@ export function TarjetaProducto({ producto }: PropsTarjetaProducto) {
 
   return (
     <article className="group relative h-full">
-      <div className="flex h-full flex-col overflow-hidden rounded-2xl border border-borde bg-fondo shadow-[0_1px_3px_rgba(17,17,17,0.04)] transition-all duration-300 ease-out group-hover:-translate-y-1 group-hover:border-acento/30 group-hover:shadow-[0_18px_40px_-12px_rgba(125,33,129,0.28)]">
+      <div className="flex h-full flex-col overflow-hidden rounded-2xl border border-borde bg-fondo shadow-[0_2px_6px_-2px_rgba(17,17,17,0.08),0_12px_28px_-16px_rgba(125,33,129,0.22)] transition-all duration-300 ease-out group-hover:-translate-y-1 group-hover:border-acento/30 group-hover:shadow-[0_22px_48px_-14px_rgba(125,33,129,0.34)]">
         <div className="relative aspect-[3/4] overflow-hidden bg-perla">
           {imagen ? (
             <Image
@@ -65,7 +65,7 @@ export function TarjetaProducto({ producto }: PropsTarjetaProducto) {
             producto={producto}
             className="absolute right-3 top-3 z-20 bg-fondo/90 shadow-sm backdrop-blur-sm"
           />
-          <BotonAgregarRapido producto={producto} variante={seleccionada} />
+          <ControlCarritoTarjeta producto={producto} />
         </div>
 
         <div className="flex flex-1 flex-col gap-1.5 p-4">

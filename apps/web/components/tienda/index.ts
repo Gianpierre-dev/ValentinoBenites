@@ -1,5 +1,5 @@
 export { TarjetaProducto } from "./tarjeta-producto";
-export { BotonAgregarRapido } from "./boton-agregar-rapido";
+export { ControlCarritoTarjeta } from "./control-carrito-tarjeta";
 export { BotonFavorito } from "./boton-favorito";
 export { CarritoDrawer } from "./carrito-drawer";
 export { GrillaProductos } from "./grilla-productos";
