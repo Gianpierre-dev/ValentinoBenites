@@ -65,7 +65,6 @@ export function TarjetaProducto({ producto }: PropsTarjetaProducto) {
             producto={producto}
             className="absolute right-3 top-3 z-20 bg-fondo/90 shadow-sm backdrop-blur-sm"
           />
-          <ControlCarritoTarjeta producto={producto} />
         </div>
 
         <div className="flex flex-1 flex-col gap-1.5 p-4">
@@ -101,6 +100,7 @@ export function TarjetaProducto({ producto }: PropsTarjetaProducto) {
               </span>
             )}
           </div>
+          <ControlCarritoTarjeta producto={producto} />
         </div>
       </div>
 
