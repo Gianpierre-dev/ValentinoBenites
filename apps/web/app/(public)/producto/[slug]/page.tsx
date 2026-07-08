@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { IconChevronRight } from "@tabler/icons-react";
+import { Eyebrow, Revelar } from "@/components/ui";
 import { CompradorProducto, GrillaProductos } from "@/components/tienda";
 import { ErrorApi, listarProductos, obtenerProducto } from "@/lib/api";
 import type { Producto } from "@/lib/tipos";
@@ -99,18 +100,22 @@ export default async function PaginaProducto({
           className="border-t border-borde bg-perla"
         >
           <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
-            <h2
-              id="titulo-relacionados"
-              className="text-3xl font-extrabold sm:text-4xl"
-            >
-              También te puede gustar
-            </h2>
-            <p className="mt-3 max-w-md text-texto">
-              Otras piezas destacadas que combinan con tu estilo.
-            </p>
-            <div className="mt-10">
+            <Revelar>
+              <Eyebrow>Sigue explorando</Eyebrow>
+              <h2
+                id="titulo-relacionados"
+                className="mt-5 text-3xl font-normal sm:text-4xl lg:text-5xl"
+              >
+                También te puede{" "}
+                <span className="italic text-acento">gustar</span>
+              </h2>
+              <p className="mt-4 max-w-md text-texto">
+                Otras piezas destacadas que combinan con tu estilo.
+              </p>
+            </Revelar>
+            <Revelar delay={80} className="mt-10">
               <GrillaProductos productos={relacionados} />
-            </div>
+            </Revelar>
           </div>
         </section>
       )}

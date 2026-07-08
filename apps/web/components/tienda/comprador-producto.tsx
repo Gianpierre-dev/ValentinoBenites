@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { IconClockHour4 } from "@tabler/icons-react";
-import { Etiqueta } from "@/components/ui";
+import { Etiqueta, Eyebrow } from "@/components/ui";
 import type { Producto, Variante } from "@/lib/tipos";
 import { formatearPrecio, precioMostrableVariante } from "@/lib/utilidades";
 import { AccionesProducto } from "./acciones-producto";
@@ -64,7 +64,7 @@ export function CompradorProducto({ producto }: PropsCompradorProducto) {
         <div className="flex flex-wrap items-center gap-3">
           {precio.precioAntes !== null ? (
             <>
-              <span className="font-display text-3xl font-semibold text-acento">
+              <span className="font-display text-4xl font-semibold text-acento">
                 {formatearPrecio(precio.precioFinal)}
               </span>
               <span className="text-xl text-texto/50 line-through">
@@ -109,13 +109,9 @@ export function CompradorProducto({ producto }: PropsCompradorProducto) {
 function EncabezadoProducto({ producto }: { producto: Producto }) {
   return (
     <div>
-      {producto.categoria && (
-        <p className="titulo-ui text-xs font-semibold uppercase tracking-[0.2em] text-acento">
-          {producto.categoria.nombre}
-        </p>
-      )}
-      <div className="mt-3 flex items-start justify-between gap-4">
-        <h1 className="text-4xl font-semibold leading-tight tracking-tight text-texto-fuerte sm:text-5xl">
+      {producto.categoria && <Eyebrow>{producto.categoria.nombre}</Eyebrow>}
+      <div className="mt-4 flex items-start justify-between gap-4">
+        <h1 className="text-4xl font-normal leading-[1.05] tracking-tight text-texto-fuerte sm:text-5xl">
           {producto.nombre}
         </h1>
         {/* El favorito es a nivel modelo (no variante) y funciona incluso sin variantes activas. */}

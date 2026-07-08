@@ -2,12 +2,12 @@
 
 import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
 import Image from "next/image";
-import Link from "next/link";
 import {
   IconArrowRight,
   IconChevronLeft,
   IconChevronRight,
 } from "@tabler/icons-react";
+import { BotonPremium } from "@/components/ui";
 import type { Banner } from "@/lib/tipos";
 
 /** Tiempo entre transiciones automáticas del carrusel. */
@@ -163,13 +163,19 @@ export function HeroSlider({
       <div className="relative mx-auto flex min-h-[68vh] max-w-7xl items-center px-4 py-20 sm:px-6 lg:px-8 lg:py-28">
         <div className="flex max-w-xl flex-col items-start gap-6">
           <p
-            className={`inline-flex items-center gap-2 rounded-full border px-4 py-1.5 text-xs font-medium uppercase tracking-[0.25em] backdrop-blur ${
+            className={`titulo-ui inline-flex items-center gap-2 rounded-full border px-4 py-1.5 text-[11px] font-semibold uppercase tracking-[0.24em] backdrop-blur ${
               textoClaro
                 ? "border-white/40 bg-white/15 text-white"
                 : "border-acento/20 bg-white/70 text-acento"
             }`}
           >
-            Nueva temporada
+            <span
+              aria-hidden
+              className={`h-1.5 w-1.5 rounded-full ${
+                textoClaro ? "bg-white/80" : "bg-acento-claro"
+              }`}
+            />
+            Nueva temporada · Hecho a mano
           </p>
           <h1
             className="text-4xl font-black leading-[1.05] sm:text-5xl lg:text-6xl"
@@ -190,18 +196,9 @@ export function HeroSlider({
           >
             {textoSubtitulo}
           </p>
-          <Link
-            href="/catalogo"
-            className="group inline-flex items-center gap-2 rounded-full bg-acento px-7 py-3.5 text-base font-medium text-acento-contraste shadow-lg shadow-acento/30 transition-all hover:-translate-y-0.5 hover:bg-acento/90 hover:shadow-xl hover:shadow-acento/40"
-          >
+          <BotonPremium href="/catalogo" icono={IconArrowRight} variante="solido">
             Ver catálogo
-            <IconArrowRight
-              size={18}
-              stroke={2}
-              aria-hidden
-              className="transition-transform group-hover:translate-x-1"
-            />
-          </Link>
+          </BotonPremium>
         </div>
       </div>
 

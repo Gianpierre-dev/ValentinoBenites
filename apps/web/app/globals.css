@@ -7,9 +7,16 @@
   Cambiar el acento aqui se propaga a todo el sitio.
 */
 :root {
-  --color-fondo: #ffffff;
-  /* Perla violacea muy sutil para alternar secciones (no todo blanco plano). */
-  --color-perla: #faf7fb;
+  /*
+    Direccion "Editorial Luxury": la base deja de ser blanco frio y pasa a una
+    CREMA CALIDA (#FBF6F1). Las tarjetas y paneles elevados van sobre blanco puro
+    (--color-superficie) para conservar contraste y profundidad sobre la crema.
+  */
+  --color-fondo: #fbf6f1;
+  /* Superficie elevada (tarjetas, paneles): blanco puro sobre la crema. */
+  --color-superficie: #ffffff;
+  /* Crema secundaria, mas calida, para alternar secciones sin romper el tono. */
+  --color-perla: #f5ece6;
   /*
     Rosa de marca para AMBIENTE (fondos de seccion y footer), inspirado en el
     sitio oficial que usa rosados calidos en hero/footer. Mas perceptible que el
@@ -20,16 +27,26 @@
   --color-rosa: #fbf0fa;
   --color-rosa-fuerte: #f7e4f4;
   --color-texto: #334155;
-  --color-texto-fuerte: #111111;
-  --color-borde: #e5e5e5;
+  /* Tinta calida casi negra para titulares editoriales (antes #111111). */
+  --color-texto-fuerte: #241522;
+  /* Linea calida, mas suave que un gris neutro, acorde a la crema. */
+  --color-borde: #e7dcd6;
   --color-acento: #7d2181;
   --color-acento-claro: #d64edc;
   --color-acento-contraste: #ffffff;
   --color-oferta: #b91c1c;
+
+  /*
+    Curva de movimiento de la casa: entrada rapida y salida muy suave (fisica de
+    "peso premium"). Se reutiliza en botones, tarjetas y reveals para que TODO el
+    sitio se mueva con el mismo lenguaje.
+  */
+  --ease-suave: cubic-bezier(0.32, 0.72, 0, 1);
 }
 
 @theme inline {
   --color-fondo: var(--color-fondo);
+  --color-superficie: var(--color-superficie);
   --color-perla: var(--color-perla);
   --color-rosa: var(--color-rosa);
   --color-rosa-fuerte: var(--color-rosa-fuerte);
@@ -43,12 +60,36 @@
 
   --font-sans: var(--fuente-sans);
   --font-display: var(--fuente-display);
+
+  /*
+    Expone la curva de la casa como utilidad Tailwind (`ease-suave`) para que
+    botones, tarjetas y reveals compartan la misma fisica sin repetir el
+    cubic-bezier en cada clase.
+  */
+  --ease-suave: var(--ease-suave);
 }
 
 body {
   background: var(--color-fondo);
   color: var(--color-texto);
   font-family: var(--font-sans), system-ui, -apple-system, sans-serif;
+}
+
+/*
+  Grano de film global: capa fija de ruido a muy baja opacidad que unifica el
+  tono "editorial" del sitio y le quita el look plano/digital. No captura el
+  mouse (pointer-events:none) y se coloca por debajo de overlays criticos
+  (lightbox z-100, drawer) para no ensuciar modales. Respeta reduce-motion por
+  ser estatico (no anima).
+*/
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  pointer-events: none;
+  opacity: 0.03;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
 /*
