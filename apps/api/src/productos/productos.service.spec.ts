@@ -51,4 +51,40 @@ describe('ProductosService.listar (contrato del catalogo)', () => {
     // Sin precio propio -> hereda el del modelo.
     expect(variante.precioEfectivo.toNumber()).toBe(120);
   });
+
+  it('traduce precioMin y precioMax a un rango sobre el precio base del producto', async () => {
+    prisma.producto.findMany.mockResolvedValue([]);
+
+    await service.listar({ precioMin: 50, precioMax: 200 });
+
+    const [args] = prisma.producto.findMany.mock.calls[0] as [
+      { where: Record<string, unknown> },
+    ];
+    const where = args.where;
+    expect(where.precio).toEqual({ gte: 50, lte: 200 });
+  });
+
+  it('aplica solo el limite inferior cuando falta precioMax', async () => {
+    prisma.producto.findMany.mockResolvedValue([]);
+
+    await service.listar({ precioMin: 80 });
+
+    const [args] = prisma.producto.findMany.mock.calls[0] as [
+      { where: Record<string, unknown> },
+    ];
+    const where = args.where;
+    expect(where.precio).toEqual({ gte: 80 });
+  });
+
+  it('no agrega filtro de precio cuando no llegan precioMin ni precioMax', async () => {
+    prisma.producto.findMany.mockResolvedValue([]);
+
+    await service.listar({});
+
+    const [args] = prisma.producto.findMany.mock.calls[0] as [
+      { where: Record<string, unknown> },
+    ];
+    const where = args.where;
+    expect(where.precio).toBeUndefined();
+  });
 });

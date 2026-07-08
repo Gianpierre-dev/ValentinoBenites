@@ -36,6 +36,15 @@ export class CrearProductoDto {
   @IsString()
   descripcion?: string;
 
+  // Ficha tecnica (texto libre, opcional).
+  @IsOptional()
+  @IsString()
+  material?: string;
+
+  @IsOptional()
+  @IsString()
+  dimensiones?: string;
+
   @IsNumber({ maxDecimalPlaces: 2 })
   @Min(0)
   precio!: number;

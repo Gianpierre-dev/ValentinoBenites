@@ -12,11 +12,27 @@ import { ActualizarCategoriaDto } from './dto/actualizar-categoria.dto';
 export class CategoriasService {
   constructor(private readonly prisma: PrismaService) {}
 
-  listarActivas() {
-    return this.prisma.categoria.findMany({
+  async listarActivas() {
+    const categorias = await this.prisma.categoria.findMany({
       where: { activo: true },
       orderBy: [{ orden: 'asc' }, { nombre: 'asc' }],
+      select: {
+        id: true,
+        nombre: true,
+        slug: true,
+        orden: true,
+        activo: true,
+        // Conteo filtrado: solo productos activos alimentan el "Bandoleras (12)".
+        _count: { select: { productos: { where: { activo: true } } } },
+      },
     });
+
+    // Aplanamos el _count a un campo estable para el front; no exponemos la
+    // forma interna del agregado de Prisma.
+    return categorias.map(({ _count, ...categoria }) => ({
+      ...categoria,
+      cantidadProductos: _count.productos,
+    }));
   }
 
   async crear(dto: CrearCategoriaDto) {

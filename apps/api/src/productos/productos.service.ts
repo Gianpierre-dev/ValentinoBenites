@@ -40,6 +40,19 @@ export class ProductosService {
       where.nombre = { contains: filtros.q, mode: 'insensitive' };
     }
 
+    // Rango de precio sobre el precio base del modelo. Cada extremo es opcional:
+    // solo agregamos las claves que llegan para no forzar un rango cerrado.
+    if (filtros.precioMin !== undefined || filtros.precioMax !== undefined) {
+      const rango: Prisma.DecimalFilter = {};
+      if (filtros.precioMin !== undefined) {
+        rango.gte = filtros.precioMin;
+      }
+      if (filtros.precioMax !== undefined) {
+        rango.lte = filtros.precioMax;
+      }
+      where.precio = rango;
+    }
+
     const productos = await this.prisma.producto.findMany({
       where,
       include: INCLUIR_RELACIONES,

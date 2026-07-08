@@ -106,4 +106,49 @@ describe('serializarProductoPublico', () => {
     expect(resultado.variantes).toHaveLength(1);
     expect(resultado.variantes[0].color).toBe('Vino');
   });
+
+  it('expone material y dimensiones tal cual vienen del modelo', () => {
+    const producto = {
+      ...base,
+      material: 'Cuero sintetico de alta calidad',
+      dimensiones: 'Alto 26 cm - Ancho 30 cm - Fondo 12 cm',
+      variantes: [],
+    };
+
+    const resultado = serializarProductoPublico(producto);
+
+    expect(resultado.material).toBe('Cuero sintetico de alta calidad');
+    expect(resultado.dimensiones).toBe(
+      'Alto 26 cm - Ancho 30 cm - Fondo 12 cm',
+    );
+  });
+
+  it('reduce la categoria a { nombre, slug } y no filtra el resto de columnas', () => {
+    const producto = {
+      ...base,
+      categoria: {
+        id: 'cat-1',
+        nombre: 'Bandoleras',
+        slug: 'bandoleras',
+        orden: 0,
+        activo: true,
+      },
+      variantes: [],
+    };
+
+    const resultado = serializarProductoPublico(producto);
+
+    expect(resultado.categoria).toEqual({
+      nombre: 'Bandoleras',
+      slug: 'bandoleras',
+    });
+  });
+
+  it('expone categoria null cuando el producto no esta clasificado', () => {
+    const producto = { ...base, categoria: null, variantes: [] };
+
+    const resultado = serializarProductoPublico(producto);
+
+    expect(resultado.categoria).toBeNull();
+  });
 });

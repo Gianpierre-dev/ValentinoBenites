@@ -54,6 +54,9 @@ model Producto {
   descripcion  String?
   precio       Decimal          @db.Decimal(10, 2) // precio base del modelo
   precioOferta Decimal?         @db.Decimal(10, 2)
+  // Ficha tecnica (texto libre, opcional): se muestran en el detalle del producto.
+  material     String? // ej. "Cuero sintetico de alta calidad"
+  dimensiones  String? // ej. "Alto 26 cm - Ancho 30 cm - Fondo 12 cm"
   activo       Boolean          @default(true)
   destacado    Boolean          @default(false)
   // Categoria OPCIONAL: un producto puede existir sin clasificar. La admin

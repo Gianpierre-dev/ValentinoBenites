@@ -18,11 +18,19 @@ export interface VarianteLike {
   imagenes: ImagenLike[];
 }
 
+export interface CategoriaLike {
+  nombre: string;
+  slug: string;
+}
+
 export interface ProductoLike<V extends VarianteLike> {
   precio: Decimal;
   precioOferta: Decimal | null;
   imagenes: ImagenLike[];
   variantes: V[];
+  // Categoria completa que llega del include de Prisma; el serializer la reduce
+  // al par { nombre, slug } que consume el front (chip de categoria).
+  categoria?: (CategoriaLike & Record<string, unknown>) | null;
 }
 
 /**
@@ -49,5 +57,11 @@ export function serializarProductoPublico<
         variante.precioOferta ?? producto.precioOferta ?? null,
     }));
 
-  return { ...producto, variantes: variantesActivas };
+  // Reducimos la categoria al par { nombre, slug }: el front solo necesita eso
+  // para el chip y el enlace; no exponemos columnas internas (id, orden, etc.).
+  const categoria = producto.categoria
+    ? { nombre: producto.categoria.nombre, slug: producto.categoria.slug }
+    : null;
+
+  return { ...producto, categoria, variantes: variantesActivas };
 }

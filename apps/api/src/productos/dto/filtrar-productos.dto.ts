@@ -1,5 +1,11 @@
-import { Transform } from 'class-transformer';
-import { IsBoolean, IsOptional, IsString } from 'class-validator';
+import { Transform, Type } from 'class-transformer';
+import {
+  IsBoolean,
+  IsNumber,
+  IsOptional,
+  IsString,
+  Min,
+} from 'class-validator';
 
 export class FiltrarProductosDto {
   @IsOptional()
@@ -14,4 +20,18 @@ export class FiltrarProductosDto {
   @IsOptional()
   @IsString()
   q?: string;
+
+  // Rango de precio sobre el precio base del modelo. Query params opcionales,
+  // numericos y no negativos; @Type convierte el string del query a number.
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(0)
+  precioMin?: number;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(0)
+  precioMax?: number;
 }
