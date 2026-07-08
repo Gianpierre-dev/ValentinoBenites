@@ -20,6 +20,8 @@ const esquemaProducto = z
     nombre: z.string().min(1, "Ingresa el nombre"),
     slug: z.string().min(1, "Ingresa el slug"),
     descripcion: z.string().optional(),
+    material: z.string().optional(),
+    dimensiones: z.string().optional(),
     precio: z.coerce.number().positive("El precio debe ser mayor a 0"),
     precioOferta: numeroOpcional,
     // Categoria opcional: el producto puede quedar sin clasificar.
@@ -66,6 +68,8 @@ export function FormularioProducto({
       nombre: producto?.nombre ?? "",
       slug: producto?.slug ?? "",
       descripcion: producto?.descripcion ?? "",
+      material: producto?.material ?? "",
+      dimensiones: producto?.dimensiones ?? "",
       precio: producto?.precio ?? undefined,
       precioOferta: producto?.precioOferta ?? undefined,
       categoriaId: producto?.categoriaId ?? "",
@@ -85,6 +89,8 @@ export function FormularioProducto({
       nombre: datos.nombre,
       slug: datos.slug,
       descripcion: datos.descripcion?.trim() ? datos.descripcion.trim() : null,
+      material: datos.material?.trim() ? datos.material.trim() : null,
+      dimensiones: datos.dimensiones?.trim() ? datos.dimensiones.trim() : null,
       precio: datos.precio,
       precioOferta: datos.precioOferta ?? null,
       categoriaId: datos.categoriaId ? datos.categoriaId : null,
@@ -113,6 +119,21 @@ export function FormularioProducto({
           rows={3}
           className="w-full border border-borde bg-fondo px-3 py-2 text-sm text-texto-fuerte outline-none transition-colors placeholder:text-texto/50 focus:border-acento"
           {...register("descripcion")}
+        />
+      </div>
+
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <Input
+          etiqueta="Material — opcional"
+          placeholder="Ej. Cuero genuino"
+          error={errors.material?.message}
+          {...register("material")}
+        />
+        <Input
+          etiqueta="Dimensiones — opcional"
+          placeholder="Ej. 30 x 20 x 10 cm"
+          error={errors.dimensiones?.message}
+          {...register("dimensiones")}
         />
       </div>
 

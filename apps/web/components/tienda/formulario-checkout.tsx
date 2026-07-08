@@ -19,6 +19,7 @@ import { useHidratado } from "@/store/usar-hidratado";
 import { crearPedido, subirArchivo, ErrorApi } from "@/lib/api";
 import type { Configuracion, MetodoPago } from "@/lib/tipos";
 import { cn } from "@/lib/utilidades";
+import { BloqueConfianza } from "./bloque-confianza";
 import { ResumenPedido } from "./resumen-pedido";
 import {
   construirEnlaceWhatsApp,
@@ -281,6 +282,8 @@ export function FormularioCheckout({ configuracion }: PropsFormularioCheckout) {
         <div className="flex flex-col gap-4">
           <ResumenPedido lineas={lineas} total={total} />
 
+          <BloqueConfianza variante="lista" />
+
           {errorEnvio && (
             <p
               role="alert"
@@ -306,11 +309,6 @@ export function FormularioCheckout({ configuracion }: PropsFormularioCheckout) {
               "Confirmar pedido"
             )}
           </Boton>
-
-          <p className="flex items-center justify-center gap-1.5 text-xs text-texto">
-            <IconLock size={13} aria-hidden />
-            Tus datos se usan solo para coordinar tu pedido.
-          </p>
         </div>
       </aside>
     </form>

@@ -157,6 +157,8 @@ export function listarProductos(filtros: FiltrosProductos = {}): Promise<Product
       categoria: filtros.categoria,
       destacados: filtros.destacados ? true : undefined,
       q: filtros.q,
+      precioMin: filtros.precioMin,
+      precioMax: filtros.precioMax,
     },
   });
 }

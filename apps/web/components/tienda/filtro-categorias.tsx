@@ -37,11 +37,22 @@ export function FiltroCategorias({
 
   const claseChip = (activa: boolean) =>
     cn(
-      "border px-4 py-2 text-sm uppercase tracking-wide transition-colors",
+      "inline-flex items-center gap-1.5 border px-4 py-2 text-sm uppercase tracking-wide transition-colors",
       activa
         ? "border-acento bg-acento text-acento-contraste"
-        : "border-borde text-texto hover:border-texto/40",
+        : "border-borde text-texto hover:border-acento/40 hover:text-acento",
     );
+
+  const claseConteo = (activa: boolean) =>
+    cn(
+      "text-xs font-semibold tabular-nums",
+      activa ? "text-acento-contraste/80" : "text-texto/50",
+    );
+
+  const total = categorias.reduce(
+    (suma, categoria) => suma + (categoria.cantidadProductos ?? 0),
+    0,
+  );
 
   return (
     <nav aria-label="Filtrar por categoria">
@@ -54,6 +65,9 @@ export function FiltroCategorias({
             className={claseChip(!categoriaActiva)}
           >
             Todos
+            {total > 0 && (
+              <span className={claseConteo(!categoriaActiva)}>({total})</span>
+            )}
           </button>
         </li>
         {categorias.map((categoria) => {
@@ -67,6 +81,11 @@ export function FiltroCategorias({
                 className={claseChip(activa)}
               >
                 {categoria.nombre}
+                {categoria.cantidadProductos !== undefined && (
+                  <span className={claseConteo(activa)}>
+                    ({categoria.cantidadProductos})
+                  </span>
+                )}
               </button>
             </li>
           );

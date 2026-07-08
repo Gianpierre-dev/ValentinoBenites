@@ -20,8 +20,15 @@ export interface Categoria {
   slug: string;
   orden: number;
   activo: boolean;
-  creadoEn: string;
-  actualizadoEn: string;
+  /**
+   * Cantidad de productos activos de la categoria. Solo lo expone el listado
+   * publico `GET /categorias` (para el filtro con contador); en respuestas de
+   * crear/actualizar puede venir ausente.
+   */
+  cantidadProductos?: number;
+  /** Ausentes en el listado publico; presentes al crear/actualizar. */
+  creadoEn?: string;
+  actualizadoEn?: string;
 }
 
 export interface ImagenProducto {
@@ -78,6 +85,10 @@ export interface Producto {
   nombre: string;
   slug: string;
   descripcion: string | null;
+  /** Ficha tecnica: material principal (ej. "Cuero genuino"); null si no se cargo. */
+  material: string | null;
+  /** Ficha tecnica: dimensiones (ej. "30 x 20 x 10 cm"); null si no se cargo. */
+  dimensiones: string | null;
   precio: number;
   precioOferta: number | null;
   activo: boolean;
@@ -176,6 +187,10 @@ export interface FiltrosProductos {
   categoria?: string;
   destacados?: boolean;
   q?: string;
+  /** Precio minimo (soles) para el rango del catalogo. */
+  precioMin?: number;
+  /** Precio maximo (soles) para el rango del catalogo. */
+  precioMax?: number;
 }
 
 /** Datos editables de un producto (crear/actualizar desde el admin). */
@@ -183,6 +198,8 @@ export interface ProductoEntrada {
   nombre: string;
   slug: string;
   descripcion?: string | null;
+  material?: string | null;
+  dimensiones?: string | null;
   precio: number;
   precioOferta?: number | null;
   activo: boolean;

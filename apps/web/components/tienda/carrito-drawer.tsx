@@ -205,7 +205,7 @@ export function CarritoDrawer() {
                 <span className="text-sm font-semibold uppercase tracking-wide text-texto-fuerte">
                   Total
                 </span>
-                <span className="text-lg font-semibold text-texto-fuerte">
+                <span className="text-lg font-semibold text-acento">
                   {formatearPrecio(total)}
                 </span>
               </div>

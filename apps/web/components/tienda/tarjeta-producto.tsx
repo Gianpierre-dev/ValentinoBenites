@@ -69,6 +69,11 @@ export function TarjetaProducto({ producto }: PropsTarjetaProducto) {
         </div>
 
         <div className="flex flex-1 flex-col gap-1.5 p-4">
+          {producto.categoria && (
+            <p className="titulo-ui text-[11px] font-semibold uppercase tracking-[0.14em] text-acento/80">
+              {producto.categoria.nombre}
+            </p>
+          )}
           <h3 className="text-sm font-medium leading-snug text-texto-fuerte">
             {producto.nombre}
           </h3>
@@ -91,7 +96,7 @@ export function TarjetaProducto({ producto }: PropsTarjetaProducto) {
                 </span>
               </>
             ) : (
-              <span className="text-base font-semibold text-texto-fuerte">
+              <span className="text-base font-semibold text-acento">
                 {formatearPrecio(producto.precio)}
               </span>
             )}

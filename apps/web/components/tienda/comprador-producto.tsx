@@ -6,7 +6,9 @@ import { Etiqueta } from "@/components/ui";
 import type { Producto, Variante } from "@/lib/tipos";
 import { formatearPrecio, precioMostrableVariante } from "@/lib/utilidades";
 import { AccionesProducto } from "./acciones-producto";
+import { BloqueConfianza } from "./bloque-confianza";
 import { BotonFavorito } from "./boton-favorito";
+import { FichaTecnica } from "./ficha-tecnica";
 import { GaleriaProducto } from "./galeria-producto";
 import { SelectorColor } from "./selector-color";
 
@@ -73,7 +75,7 @@ export function CompradorProducto({ producto }: PropsCompradorProducto) {
               )}
             </>
           ) : (
-            <span className="font-display text-3xl font-semibold text-texto-fuerte">
+            <span className="font-display text-3xl font-semibold text-acento">
               {formatearPrecio(precio.precioFinal)}
             </span>
           )}
@@ -92,19 +94,13 @@ export function CompradorProducto({ producto }: PropsCompradorProducto) {
 
         <AccionesProducto producto={producto} variante={seleccionada} />
 
-        {producto.descripcion && (
-          <section
-            aria-label="Descripción del producto"
-            className="rounded-2xl border border-borde bg-fondo p-6 shadow-[0_1px_3px_rgba(17,17,17,0.04)]"
-          >
-            <h2 className="titulo-ui text-sm font-semibold uppercase tracking-wide text-texto-fuerte">
-              Descripción
-            </h2>
-            <p className="mt-3 whitespace-pre-line leading-relaxed text-texto">
-              {producto.descripcion}
-            </p>
-          </section>
-        )}
+        <BloqueConfianza variante="tarjetas" />
+
+        <FichaTecnica
+          descripcion={producto.descripcion}
+          material={producto.material}
+          dimensiones={producto.dimensiones}
+        />
       </div>
     </div>
   );
