@@ -1,0 +1,990 @@
+[
+  {
+    "slug": "et-0001",
+    "url": "https://esvalentinobenites.com/producto/et-0001/",
+    "nombre": "ET 0001",
+    "precio": "83,00 &euro;",
+    "categoria": "Bolsos",
+    "urlsImagenes": [
+      "https://esvalentinobenites.com/wp-content/uploads/2024/02/8.png"
+    ],
+    "archivos": [
+      "et-0001-1.png"
+    ]
+  },
+  {
+    "slug": "et-0002",
+    "url": "https://esvalentinobenites.com/producto/et-0002/",
+    "nombre": "ET 0002",
+    "precio": "83,00 &euro;",
+    "categoria": "Bolsos",
+    "urlsImagenes": [
+      "https://esvalentinobenites.com/wp-content/uploads/2024/02/4.png"
+    ],
+    "archivos": [
+      "et-0002-1.png"
+    ]
+  },
+  {
+    "slug": "et-a0001",
+    "url": "https://esvalentinobenites.com/producto/et-a0001/",
+    "nombre": "ET A0001",
+    "precio": "83,00 &euro;",
+    "categoria": "Bolsos",
+    "urlsImagenes": [
+      "https://esvalentinobenites.com/wp-content/uploads/2024/02/7.png"
+    ],
+    "archivos": [
+      "et-a0001-1.png"
+    ]
+  },
+  {
+    "slug": "et-a0002",
+    "url": "https://esvalentinobenites.com/producto/et-a0002/",
+    "nombre": "ET A0002",
+    "precio": "83,00 &euro;",
+    "categoria": "Bolsos",
+    "urlsImagenes": [
+      "https://esvalentinobenites.com/wp-content/uploads/2024/02/6.png"
+    ],
+    "archivos": [
+      "et-a0002-1.png"
+    ]
+  },
+  {
+    "slug": "et-a0003",
+    "url": "https://esvalentinobenites.com/producto/et-a0003/",
+    "nombre": "ET A0003",
+    "precio": "83,00 &euro;",
+    "categoria": "Bolsos",
+    "urlsImagenes": [
+      "https://esvalentinobenites.com/wp-content/uploads/2024/02/5.png"
+    ],
+    "archivos": [
+      "et-a0003-1.png"
+    ]
+  },
+  {
+    "slug": "et-a0004",
+    "url": "https://esvalentinobenites.com/producto/et-a0004/",
+    "nombre": "ET A0004",
+    "precio": "83,00 &euro;",
+    "categoria": "Bolsos",
+    "urlsImagenes": [
+      "https://esvalentinobenites.com/wp-content/uploads/2024/02/3.png"
+    ],
+    "archivos": [
+      "et-a0004-1.png"
+    ]
+  },
+  {
+    "slug": "et-a0005",
+    "url": "https://esvalentinobenites.com/producto/et-a0005/",
+    "nombre": "ET A0005",
+    "precio": "83,00 &euro;",
+    "categoria": "Bolsos",
+    "urlsImagenes": [
+      "https://esvalentinobenites.com/wp-content/uploads/2024/02/1.png"
+    ],
+    "archivos": [
+      "et-a0005-1.png"
+    ]
+  },
+  {
+    "slug": "ced-0001",
+    "url": "https://esvalentinobenites.com/producto/ced-0001/",
+    "nombre": "CED 0001",
+    "precio": "74,00 &euro;",
+    "categoria": "Bolsos",
+    "urlsImagenes": [
+      "https://esvalentinobenites.com/wp-content/uploads/2024/02/3-2.png"
+    ],
+    "archivos": [
+      "ced-0001-1.png"
+    ]
+  },
+  {
+    "slug": "ced-0002",
+    "url": "https://esvalentinobenites.com/producto/ced-0002/",
+    "nombre": "CED 0002",
+    "precio": "74,00 &euro;",
+    "categoria": "Bolsos",
+    "urlsImagenes": [
+      "https://esvalentinobenites.com/wp-content/uploads/2024/02/2-2.png"
+    ],
+    "archivos": [
+      "ced-0002-1.png"
+    ]
+  },
+  {
+    "slug": "ced-0003",
+    "url": "https://esvalentinobenites.com/producto/ced-0003/",
+    "nombre": "CED 0003",
+    "precio": "74,00 &euro;",
+    "categoria": "Bolsos",
+    "urlsImagenes": [
+      "https://esvalentinobenites.com/wp-content/uploads/2024/02/1-1.png"
+    ],
+    "archivos": [
+      "ced-0003-1.png"
+    ]
+  },
+  {
+    "slug": "ced-0004",
+    "url": "https://esvalentinobenites.com/producto/ced-0004/",
+    "nombre": "CED 0004",
+    "precio": "74,00 &euro;",
+    "categoria": "Bolsos",
+    "urlsImagenes": [
+      "https://esvalentinobenites.com/wp-content/uploads/2024/02/6-1.png"
+    ],
+    "archivos": [
+      "ced-0004-1.png"
+    ]
+  },
+  {
+    "slug": "ced-a0001",
+    "url": "https://esvalentinobenites.com/producto/ced-a0001/",
+    "nombre": "CED A0001",
+    "precio": "74,00 &euro;",
+    "categoria": "Bolsos",
+    "urlsImagenes": [
+      "https://esvalentinobenites.com/wp-content/uploads/2024/02/9.png"
+    ],
+    "archivos": [
+      "ced-a0001-1.png"
+    ]
+  },
+  {
+    "slug": "ced-a0002",
+    "url": "https://esvalentinobenites.com/producto/ced-a0002/",
+    "nombre": "CED A0002",
+    "precio": "74,00 &euro;",
+    "categoria": "Bolsos",
+    "urlsImagenes": [
+      "https://esvalentinobenites.com/wp-content/uploads/2024/02/7-1.png"
+    ],
+    "archivos": [
+      "ced-a0002-1.png"
+    ]
+  },
+  {
+    "slug": "ced-a0003",
+    "url": "https://esvalentinobenites.com/producto/ced-a0003/",
+    "nombre": "CED A0003",
+    "precio": "74,00 &euro;",
+    "categoria": "Bolsos",
+    "urlsImagenes": [
+      "https://esvalentinobenites.com/wp-content/uploads/2024/02/5-2.png"
+    ],
+    "archivos": [
+      "ced-a0003-1.png"
+    ]
+  },
+  {
+    "slug": "ced-a0004",
+    "url": "https://esvalentinobenites.com/producto/ced-a0004/",
+    "nombre": "CED A0004",
+    "precio": "74,00 &euro;",
+    "categoria": "Bolsos",
+    "urlsImagenes": [
+      "https://esvalentinobenites.com/wp-content/uploads/2024/02/4-2.png"
+    ],
+    "archivos": [
+      "ced-a0004-1.png"
+    ]
+  },
+  {
+    "slug": "ced-a0005",
+    "url": "https://esvalentinobenites.com/producto/ced-a0005/",
+    "nombre": "CED A0005",
+    "precio": "74,00 &euro;",
+    "categoria": "Bolsos",
+    "urlsImagenes": [
+      "https://esvalentinobenites.com/wp-content/uploads/2024/02/8-1.png"
+    ],
+    "archivos": [
+      "ced-a0005-1.png"
+    ]
+  },
+  {
+    "slug": "lp-0001",
+    "url": "https://esvalentinobenites.com/producto/lp-0001/",
+    "nombre": "LP 0001",
+    "precio": "77,00 &euro;",
+    "categoria": "Bolsos",
+    "urlsImagenes": [
+      "https://esvalentinobenites.com/wp-content/uploads/2024/02/39.png"
+    ],
+    "archivos": [
+      "lp-0001-1.png"
+    ]
+  },
+  {
+    "slug": "lp-0002",
+    "url": "https://esvalentinobenites.com/producto/lp-0002/",
+    "nombre": "LP 0002",
+    "precio": "77,00 &euro;",
+    "categoria": "Bolsos",
+    "urlsImagenes": [
+      "https://esvalentinobenites.com/wp-content/uploads/2024/02/40.png"
+    ],
+    "archivos": [
+      "lp-0002-1.png"
+    ]
+  },
+  {
+    "slug": "lp-0003",
+    "url": "https://esvalentinobenites.com/producto/lp-0003/",
+    "nombre": "LP 0003",
+    "precio": "77,00 &euro;",
+    "categoria": "Bolsos",
+    "urlsImagenes": [
+      "https://esvalentinobenites.com/wp-content/uploads/2024/02/41.png"
+    ],
+    "archivos": [
+      "lp-0003-1.png"
+    ]
+  },
+  {
+    "slug": "lp-0004",
+    "url": "https://esvalentinobenites.com/producto/lp-0004/",
+    "nombre": "LP 0004",
+    "precio": "77,00 &euro;",
+    "categoria": "Bolsos",
+    "urlsImagenes": [
+      "https://esvalentinobenites.com/wp-content/uploads/2024/02/37.png"
+    ],
+    "archivos": [
+      "lp-0004-1.png"
+    ]
+  },
+  {
+    "slug": "lp-0005",
+    "url": "https://esvalentinobenites.com/producto/lp-0005/",
+    "nombre": "LP 0005",
+    "precio": "77,00 &euro;",
+    "categoria": "Bolsos",
+    "urlsImagenes": [
+      "https://esvalentinobenites.com/wp-content/uploads/2024/02/38.png"
+    ],
+    "archivos": [
+      "lp-0005-1.png"
+    ]
+  },
+  {
+    "slug": "tc-a0002",
+    "url": "https://esvalentinobenites.com/producto/tc-a0002/",
+    "nombre": "TC A0002",
+    "precio": "68,00 &euro;",
+    "categoria": "Bolsos",
+    "urlsImagenes": [
+      "https://esvalentinobenites.com/wp-content/uploads/2024/04/32.png"
+    ],
+    "archivos": [
+      "tc-a0002-1.png"
+    ]
+  },
+  {
+    "slug": "tc-a0001",
+    "url": "https://esvalentinobenites.com/producto/tc-a0001/",
+    "nombre": "TC A0001",
+    "precio": "68,00 &euro;",
+    "categoria": "Bolsos",
+    "urlsImagenes": [
+      "https://esvalentinobenites.com/wp-content/uploads/2024/04/31.png"
+    ],
+    "archivos": [
+      "tc-a0001-1.png"
+    ]
+  },
+  {
+    "slug": "tc-0005",
+    "url": "https://esvalentinobenites.com/producto/tc-0005/",
+    "nombre": "TC 0005",
+    "precio": "68,00 &euro;",
+    "categoria": "Bolsos",
+    "urlsImagenes": [
+      "https://esvalentinobenites.com/wp-content/uploads/2024/04/30.png"
+    ],
+    "archivos": [
+      "tc-0005-1.png"
+    ]
+  },
+  {
+    "slug": "tc-0004",
+    "url": "https://esvalentinobenites.com/producto/tc-0004/",
+    "nombre": "TC 0004",
+    "precio": "68,00 &euro;",
+    "categoria": "Bolsos",
+    "urlsImagenes": [
+      "https://esvalentinobenites.com/wp-content/uploads/2024/04/25.png"
+    ],
+    "archivos": [
+      "tc-0004-1.png"
+    ]
+  },
+  {
+    "slug": "tc-0003",
+    "url": "https://esvalentinobenites.com/producto/tc-0003/",
+    "nombre": "TC 0003",
+    "precio": "68,00 &euro;",
+    "categoria": "Bolsos",
+    "urlsImagenes": [
+      "https://esvalentinobenites.com/wp-content/uploads/2024/04/26.png"
+    ],
+    "archivos": [
+      "tc-0003-1.png"
+    ]
+  },
+  {
+    "slug": "tc-0002",
+    "url": "https://esvalentinobenites.com/producto/tc-0002/",
+    "nombre": "TC 0002",
+    "precio": "68,00 &euro;",
+    "categoria": "Bolsos",
+    "urlsImagenes": [
+      "https://esvalentinobenites.com/wp-content/uploads/2024/04/27.png"
+    ],
+    "archivos": [
+      "tc-0002-1.png"
+    ]
+  },
+  {
+    "slug": "tc-0001",
+    "url": "https://esvalentinobenites.com/producto/tc-0001/",
+    "nombre": "TC 0001",
+    "precio": "68,00 &euro;",
+    "categoria": "Bolsos",
+    "urlsImagenes": [
+      "https://esvalentinobenites.com/wp-content/uploads/2024/04/29.png"
+    ],
+    "archivos": [
+      "tc-0001-1.png"
+    ]
+  },
+  {
+    "slug": "mc-a0005",
+    "url": "https://esvalentinobenites.com/producto/mc-a0005/",
+    "nombre": "MC A0005",
+    "precio": "86,00 &euro;",
+    "categoria": "Bolsos",
+    "urlsImagenes": [
+      "https://esvalentinobenites.com/wp-content/uploads/2024/04/17.png"
+    ],
+    "archivos": [
+      "mc-a0005-1.png"
+    ]
+  },
+  {
+    "slug": "mc-a0004",
+    "url": "https://esvalentinobenites.com/producto/mc-a0004/",
+    "nombre": "MC A0004",
+    "precio": "86,00 &euro;",
+    "categoria": "Bolsos",
+    "urlsImagenes": [
+      "https://esvalentinobenites.com/wp-content/uploads/2024/04/24.png"
+    ],
+    "archivos": [
+      "mc-a0004-1.png"
+    ]
+  },
+  {
+    "slug": "mc-a0003",
+    "url": "https://esvalentinobenites.com/producto/mc-a0003/",
+    "nombre": "MC A0003",
+    "precio": "86,00 &euro;",
+    "categoria": "Bolsos",
+    "urlsImagenes": [
+      "https://esvalentinobenites.com/wp-content/uploads/2024/04/19.png"
+    ],
+    "archivos": [
+      "mc-a0003-1.png"
+    ]
+  },
+  {
+    "slug": "mc-a0002",
+    "url": "https://esvalentinobenites.com/producto/mc-a0002/",
+    "nombre": "MC A0002",
+    "precio": "86,00 &euro;",
+    "categoria": "Bolsos",
+    "urlsImagenes": [
+      "https://esvalentinobenites.com/wp-content/uploads/2024/04/18.png"
+    ],
+    "archivos": [
+      "mc-a0002-1.png"
+    ]
+  },
+  {
+    "slug": "mc-a0001",
+    "url": "https://esvalentinobenites.com/producto/mc-a0001/",
+    "nombre": "MC A0001",
+    "precio": "86,00 &euro;",
+    "categoria": "Bolsos",
+    "urlsImagenes": [
+      "https://esvalentinobenites.com/wp-content/uploads/2024/04/21.png"
+    ],
+    "archivos": [
+      "mc-a0001-1.png"
+    ]
+  },
+  {
+    "slug": "mc-0003",
+    "url": "https://esvalentinobenites.com/producto/mc-0003/",
+    "nombre": "MC 0003",
+    "precio": "86,00 &euro;",
+    "categoria": "Bolsos",
+    "urlsImagenes": [
+      "https://esvalentinobenites.com/wp-content/uploads/2024/04/23.png"
+    ],
+    "archivos": [
+      "mc-0003-1.png"
+    ]
+  },
+  {
+    "slug": "mc-0002",
+    "url": "https://esvalentinobenites.com/producto/mc-0002/",
+    "nombre": "MC 0002",
+    "precio": "86,00 &euro;",
+    "categoria": "Bolsos",
+    "urlsImagenes": [
+      "https://esvalentinobenites.com/wp-content/uploads/2024/04/20.png"
+    ],
+    "archivos": [
+      "mc-0002-1.png"
+    ]
+  },
+  {
+    "slug": "mc-0001",
+    "url": "https://esvalentinobenites.com/producto/mc-0001/",
+    "nombre": "MC 0001",
+    "precio": "86,00 &euro;",
+    "categoria": "Bolsos",
+    "urlsImagenes": [
+      "https://esvalentinobenites.com/wp-content/uploads/2024/04/22.png"
+    ],
+    "archivos": [
+      "mc-0001-1.png"
+    ]
+  },
+  {
+    "slug": "mor-a0006",
+    "url": "https://esvalentinobenites.com/producto/mor-a0006/",
+    "nombre": "MOR A0006",
+    "precio": "56,00 &euro;",
+    "categoria": "Bandoleras",
+    "urlsImagenes": [
+      "https://esvalentinobenites.com/wp-content/uploads/2024/04/5.png"
+    ],
+    "archivos": [
+      "mor-a0006-1.png"
+    ]
+  },
+  {
+    "slug": "mor-a0005",
+    "url": "https://esvalentinobenites.com/producto/mor-a0005/",
+    "nombre": "MOR A0005",
+    "precio": "56,00 &euro;",
+    "categoria": "Bandoleras",
+    "urlsImagenes": [
+      "https://esvalentinobenites.com/wp-content/uploads/2024/04/4.png"
+    ],
+    "archivos": [
+      "mor-a0005-1.png"
+    ]
+  },
+  {
+    "slug": "mor-a0004",
+    "url": "https://esvalentinobenites.com/producto/mor-a0004/",
+    "nombre": "MOR A0004",
+    "precio": "56,00 &euro;",
+    "categoria": "Bandoleras",
+    "urlsImagenes": [
+      "https://esvalentinobenites.com/wp-content/uploads/2024/04/7.png"
+    ],
+    "archivos": [
+      "mor-a0004-1.png"
+    ]
+  },
+  {
+    "slug": "mor-a0003",
+    "url": "https://esvalentinobenites.com/producto/mor-a0003/",
+    "nombre": "MOR A0003",
+    "precio": "56,00 &euro;",
+    "categoria": "Bandoleras",
+    "urlsImagenes": [
+      "https://esvalentinobenites.com/wp-content/uploads/2024/04/3.png"
+    ],
+    "archivos": [
+      "mor-a0003-1.png"
+    ]
+  },
+  {
+    "slug": "mor-a0002",
+    "url": "https://esvalentinobenites.com/producto/mor-a0002/",
+    "nombre": "MOR A0002",
+    "precio": "56,00 &euro;",
+    "categoria": "Bandoleras",
+    "urlsImagenes": [
+      "https://esvalentinobenites.com/wp-content/uploads/2024/04/2.png"
+    ],
+    "archivos": [
+      "mor-a0002-1.png"
+    ]
+  },
+  {
+    "slug": "mor-a0001",
+    "url": "https://esvalentinobenites.com/producto/mor-a0001/",
+    "nombre": "MOR A0001",
+    "precio": "56,00 &euro;",
+    "categoria": "Bandoleras",
+    "urlsImagenes": [
+      "https://esvalentinobenites.com/wp-content/uploads/2024/04/6.png"
+    ],
+    "archivos": [
+      "mor-a0001-1.png"
+    ]
+  },
+  {
+    "slug": "mor-0003",
+    "url": "https://esvalentinobenites.com/producto/mor-0003/",
+    "nombre": "MOR 0003",
+    "precio": "56,00 &euro;",
+    "categoria": "Bandoleras",
+    "urlsImagenes": [
+      "https://esvalentinobenites.com/wp-content/uploads/2024/04/10.png"
+    ],
+    "archivos": [
+      "mor-0003-1.png"
+    ]
+  },
+  {
+    "slug": "mor-0002",
+    "url": "https://esvalentinobenites.com/producto/mor-0002/",
+    "nombre": "MOR 0002",
+    "precio": "56,00 &euro;",
+    "categoria": "Bandoleras",
+    "urlsImagenes": [
+      "https://esvalentinobenites.com/wp-content/uploads/2024/04/8.png"
+    ],
+    "archivos": [
+      "mor-0002-1.png"
+    ]
+  },
+  {
+    "slug": "mor-0001",
+    "url": "https://esvalentinobenites.com/producto/mor-0001/",
+    "nombre": "MOR 0001",
+    "precio": "56,00 &euro;",
+    "categoria": "Bandoleras",
+    "urlsImagenes": [
+      "https://esvalentinobenites.com/wp-content/uploads/2024/04/12.png"
+    ],
+    "archivos": [
+      "mor-0001-1.png"
+    ]
+  },
+  {
+    "slug": "lw-0006",
+    "url": "https://esvalentinobenites.com/producto/lw-0006/",
+    "nombre": "LW 0006",
+    "precio": "68,00 &euro;",
+    "categoria": "Bolsos",
+    "urlsImagenes": [
+      "https://esvalentinobenites.com/wp-content/uploads/2024/02/2-1.png"
+    ],
+    "archivos": [
+      "lw-0006-1.png"
+    ]
+  },
+  {
+    "slug": "lw-0005",
+    "url": "https://esvalentinobenites.com/producto/lw-0005/",
+    "nombre": "LW 0005",
+    "precio": "68,00 &euro;",
+    "categoria": "Bolsos",
+    "urlsImagenes": [
+      "https://esvalentinobenites.com/wp-content/uploads/2024/02/12.png"
+    ],
+    "archivos": [
+      "lw-0005-1.png"
+    ]
+  },
+  {
+    "slug": "lw-0004",
+    "url": "https://esvalentinobenites.com/producto/lw-0004/",
+    "nombre": "LW 0004",
+    "precio": "68,00 &euro;",
+    "categoria": "Bolsos",
+    "urlsImagenes": [
+      "https://esvalentinobenites.com/wp-content/uploads/2024/02/LW-0004-NEGRO.png"
+    ],
+    "archivos": [
+      "lw-0004-1.png"
+    ]
+  },
+  {
+    "slug": "lw-0003",
+    "url": "https://esvalentinobenites.com/producto/lw-0003/",
+    "nombre": "LW 0003",
+    "precio": "68,00 &euro;",
+    "categoria": "Bolsos",
+    "urlsImagenes": [
+      "https://esvalentinobenites.com/wp-content/uploads/2024/02/3-1.png"
+    ],
+    "archivos": [
+      "lw-0003-1.png"
+    ]
+  },
+  {
+    "slug": "lw-0002",
+    "url": "https://esvalentinobenites.com/producto/lw-0002/",
+    "nombre": "LW 0002",
+    "precio": "68,00 &euro;",
+    "categoria": "Bolsos",
+    "urlsImagenes": [
+      "https://esvalentinobenites.com/wp-content/uploads/2024/02/4-1.png"
+    ],
+    "archivos": [
+      "lw-0002-1.png"
+    ]
+  },
+  {
+    "slug": "lw-0001",
+    "url": "https://esvalentinobenites.com/producto/lw-0001/",
+    "nombre": "LW 0001",
+    "precio": "68,00 &euro;",
+    "categoria": "Bolsos",
+    "urlsImagenes": [
+      "https://esvalentinobenites.com/wp-content/uploads/2024/02/5-1.png"
+    ],
+    "archivos": [
+      "lw-0001-1.png"
+    ]
+  },
+  {
+    "slug": "nec-0001",
+    "url": "https://esvalentinobenites.com/producto/nec-0001/",
+    "nombre": "NEC 0001",
+    "precio": "56,00 &euro;",
+    "categoria": "Bolsos",
+    "urlsImagenes": [
+      "https://esvalentinobenites.com/wp-content/uploads/2024/05/2-2.png"
+    ],
+    "archivos": [
+      "nec-0001-1.png"
+    ]
+  },
+  {
+    "slug": "nec-0002",
+    "url": "https://esvalentinobenites.com/producto/nec-0002/",
+    "nombre": "NEC 0002",
+    "precio": "56,00 &euro;",
+    "categoria": "Bolsos",
+    "urlsImagenes": [
+      "https://esvalentinobenites.com/wp-content/uploads/2024/05/3-2.png"
+    ],
+    "archivos": [
+      "nec-0002-1.png"
+    ]
+  },
+  {
+    "slug": "nec-0003",
+    "url": "https://esvalentinobenites.com/producto/nec-0003/",
+    "nombre": "NEC 0003",
+    "precio": "56,00 &euro;",
+    "categoria": "Bolsos",
+    "urlsImagenes": [
+      "https://esvalentinobenites.com/wp-content/uploads/2024/05/5-1.png"
+    ],
+    "archivos": [
+      "nec-0003-1.png"
+    ]
+  },
+  {
+    "slug": "nec-0004",
+    "url": "https://esvalentinobenites.com/producto/nec-0004/",
+    "nombre": "NEC 0004",
+    "precio": "56,00 &euro;",
+    "categoria": "Bolsos",
+    "urlsImagenes": [
+      "https://esvalentinobenites.com/wp-content/uploads/2024/03/CARTERA.png"
+    ],
+    "archivos": [
+      "nec-0004-1.png"
+    ]
+  },
+  {
+    "slug": "nec-a0001",
+    "url": "https://esvalentinobenites.com/producto/nec-a0001/",
+    "nombre": "NEC A0001",
+    "precio": "56,00 &euro;",
+    "categoria": "Bolsos",
+    "urlsImagenes": [
+      "https://esvalentinobenites.com/wp-content/uploads/2024/05/111.png"
+    ],
+    "archivos": [
+      "nec-a0001-1.png"
+    ]
+  },
+  {
+    "slug": "nec-a0002",
+    "url": "https://esvalentinobenites.com/producto/nec-a0002/",
+    "nombre": "NEC A0002",
+    "precio": "56,00 &euro;",
+    "categoria": "Bolsos",
+    "urlsImagenes": [
+      "https://esvalentinobenites.com/wp-content/uploads/2024/05/4-1.png"
+    ],
+    "archivos": [
+      "nec-a0002-1.png"
+    ]
+  },
+  {
+    "slug": "ro-0001",
+    "url": "https://esvalentinobenites.com/producto/ro-0001/",
+    "nombre": "RO 0001",
+    "precio": "80,00 &euro;",
+    "categoria": "Bolsos",
+    "urlsImagenes": [
+      "https://esvalentinobenites.com/wp-content/uploads/2024/05/2.png"
+    ],
+    "archivos": [
+      "ro-0001-1.png"
+    ]
+  },
+  {
+    "slug": "ro-0002",
+    "url": "https://esvalentinobenites.com/producto/ro-0002/",
+    "nombre": "RO 0002",
+    "precio": "80,00 &euro;",
+    "categoria": "Bolsos",
+    "urlsImagenes": [
+      "https://esvalentinobenites.com/wp-content/uploads/2024/05/3.png"
+    ],
+    "archivos": [
+      "ro-0002-1.png"
+    ]
+  },
+  {
+    "slug": "ro-0003",
+    "url": "https://esvalentinobenites.com/producto/ro-0003/",
+    "nombre": "RO 0003",
+    "precio": "80,00 &euro;",
+    "categoria": "Bolsos",
+    "urlsImagenes": [
+      "https://esvalentinobenites.com/wp-content/uploads/2024/05/1.png"
+    ],
+    "archivos": [
+      "ro-0003-1.png"
+    ]
+  },
+  {
+    "slug": "ro-0005",
+    "url": "https://esvalentinobenites.com/producto/ro-0005/",
+    "nombre": "RO 0004",
+    "precio": "80,00 &euro;",
+    "categoria": "Bolsos",
+    "urlsImagenes": [
+      "https://esvalentinobenites.com/wp-content/uploads/2024/05/5.png"
+    ],
+    "archivos": [
+      "ro-0005-1.png"
+    ]
+  },
+  {
+    "slug": "ro-0005-2",
+    "url": "https://esvalentinobenites.com/producto/ro-0005-2/",
+    "nombre": "RO 0005",
+    "precio": "80,00 &euro;",
+    "categoria": "Bolsos",
+    "urlsImagenes": [
+      "https://esvalentinobenites.com/wp-content/uploads/2024/05/4.png"
+    ],
+    "archivos": [
+      "ro-0005-2-1.png"
+    ]
+  },
+  {
+    "slug": "ml-0001",
+    "url": "https://esvalentinobenites.com/producto/ml-0001/",
+    "nombre": "ML 0001",
+    "precio": "83,00 &euro;",
+    "categoria": "Bolsos",
+    "urlsImagenes": [
+      "https://esvalentinobenites.com/wp-content/uploads/2024/03/3.png"
+    ],
+    "archivos": [
+      "ml-0001-1.png"
+    ]
+  },
+  {
+    "slug": "ml-a0001",
+    "url": "https://esvalentinobenites.com/producto/ml-a0001/",
+    "nombre": "ML A0001",
+    "precio": "83,00 &euro;",
+    "categoria": "Bolsos",
+    "urlsImagenes": [
+      "https://esvalentinobenites.com/wp-content/uploads/2024/03/1.png"
+    ],
+    "archivos": [
+      "ml-a0001-1.png"
+    ]
+  },
+  {
+    "slug": "mor-a0007",
+    "url": "https://esvalentinobenites.com/producto/mor-a0007/",
+    "nombre": "MOR A0007",
+    "precio": "56,00 &euro;",
+    "categoria": "Bandoleras",
+    "urlsImagenes": [
+      "https://esvalentinobenites.com/wp-content/uploads/2024/04/1.png"
+    ],
+    "archivos": [
+      "mor-a0007-1.png"
+    ]
+  },
+  {
+    "slug": "ml-a0002",
+    "url": "https://esvalentinobenites.com/producto/ml-a0002/",
+    "nombre": "ML A0002",
+    "precio": "83,00 &euro;",
+    "categoria": "Bolsos",
+    "urlsImagenes": [
+      "https://esvalentinobenites.com/wp-content/uploads/2024/03/2.png"
+    ],
+    "archivos": [
+      "ml-a0002-1.png"
+    ]
+  },
+  {
+    "slug": "ml-0002",
+    "url": "https://esvalentinobenites.com/producto/ml-0002/",
+    "nombre": "ML 0002",
+    "precio": "83,00 &euro;",
+    "categoria": "Bolsos",
+    "urlsImagenes": [
+      "https://esvalentinobenites.com/wp-content/uploads/2024/03/4.png"
+    ],
+    "archivos": [
+      "ml-0002-1.png"
+    ]
+  },
+  {
+    "slug": "br-0001",
+    "url": "https://esvalentinobenites.com/producto/br-0001/",
+    "nombre": "BR 0001",
+    "precio": "89,00 &euro;",
+    "categoria": "Bolsos",
+    "urlsImagenes": [
+      "https://esvalentinobenites.com/wp-content/uploads/2024/05/3-1.png"
+    ],
+    "archivos": [
+      "br-0001-1.png"
+    ]
+  },
+  {
+    "slug": "br-0002",
+    "url": "https://esvalentinobenites.com/producto/br-0002/",
+    "nombre": "BR 0002",
+    "precio": "89,00 &euro;",
+    "categoria": "Bolsos",
+    "urlsImagenes": [
+      "https://esvalentinobenites.com/wp-content/uploads/2024/05/2-1.png"
+    ],
+    "archivos": [
+      "br-0002-1.png"
+    ]
+  },
+  {
+    "slug": "tc-0006",
+    "url": "https://esvalentinobenites.com/producto/tc-0006/",
+    "nombre": "TC 0006",
+    "precio": "68,00 &euro;",
+    "categoria": "Bolsos",
+    "urlsImagenes": [
+      "https://esvalentinobenites.com/wp-content/uploads/2024/04/28.png"
+    ],
+    "archivos": [
+      "tc-0006-1.png"
+    ]
+  },
+  {
+    "slug": "br-0003",
+    "url": "https://esvalentinobenites.com/producto/br-0003/",
+    "nombre": "BR 0003",
+    "precio": "89,00 &euro;",
+    "categoria": "Bolsos",
+    "urlsImagenes": [
+      "https://esvalentinobenites.com/wp-content/uploads/2024/05/1-1.png"
+    ],
+    "archivos": [
+      "br-0003-1.png"
+    ]
+  },
+  {
+    "slug": "mor-0004",
+    "url": "https://esvalentinobenites.com/producto/mor-0004/",
+    "nombre": "MOR 0004",
+    "precio": "56,00 &euro;",
+    "categoria": "Bandoleras",
+    "urlsImagenes": [
+      "https://esvalentinobenites.com/wp-content/uploads/2024/04/11.png"
+    ],
+    "archivos": [
+      "mor-0004-1.png"
+    ]
+  },
+  {
+    "slug": "mor-0005",
+    "url": "https://esvalentinobenites.com/producto/mor-0005/",
+    "nombre": "MOR 0005",
+    "precio": "56,00 &euro;",
+    "categoria": "Bandoleras",
+    "urlsImagenes": [
+      "https://esvalentinobenites.com/wp-content/uploads/2024/04/13.png"
+    ],
+    "archivos": [
+      "mor-0005-1.png"
+    ]
+  },
+  {
+    "slug": "ml-0003",
+    "url": "https://esvalentinobenites.com/producto/ml-0003/",
+    "nombre": "ML 0003",
+    "precio": "83,00 &euro;",
+    "categoria": "Bolsos",
+    "urlsImagenes": [
+      "https://esvalentinobenites.com/wp-content/uploads/2024/05/12-1.png"
+    ],
+    "archivos": [
+      "ml-0003-1.png"
+    ]
+  },
+  {
+    "slug": "tc-a0003-2",
+    "url": "https://esvalentinobenites.com/producto/tc-a0003-2/",
+    "nombre": "TC A0003",
+    "precio": "68,00 &euro;",
+    "categoria": "Bolsos",
+    "urlsImagenes": [
+      "https://esvalentinobenites.com/wp-content/uploads/2024/04/33.png"
+    ],
+    "archivos": [
+      "tc-a0003-2-1.png"
+    ]
+  },
+  {
+    "slug": "et-a0006",
+    "url": "https://esvalentinobenites.com/producto/et-a0006/",
+    "nombre": "ET A0006",
+    "precio": "83,00 &euro;",
+    "categoria": "Bolsos",
+    "urlsImagenes": [
+      "https://esvalentinobenites.com/wp-content/uploads/2024/02/2.png"
+    ],
+    "archivos": [
+      "et-a0006-1.png"
+    ]
+  }
+]
