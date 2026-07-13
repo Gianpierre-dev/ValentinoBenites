@@ -10,15 +10,30 @@ import {
   IsUrl,
   MaxLength,
   Min,
+  ValidateIf,
   ValidateNested,
 } from 'class-validator';
 import { MetodoPago } from '@prisma/client';
 
+/**
+ * Un item del pedido es O BIEN una variante (color) elegida, O BIEN un producto
+ * "a coordinar" (modelo multi-color agregado sin color; se define luego por
+ * WhatsApp). Debe venir al menos uno de los dos identificadores:
+ * - `varianteId` presente  -> color elegido (precio efectivo de la variante).
+ * - sin `varianteId` + `productoId` -> a coordinar (precio base del producto).
+ */
 export class ItemPedidoDto {
-  // La unidad comprable es la Variante (color), no el Producto (modelo).
+  // Se valida solo si no vino productoId (asi neither -> ambos fallan).
+  @ValidateIf((item: ItemPedidoDto) => !item.productoId)
   @IsString()
-  @IsNotEmpty({ message: 'La variante es obligatoria.' })
-  varianteId!: string;
+  @IsNotEmpty({ message: 'Debes indicar la variante o el producto.' })
+  varianteId?: string;
+
+  // Alternativa a coordinar: requerido solo cuando no hay varianteId.
+  @ValidateIf((item: ItemPedidoDto) => !item.varianteId)
+  @IsString()
+  @IsNotEmpty({ message: 'Debes indicar la variante o el producto.' })
+  productoId?: string;
 
   @IsInt()
   @Min(1, { message: 'La cantidad debe ser al menos 1.' })

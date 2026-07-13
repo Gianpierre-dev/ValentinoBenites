@@ -50,7 +50,7 @@ export default function PaginaCarrito() {
           <ul className="flex flex-col gap-4 lg:col-span-2">
             {lineas.map((linea) => (
               <li
-                key={linea.varianteId}
+                key={linea.clave}
                 className="flex gap-4 rounded-2xl border border-borde bg-fondo p-4 shadow-[0_1px_3px_rgba(17,17,17,0.04)] transition-shadow hover:shadow-[0_14px_36px_-18px_rgba(125,33,129,0.25)] sm:gap-5 sm:p-5"
               >
                 <Link
@@ -90,7 +90,7 @@ export default function PaginaCarrito() {
                     </div>
                     <button
                       type="button"
-                      onClick={() => quitar(linea.varianteId)}
+                      onClick={() => quitar(linea.clave)}
                       aria-label={`Quitar ${linea.nombre} (${linea.color}) del carrito`}
                       className="flex h-9 w-9 items-center justify-center rounded-full text-texto/60 transition-colors hover:bg-oferta/10 hover:text-oferta"
                     >
@@ -102,7 +102,7 @@ export default function PaginaCarrito() {
                     <SelectorCantidad
                       cantidad={linea.cantidad}
                       alCambiar={(cantidad) =>
-                        cambiarCantidad(linea.varianteId, cantidad)
+                        cambiarCantidad(linea.clave, cantidad)
                       }
                     />
                     <span className="text-base font-semibold text-texto-fuerte">

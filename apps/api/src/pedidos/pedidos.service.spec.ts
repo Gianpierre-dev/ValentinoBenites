@@ -3,7 +3,7 @@ import { EstadoPedido, MetodoPago, Prisma } from '@prisma/client';
 import { PedidosService } from './pedidos.service';
 
 interface LineaCreada {
-  varianteId: string;
+  varianteId: string | null;
   productoId: string;
   nombreProducto: string;
   colorElegido: string;
@@ -23,6 +23,7 @@ type PedidoCreateArgs = [
 
 type PrismaMock = {
   variante: { findMany: jest.Mock };
+  producto: { findMany: jest.Mock };
   pedido: {
     create: jest.Mock<unknown, PedidoCreateArgs>;
     findUnique: jest.Mock;
@@ -34,6 +35,7 @@ const dec = (valor: number) => new Prisma.Decimal(valor);
 
 const crearPrismaMock = (): PrismaMock => ({
   variante: { findMany: jest.fn() },
+  producto: { findMany: jest.fn() },
   pedido: {
     create: jest.fn<unknown, PedidoCreateArgs>(),
     findUnique: jest.fn(),
@@ -56,6 +58,15 @@ const varianteVino = {
   },
 };
 
+// Producto "hecho a pedido" para las lineas a coordinar (sin variante elegida).
+const productoAndina = {
+  id: 'prod-1',
+  nombre: 'Bandolera Andina',
+  activo: true,
+  precio: dec(120),
+  precioOferta: null,
+};
+
 describe('PedidosService', () => {
   let prisma: PrismaMock;
   let service: PedidosService;
@@ -63,6 +74,9 @@ describe('PedidosService', () => {
   beforeEach(() => {
     prisma = crearPrismaMock();
     service = new PedidosService(prisma as never);
+    // Por defecto: sin variantes ni productos hasta que cada test los configure.
+    prisma.variante.findMany.mockResolvedValue([]);
+    prisma.producto.findMany.mockResolvedValue([]);
     // El codigo unico consulta pedido.findUnique buscando colision: devolver null.
     prisma.pedido.findUnique.mockResolvedValue(null);
   });
@@ -147,6 +161,91 @@ describe('PedidosService', () => {
 
       expect(prisma.pedido.create).toHaveBeenCalledTimes(2);
       expect(data.total.toNumber()).toBe(120);
+    });
+
+    it('crea una linea "A coordinar" (sin variante) con el precio base del producto', async () => {
+      prisma.producto.findMany.mockResolvedValue([productoAndina]);
+      prisma.pedido.create.mockImplementation(({ data }) => data);
+
+      await service.crear({
+        nombreCliente: 'Ana',
+        telefono: '999',
+        metodoPago: MetodoPago.WHATSAPP,
+        items: [{ productoId: 'prod-1', cantidad: 2 }],
+      });
+
+      const data = prisma.pedido.create.mock.calls[0][0].data;
+      const linea = data.items.create[0];
+      expect(linea).toMatchObject({
+        varianteId: null,
+        productoId: 'prod-1',
+        nombreProducto: 'Bandolera Andina',
+        colorElegido: 'A coordinar',
+        cantidad: 2,
+      });
+      expect(linea.precioUnitario.toNumber()).toBe(120);
+      expect(linea.subtotal.toNumber()).toBe(240);
+      expect(data.total.toNumber()).toBe(240);
+    });
+
+    it('usa el precioOferta del producto para la linea a coordinar cuando existe', async () => {
+      prisma.producto.findMany.mockResolvedValue([
+        { ...productoAndina, precioOferta: dec(99) },
+      ]);
+      prisma.pedido.create.mockImplementation(({ data }) => data);
+
+      await service.crear({
+        nombreCliente: 'Ana',
+        telefono: '999',
+        metodoPago: MetodoPago.YAPE,
+        items: [{ productoId: 'prod-1', cantidad: 1 }],
+      });
+
+      const data = prisma.pedido.create.mock.calls[0][0].data;
+      expect(data.items.create[0].precioUnitario.toNumber()).toBe(99);
+    });
+
+    it('mezcla un item con color elegido y un item a coordinar en el mismo pedido', async () => {
+      prisma.variante.findMany.mockResolvedValue([varianteVino]);
+      prisma.producto.findMany.mockResolvedValue([productoAndina]);
+      prisma.pedido.create.mockImplementation(({ data }) => data);
+
+      await service.crear({
+        nombreCliente: 'Ana',
+        telefono: '999',
+        metodoPago: MetodoPago.PLIN,
+        items: [
+          { varianteId: 'var-vino', cantidad: 1 },
+          { productoId: 'prod-1', cantidad: 1 },
+        ],
+      });
+
+      const data = prisma.pedido.create.mock.calls[0][0].data;
+      const [conColor, aCoordinar] = data.items.create;
+      expect(conColor).toMatchObject({
+        varianteId: 'var-vino',
+        colorElegido: 'Vino',
+      });
+      expect(aCoordinar).toMatchObject({
+        varianteId: null,
+        colorElegido: 'A coordinar',
+      });
+      // 120 (variante) + 120 (producto base) = 240
+      expect(data.total.toNumber()).toBe(240);
+    });
+
+    it('falla si el producto a coordinar no existe o esta inactivo', async () => {
+      prisma.producto.findMany.mockResolvedValue([]);
+
+      await expect(
+        service.crear({
+          nombreCliente: 'Ana',
+          telefono: '999',
+          metodoPago: MetodoPago.YAPE,
+          items: [{ productoId: 'inexistente', cantidad: 1 }],
+        }),
+      ).rejects.toBeInstanceOf(BadRequestException);
+      expect(prisma.pedido.create).not.toHaveBeenCalled();
     });
 
     it('falla si alguna variante no existe o esta inactiva', async () => {

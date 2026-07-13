@@ -167,10 +167,16 @@ export interface RespuestaLogin {
   usuario: Usuario;
 }
 
-/** Payload para crear un pedido (lo calcula el backend; aqui solo se envia el detalle). */
+/**
+ * Payload para crear un pedido (lo calcula el backend; aqui solo se envia el
+ * detalle). Un item lleva O BIEN `varianteId` (color elegido) O BIEN `productoId`
+ * (multi-color agregado "a coordinar", sin color); el backend resuelve el precio.
+ */
 export interface ItemPedidoEntrada {
-  /** La variante (color) es la unidad comprable; el backend resuelve el precio. */
-  varianteId: string;
+  /** Variante (color) elegida. Presente cuando el cliente eligio color. */
+  varianteId?: string;
+  /** Producto (modelo) para lineas "a coordinar", sin color comprometido. */
+  productoId?: string;
   cantidad: number;
 }
 

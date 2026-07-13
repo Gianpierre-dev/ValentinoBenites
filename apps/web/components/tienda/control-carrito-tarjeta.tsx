@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import { IconMinus, IconPlus, IconShoppingBagPlus } from "@tabler/icons-react";
 import { useCarrito } from "@/store/carrito";
 import type { Producto } from "@/lib/tipos";
@@ -13,11 +12,12 @@ interface PropsControlCarritoTarjeta {
 /**
  * Accion de carrito en el pie de la tarjeta del catalogo (patron clasico de
  * ecommerce): un selector de cantidad − N + siempre visible junto al boton
- * "Agregar". Al agregar se suma esa cantidad de la variante al carrito.
+ * "Agregar". TODAS las tarjetas se ven iguales, sin importar cuantos colores
+ * tenga el modelo. El color solo se elige DENTRO de la ficha del producto.
  *
- * Resuelve la ambiguedad de color: si el modelo tiene UNA sola variante activa
- * el agregado es inequivoco (selector + Agregar); si tiene 2 o mas colores no
- * se puede agregar a ciegas → "Elegir color" lleva a la ficha para decidir.
+ * - Modelo de un solo color -> agrega esa variante.
+ * - Modelo multi-color -> se agrega "a coordinar" (sin color comprometido); el
+ *   cliente elige el color en la ficha o se define por WhatsApp al confirmar.
  *
  * Convive con el enlace "stretched" de la tarjeta: va en `z-20` (por encima) y
  * ademas corta la propagacion, para que interactuar aqui no navegue al producto.
@@ -27,6 +27,7 @@ export function ControlCarritoTarjeta({ producto }: PropsControlCarritoTarjeta) 
   const varianteUnica = variantes.length === 1 ? variantes[0] : null;
 
   const agregar = useCarrito((estado) => estado.agregar);
+  const agregarSinColor = useCarrito((estado) => estado.agregarSinColor);
   const [cantidad, setCantidad] = useState(1);
 
   const cortar = (evento: React.MouseEvent<HTMLElement>) => {
@@ -37,21 +38,7 @@ export function ControlCarritoTarjeta({ producto }: PropsControlCarritoTarjeta) 
   // Modelo sin variantes activas: no hay nada que agregar.
   if (variantes.length === 0) return null;
 
-  // Multi-color: la eleccion de color se decide en la ficha.
-  if (!varianteUnica) {
-    return (
-      <Link
-        href={`/producto/${producto.slug}`}
-        aria-label={`Elegir color de ${producto.nombre}`}
-        className="relative z-20 mt-3 inline-flex h-11 w-full items-center justify-center gap-1.5 rounded-full bg-acento px-4 text-sm font-medium text-acento-contraste transition-all duration-300 ease-suave hover:bg-acento/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-acento focus-visible:ring-offset-2 motion-reduce:transition-none"
-      >
-        <IconShoppingBagPlus size={18} aria-hidden />
-        Elegir color
-      </Link>
-    );
-  }
-
-  // Variante unica: selector de cantidad + Agregar, siempre visibles.
+  // Selector de cantidad + Agregar, siempre visibles (single y multi-color).
   const bajar = (evento: React.MouseEvent<HTMLButtonElement>) => {
     cortar(evento);
     setCantidad((n) => Math.max(1, n - 1));
@@ -62,7 +49,12 @@ export function ControlCarritoTarjeta({ producto }: PropsControlCarritoTarjeta) 
   };
   const alAgregar = (evento: React.MouseEvent<HTMLButtonElement>) => {
     cortar(evento);
-    agregar(producto, varianteUnica, cantidad);
+    if (varianteUnica) {
+      agregar(producto, varianteUnica, cantidad);
+    } else {
+      // Multi-color: entra "a coordinar", el color se define despues.
+      agregarSinColor(producto, cantidad);
+    }
     setCantidad(1);
   };
 

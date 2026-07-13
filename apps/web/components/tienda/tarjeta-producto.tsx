@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Etiqueta } from "@/components/ui";
@@ -8,29 +7,22 @@ import type { Producto } from "@/lib/tipos";
 import { calcularDescuento, formatearPrecio } from "@/lib/utilidades";
 import { ControlCarritoTarjeta } from "./control-carrito-tarjeta";
 import { BotonFavorito } from "./boton-favorito";
-import { BolitasColor } from "./bolitas-color";
 
 interface PropsTarjetaProducto {
   producto: Producto;
 }
 
 /**
- * Tarjeta de producto del catalogo: foto protagonista, nombre, bolitas de color
- * y precio (tachado + badge si hay oferta). Elegir una bolita previsualiza la
- * foto de esa variante y define que color agrega el boton rapido. Usa el patron
+ * Tarjeta de producto del catalogo: foto protagonista, nombre y precio (tachado
+ * + badge si hay oferta). Todas las tarjetas se ven iguales (selector de cantidad
+ * + Agregar); los colores solo se muestran DENTRO de la ficha. Usa el patron
  * "stretched link": un enlace superpuesto cubre toda la tarjeta para navegar al
- * detalle, y las acciones (bolitas, favorito, agregar) se elevan por encima.
+ * detalle, y las acciones (favorito, agregar) se elevan por encima.
  */
 export function TarjetaProducto({ producto }: PropsTarjetaProducto) {
   const variantes = producto.variantes ?? [];
-  const [varianteId, setVarianteId] = useState<string | null>(
-    variantes[0]?.id ?? null,
-  );
-  const seleccionada =
-    variantes.find((variante) => variante.id === varianteId) ?? variantes[0];
-
   const imagen =
-    seleccionada?.imagenesEfectivas?.[0]?.url ??
+    variantes[0]?.imagenesEfectivas?.[0]?.url ??
     producto.imagenes?.[0]?.url ??
     null;
   const enOferta = producto.precioOferta !== null && producto.precioOferta < producto.precio;
@@ -76,14 +68,6 @@ export function TarjetaProducto({ producto }: PropsTarjetaProducto) {
           <h3 className="text-sm font-medium leading-snug text-texto-fuerte">
             {producto.nombre}
           </h3>
-          {variantes.length > 1 && (
-            <BolitasColor
-              variantes={variantes}
-              varianteSeleccionadaId={seleccionada?.id ?? null}
-              alSeleccionar={(variante) => setVarianteId(variante.id)}
-              className="mt-0.5"
-            />
-          )}
           <div className="mt-auto flex items-baseline gap-2 pt-1.5">
             {enOferta ? (
               <>

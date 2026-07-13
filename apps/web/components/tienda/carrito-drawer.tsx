@@ -139,7 +139,7 @@ export function CarritoDrawer() {
           <>
             <ul className="flex-1 divide-y divide-borde overflow-y-auto px-5">
               {lineas.map((linea) => (
-                <li key={linea.varianteId} className="flex gap-4 py-4">
+                <li key={linea.clave} className="flex gap-4 py-4">
                   <Link
                     href={`/producto/${linea.slug}`}
                     onClick={cerrar}
@@ -176,7 +176,7 @@ export function CarritoDrawer() {
                       </div>
                       <button
                         type="button"
-                        onClick={() => quitar(linea.varianteId)}
+                        onClick={() => quitar(linea.clave)}
                         aria-label={`Quitar ${linea.nombre} (${linea.color}) del carrito`}
                         className="shrink-0 text-texto/60 transition-colors hover:text-oferta"
                       >
@@ -188,7 +188,7 @@ export function CarritoDrawer() {
                       <SelectorCantidad
                         cantidad={linea.cantidad}
                         alCambiar={(cantidad) =>
-                          cambiarCantidad(linea.varianteId, cantidad)
+                          cambiarCantidad(linea.clave, cantidad)
                         }
                       />
                       <span className="text-sm font-semibold text-texto-fuerte">

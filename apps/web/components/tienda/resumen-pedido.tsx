@@ -32,7 +32,7 @@ export function ResumenPedido({ lineas, total }: PropsResumenPedido) {
 
       <ul className="divide-y divide-borde px-6">
         {lineas.map((linea) => (
-          <li key={linea.varianteId} className="flex gap-4 py-4">
+          <li key={linea.clave} className="flex gap-4 py-4">
             <div className="relative h-20 w-16 shrink-0 overflow-hidden rounded-xl border border-borde bg-perla">
               {linea.imagenUrl ? (
                 <Image

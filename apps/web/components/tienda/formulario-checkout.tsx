@@ -104,10 +104,12 @@ export function FormularioCheckout({ configuracion }: PropsFormularioCheckout) {
     }
   };
 
-  const itemsPedido = lineas.map((linea) => ({
-    varianteId: linea.varianteId,
-    cantidad: linea.cantidad,
-  }));
+  // Con color elegido -> varianteId; "a coordinar" (sin variante) -> productoId.
+  const itemsPedido = lineas.map((linea) =>
+    linea.varianteId
+      ? { varianteId: linea.varianteId, cantidad: linea.cantidad }
+      : { productoId: linea.productoId, cantidad: linea.cantidad },
+  );
 
   // Se ejecuta en el onClick del boton (gesto del usuario), sincronamente, antes
   // de cualquier await. Reserva la pestana de WhatsApp para que el navegador movil

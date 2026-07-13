@@ -12,13 +12,17 @@ const INCLUIR_ITEMS = {
 
 interface LineaCalculada {
   productoId: string;
-  varianteId: string;
+  // null para lineas "a coordinar" (producto multi-color sin color elegido).
+  varianteId: string | null;
   nombreProducto: string;
   colorElegido: string;
   precioUnitario: Prisma.Decimal;
   cantidad: number;
   subtotal: Prisma.Decimal;
 }
+
+/** Snapshot de color para una linea agregada sin variante (multi-color). */
+const COLOR_A_COORDINAR = 'A coordinar';
 
 @Injectable()
 export class PedidosService {
@@ -101,37 +105,88 @@ export class PedidosService {
    * hecho a pedido: NO hay validacion ni descuento de inventario.
    */
   private async calcularLineas(dto: CrearPedidoDto): Promise<LineaCalculada[]> {
-    const ids = dto.items.map((item) => item.varianteId);
+    // Un item con varianteId es un color elegido; sin el (y con productoId) es
+    // una linea "a coordinar" que se resuelve contra el producto (modelo).
+    const varianteIds = dto.items
+      .filter((item) => item.varianteId)
+      .map((item) => item.varianteId as string);
+    const productoIds = dto.items
+      .filter((item) => !item.varianteId && item.productoId)
+      .map((item) => item.productoId as string);
+
     const variantes = await this.prisma.variante.findMany({
-      where: { id: { in: ids }, activo: true },
+      where: { id: { in: varianteIds }, activo: true },
       include: { producto: true },
     });
-    const porId = new Map(variantes.map((v) => [v.id, v]));
+    const porVariante = new Map(variantes.map((v) => [v.id, v]));
+
+    const productos = productoIds.length
+      ? await this.prisma.producto.findMany({
+          where: { id: { in: productoIds }, activo: true },
+        })
+      : [];
+    const porProducto = new Map(productos.map((p) => [p.id, p]));
 
     return dto.items.map((item) => {
-      const variante = porId.get(item.varianteId);
-      if (!variante) {
-        throw new BadRequestException(
-          `La variante ${item.varianteId} no esta disponible.`,
-        );
+      if (item.varianteId) {
+        return this.lineaConColor(item, porVariante);
       }
-
-      const precioUnitario = precioEfectivoVariante(
-        variante,
-        variante.producto,
-      );
-      const subtotal = precioUnitario.mul(item.cantidad);
-
-      return {
-        productoId: variante.productoId,
-        varianteId: variante.id,
-        nombreProducto: variante.producto.nombre,
-        colorElegido: variante.color,
-        precioUnitario,
-        cantidad: item.cantidad,
-        subtotal,
-      };
+      return this.lineaACoordinar(item, porProducto);
     });
+  }
+
+  /** Linea con color elegido: precio efectivo de la variante + snapshot de color. */
+  private lineaConColor(
+    item: CrearPedidoDto['items'][number],
+    porVariante: Map<
+      string,
+      Prisma.VarianteGetPayload<{ include: { producto: true } }>
+    >,
+  ): LineaCalculada {
+    const variante = porVariante.get(item.varianteId as string);
+    if (!variante) {
+      throw new BadRequestException(
+        `La variante ${item.varianteId} no esta disponible.`,
+      );
+    }
+
+    const precioUnitario = precioEfectivoVariante(variante, variante.producto);
+    return {
+      productoId: variante.productoId,
+      varianteId: variante.id,
+      nombreProducto: variante.producto.nombre,
+      colorElegido: variante.color,
+      precioUnitario,
+      cantidad: item.cantidad,
+      subtotal: precioUnitario.mul(item.cantidad),
+    };
+  }
+
+  /**
+   * Linea "a coordinar": producto multi-color agregado sin color. El precio es
+   * el base del modelo (oferta -> precio) y el color se define luego por WhatsApp.
+   */
+  private lineaACoordinar(
+    item: CrearPedidoDto['items'][number],
+    porProducto: Map<string, Prisma.ProductoGetPayload<object>>,
+  ): LineaCalculada {
+    const producto = porProducto.get(item.productoId as string);
+    if (!producto) {
+      throw new BadRequestException(
+        `El producto ${item.productoId} no esta disponible.`,
+      );
+    }
+
+    const precioUnitario = producto.precioOferta ?? producto.precio;
+    return {
+      productoId: producto.id,
+      varianteId: null,
+      nombreProducto: producto.nombre,
+      colorElegido: COLOR_A_COORDINAR,
+      precioUnitario,
+      cantidad: item.cantidad,
+      subtotal: precioUnitario.mul(item.cantidad),
+    };
   }
 
   private async generarCodigoUnico(): Promise<string> {
