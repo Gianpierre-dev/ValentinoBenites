@@ -18,7 +18,7 @@ export function IconoFavoritos() {
     <Link
       href="/favoritos"
       aria-label={`Ver favoritos${montado && cantidad > 0 ? `, ${cantidad} productos` : ""}`}
-      className="relative inline-flex h-10 w-10 items-center justify-center text-texto-fuerte transition-colors hover:text-acento"
+      className="relative inline-flex h-11 w-11 items-center justify-center text-texto-fuerte transition-colors hover:text-acento sm:h-10 sm:w-10"
     >
       <IconHeart size={22} stroke={1.5} aria-hidden />
       {montado && cantidad > 0 && (

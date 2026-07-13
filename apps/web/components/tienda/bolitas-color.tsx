@@ -75,7 +75,7 @@ export function BolitasColor({
             title={variante.color}
             onClick={(evento) => alElegir(evento, variante)}
             className={cn(
-              "relative h-[18px] w-[18px] overflow-hidden rounded-full shadow-[inset_0_0_0_1px_rgba(0,0,0,0.15)] transition-transform hover:scale-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-acento focus-visible:ring-offset-1 motion-reduce:transition-none",
+              "relative h-6 w-6 overflow-hidden rounded-full shadow-[inset_0_0_0_1px_rgba(0,0,0,0.15)] transition-transform hover:scale-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-acento focus-visible:ring-offset-1 motion-reduce:transition-none sm:h-[18px] sm:w-[18px]",
               activa && "ring-2 ring-acento ring-offset-1",
             )}
           >

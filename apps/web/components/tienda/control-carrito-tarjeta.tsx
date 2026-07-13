@@ -67,17 +67,17 @@ export function ControlCarritoTarjeta({ producto }: PropsControlCarritoTarjeta) 
   };
 
   return (
-    <div className="relative z-20 mt-3 flex items-center gap-2">
+    <div className="relative z-20 mt-3 flex flex-col gap-2 sm:flex-row sm:items-center">
       <div
         role="group"
         aria-label={`Cantidad de ${producto.nombre}`}
-        className="inline-flex h-11 shrink-0 items-center rounded-full border border-borde bg-superficie px-1"
+        className="flex h-11 w-full items-center justify-between rounded-full border border-borde bg-superficie px-1 sm:inline-flex sm:w-auto sm:shrink-0 sm:justify-start"
       >
         <button
           type="button"
           onClick={bajar}
           aria-label="Quitar uno"
-          className="inline-flex h-8 w-8 items-center justify-center rounded-full text-texto-fuerte transition-colors hover:bg-acento/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-acento motion-reduce:transition-none"
+          className="inline-flex h-10 w-10 items-center justify-center rounded-full text-texto-fuerte transition-colors hover:bg-acento/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-acento motion-reduce:transition-none sm:h-8 sm:w-8"
         >
           <IconMinus size={16} aria-hidden />
         </button>
@@ -91,7 +91,7 @@ export function ControlCarritoTarjeta({ producto }: PropsControlCarritoTarjeta) 
           type="button"
           onClick={subir}
           aria-label="Agregar uno más"
-          className="inline-flex h-8 w-8 items-center justify-center rounded-full text-texto-fuerte transition-colors hover:bg-acento/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-acento motion-reduce:transition-none"
+          className="inline-flex h-10 w-10 items-center justify-center rounded-full text-texto-fuerte transition-colors hover:bg-acento/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-acento motion-reduce:transition-none sm:h-8 sm:w-8"
         >
           <IconPlus size={16} aria-hidden />
         </button>
@@ -100,7 +100,7 @@ export function ControlCarritoTarjeta({ producto }: PropsControlCarritoTarjeta) 
         type="button"
         onClick={alAgregar}
         aria-label={`Agregar ${producto.nombre} al carrito`}
-        className="inline-flex h-11 flex-1 items-center justify-center gap-1.5 rounded-full bg-acento px-4 text-sm font-medium text-acento-contraste transition-all duration-300 ease-suave hover:bg-acento/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-acento focus-visible:ring-offset-2 active:scale-[0.98] motion-reduce:transition-none"
+        className="inline-flex h-11 w-full items-center justify-center gap-1.5 rounded-full bg-acento px-4 text-sm font-medium text-acento-contraste transition-all duration-300 ease-suave hover:bg-acento/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-acento focus-visible:ring-offset-2 active:scale-[0.98] motion-reduce:transition-none sm:w-auto sm:flex-1"
       >
         <IconShoppingBagPlus size={18} aria-hidden />
         Agregar

@@ -49,7 +49,7 @@ export function NavCategorias({ categorias }: PropsNavCategorias) {
         aria-label={abierto ? "Cerrar menu" : "Abrir menu"}
         aria-expanded={abierto}
         onClick={() => setAbierto((previo) => !previo)}
-        className="inline-flex h-10 w-10 items-center justify-center text-texto-fuerte md:hidden"
+        className="inline-flex h-11 w-11 items-center justify-center text-texto-fuerte md:hidden"
       >
         {abierto ? <IconX size={22} aria-hidden /> : <IconMenu2 size={22} aria-hidden />}
       </button>

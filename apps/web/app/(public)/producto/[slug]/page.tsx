@@ -67,7 +67,7 @@ export default async function PaginaProducto({
   return (
     <>
       <div className="bg-gradient-to-b from-perla to-fondo">
-        <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:py-14 lg:px-8">
+        <div className="mx-auto max-w-7xl px-4 py-10 pb-24 sm:px-6 sm:pb-10 lg:py-14 lg:px-8 lg:pb-14">
           <nav
             aria-label="Ruta de navegación"
             className="mb-8 flex items-center gap-1.5 text-sm text-texto"

@@ -37,7 +37,7 @@ export function FiltroCategorias({
 
   const claseChip = (activa: boolean) =>
     cn(
-      "inline-flex items-center gap-1.5 border px-4 py-2 text-sm uppercase tracking-wide transition-colors",
+      "inline-flex min-h-11 items-center gap-1.5 border px-4 py-2 text-sm uppercase tracking-wide transition-colors sm:min-h-0",
       activa
         ? "border-acento bg-acento text-acento-contraste"
         : "border-borde text-texto hover:border-acento/40 hover:text-acento",

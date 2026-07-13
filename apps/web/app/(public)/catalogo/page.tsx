@@ -40,7 +40,7 @@ export default async function PaginaCatalogo({
 
   return (
     <div className="bg-rosa">
-      <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-7xl px-4 py-10 pb-24 sm:px-6 sm:pb-10 lg:px-8">
         <header className="flex flex-col gap-6">
           <h1 className="text-3xl font-semibold tracking-tight text-texto-fuerte">
             Catalogo

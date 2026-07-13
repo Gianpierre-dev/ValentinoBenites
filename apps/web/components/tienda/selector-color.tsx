@@ -91,7 +91,7 @@ export function SelectorColor({
               tabIndex={activa || (indiceActual < 0 && indice === 0) ? 0 : -1}
               onClick={() => alSeleccionar(variante)}
               className={cn(
-                "relative block h-8 w-8 overflow-hidden rounded-full bg-perla shadow-[inset_0_0_0_1px_rgba(0,0,0,0.15)] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-acento focus-visible:ring-offset-2 motion-reduce:transition-none",
+                "relative block h-11 w-11 overflow-hidden rounded-full bg-perla shadow-[inset_0_0_0_1px_rgba(0,0,0,0.15)] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-acento focus-visible:ring-offset-2 motion-reduce:transition-none sm:h-8 sm:w-8",
                 activa
                   ? "ring-2 ring-acento ring-offset-2"
                   : "hover:scale-110",

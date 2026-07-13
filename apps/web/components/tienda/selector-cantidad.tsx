@@ -43,7 +43,7 @@ export function SelectorCantidad({
         onClick={bajar}
         disabled={!puedeBajar}
         aria-label="Disminuir cantidad"
-        className="inline-flex h-10 w-10 items-center justify-center text-texto-fuerte transition-colors hover:bg-black/[.04] disabled:cursor-not-allowed disabled:opacity-40"
+        className="inline-flex h-11 w-11 items-center justify-center text-texto-fuerte transition-colors hover:bg-black/[.04] disabled:cursor-not-allowed disabled:opacity-40 sm:h-10 sm:w-10"
       >
         <IconMinus size={16} aria-hidden />
       </button>
@@ -59,7 +59,7 @@ export function SelectorCantidad({
         onClick={subir}
         disabled={!puedeSubir}
         aria-label="Aumentar cantidad"
-        className="inline-flex h-10 w-10 items-center justify-center text-texto-fuerte transition-colors hover:bg-black/[.04] disabled:cursor-not-allowed disabled:opacity-40"
+        className="inline-flex h-11 w-11 items-center justify-center text-texto-fuerte transition-colors hover:bg-black/[.04] disabled:cursor-not-allowed disabled:opacity-40 sm:h-10 sm:w-10"
       >
         <IconPlus size={16} aria-hidden />
       </button>
