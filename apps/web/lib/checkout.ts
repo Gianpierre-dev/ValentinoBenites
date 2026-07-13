@@ -55,6 +55,31 @@ export function construirMensajeWhatsApp(
 }
 
 /**
+ * Arma el mensaje de WhatsApp de CONSULTA con la lista de favoritos.
+ * A diferencia del checkout, no es un pedido: abre una conversacion de venta
+ * ("me interesan estos modelos"), sin cantidades ni datos del cliente.
+ */
+export function construirMensajeFavoritos(
+  items: { nombre: string; precio: number; precioOferta: number | null; slug: string }[],
+  origenSitio: string,
+): string {
+  const detalle = items
+    .map((item) => {
+      const precio = formatearPrecio(item.precioOferta ?? item.precio);
+      return `• ${item.nombre} — ${precio}\n  ${origenSitio}/producto/${item.slug}`;
+    })
+    .join("\n");
+
+  return [
+    "*Hola, me interesan estos modelos:*",
+    "",
+    detalle,
+    "",
+    "¿Me puedes contar más sobre colores y disponibilidad?",
+  ].join("\n");
+}
+
+/**
  * Construye el enlace wa.me con el mensaje codificado. Si no hay numero de
  * negocio configurado, devuelve null (el flujo debe avisar al usuario).
  */
