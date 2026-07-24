@@ -13,6 +13,11 @@ export const esquemaCheckout = z.object({
     .string()
     .trim()
     .regex(/^9\d{8}$/, "Ingresa un celular valido de 9 digitos (empieza en 9)."),
+  // Ley 29733: el consentimiento debe ser expreso y previo (checkbox no
+  // premarcado). Sin aceptar la politica de privacidad no se registra el pedido.
+  aceptaPrivacidad: z.boolean().refine((valor) => valor, {
+    message: "Debes aceptar la Política de Privacidad para continuar.",
+  }),
 });
 
 export type DatosCheckout = z.infer<typeof esquemaCheckout>;

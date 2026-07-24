@@ -17,6 +17,9 @@ import { Boton, Input } from "@/components/ui";
 
 interface FormularioConfig {
   whatsapp: string;
+  razonSocial: string;
+  ruc: string;
+  direccion: string;
   datosYape: string;
   datosPlin: string;
   qrYape: string | null;
@@ -36,6 +39,9 @@ async function cargarFormulario(): Promise<FormularioConfig> {
   const config = await obtenerConfiguracion();
   return {
     whatsapp: config.whatsapp ?? "",
+    razonSocial: config.razonSocial ?? "",
+    ruc: config.ruc ?? "",
+    direccion: config.direccion ?? "",
     datosYape: config.datosYape ?? "",
     datosPlin: config.datosPlin ?? "",
     qrYape: config.qrYape,
@@ -68,6 +74,9 @@ export default function PaginaConfiguracion() {
     try {
       const {
         whatsapp,
+        razonSocial,
+        ruc,
+        direccion,
         datosYape,
         datosPlin,
         qrYape,
@@ -84,6 +93,9 @@ export default function PaginaConfiguracion() {
       } = estado.datos;
       await actualizarConfiguracion({
         whatsapp: whatsapp.trim() || null,
+        razonSocial: razonSocial.trim() || null,
+        ruc: ruc.trim() || null,
+        direccion: direccion.trim() || null,
         datosYape: datosYape.trim() || null,
         datosPlin: datosPlin.trim() || null,
         qrYape,
@@ -126,6 +138,35 @@ export default function PaginaConfiguracion() {
           }}
           className="flex max-w-2xl flex-col gap-8"
         >
+          <section className="flex flex-col gap-4">
+            <h2 className="border-b border-borde pb-2 text-sm font-semibold uppercase tracking-wide text-texto/70">
+              Datos legales del negocio
+            </h2>
+            <p className="text-sm text-texto/60">
+              Se muestran en el pie de página y en el Libro de Reclamaciones,
+              como exige la normativa de protección al consumidor.
+            </p>
+            <Input
+              etiqueta="Razón social o nombre del titular"
+              placeholder="Ej. Valentino Benites E.I.R.L."
+              value={estado.datos.razonSocial}
+              onChange={(evento) => actualizarCampo("razonSocial", evento.target.value)}
+            />
+            <Input
+              etiqueta="RUC"
+              placeholder="20XXXXXXXXX"
+              inputMode="numeric"
+              value={estado.datos.ruc}
+              onChange={(evento) => actualizarCampo("ruc", evento.target.value)}
+            />
+            <Input
+              etiqueta="Domicilio fiscal"
+              placeholder="Av. ..., distrito, Lima"
+              value={estado.datos.direccion}
+              onChange={(evento) => actualizarCampo("direccion", evento.target.value)}
+            />
+          </section>
+
           <section className="flex flex-col gap-4">
             <h2 className="border-b border-borde pb-2 text-sm font-semibold uppercase tracking-wide text-texto/70">
               Contacto y pagos

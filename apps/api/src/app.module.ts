@@ -11,6 +11,7 @@ import { PedidosModule } from './pedidos/pedidos.module';
 import { PagosModule } from './pagos/pagos.module';
 import { MigracionModule } from './migracion/migracion.module';
 import { ConfiguracionModule } from './configuracion/configuracion.module';
+import { ReclamosModule } from './reclamos/reclamos.module';
 import { StorageModule } from './storage/storage.module';
 
 @Module({
@@ -27,6 +28,7 @@ import { StorageModule } from './storage/storage.module';
     PagosModule,
     MigracionModule,
     ConfiguracionModule,
+    ReclamosModule,
     StorageModule,
   ],
   providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],

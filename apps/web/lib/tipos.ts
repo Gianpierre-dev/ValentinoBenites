@@ -137,6 +137,10 @@ export interface Banner {
 export interface Configuracion {
   id: string;
   whatsapp: string | null;
+  /** Identificacion legal del proveedor (footer y Libro de Reclamaciones). */
+  razonSocial: string | null;
+  ruc: string | null;
+  direccion: string | null;
   datosYape: string | null;
   datosPlin: string | null;
   qrYape: string | null;
@@ -264,6 +268,50 @@ export interface ResultadoAplicacion {
   variantesCreadas: number;
   variantesExistentes: number;
   productosAbsorbidos: string[];
+}
+
+/* ---- Libro de Reclamaciones (Ley 29571 + DS 011-2011) ---- */
+
+export type TipoReclamo = "RECLAMO" | "QUEJA";
+export type EstadoReclamo = "PENDIENTE" | "RESPONDIDO";
+
+/** Hoja de reclamacion registrada en el Libro de Reclamaciones virtual. */
+export interface Reclamo {
+  id: string;
+  codigo: string;
+  tipo: TipoReclamo;
+  nombreCompleto: string;
+  documento: string;
+  domicilio: string;
+  telefono: string;
+  email: string | null;
+  esMenorDeEdad: boolean;
+  apoderado: string | null;
+  descripcionBien: string;
+  montoReclamado: number | null;
+  detalle: string;
+  pedidoConsumidor: string;
+  respuesta: string | null;
+  estado: EstadoReclamo;
+  creadoEn: string;
+  respondidoEn: string | null;
+  actualizadoEn: string;
+}
+
+/** Payload para registrar una hoja de reclamacion (formulario publico). */
+export interface ReclamoEntrada {
+  tipo: TipoReclamo;
+  nombreCompleto: string;
+  documento: string;
+  domicilio: string;
+  telefono: string;
+  email?: string;
+  esMenorDeEdad?: boolean;
+  apoderado?: string;
+  descripcionBien: string;
+  montoReclamado?: number;
+  detalle: string;
+  pedidoConsumidor: string;
 }
 
 /** Datos editables de una categoria (crear/actualizar desde el admin). */

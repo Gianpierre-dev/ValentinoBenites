@@ -19,6 +19,8 @@ import type {
   Pedido,
   Producto,
   ProductoEntrada,
+  Reclamo,
+  ReclamoEntrada,
   ResultadoAplicacion,
   RespuestaLogin,
   Variante,
@@ -338,6 +340,29 @@ export function actualizarConfiguracion(
   return peticion<Configuracion>("/configuracion", {
     metodo: "PUT",
     cuerpo: datos,
+    autenticado: true,
+  });
+}
+
+/* ---------------------------------------------------------------- */
+/* Libro de Reclamaciones                                           */
+/* ---------------------------------------------------------------- */
+
+export function crearReclamo(datos: ReclamoEntrada): Promise<Reclamo> {
+  return peticion<Reclamo>("/reclamos", { metodo: "POST", cuerpo: datos });
+}
+
+export function listarReclamos(): Promise<Reclamo[]> {
+  return peticion<Reclamo[]>("/reclamos", { autenticado: true });
+}
+
+export function responderReclamo(
+  id: string,
+  respuesta: string,
+): Promise<Reclamo> {
+  return peticion<Reclamo>(`/reclamos/${id}/responder`, {
+    metodo: "PATCH",
+    cuerpo: { respuesta },
     autenticado: true,
   });
 }

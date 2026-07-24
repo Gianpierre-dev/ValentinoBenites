@@ -17,10 +17,11 @@ const ENLACES_TIENDA = [
   { etiqueta: "Carrito", href: "/carrito" },
 ];
 
-const ENLACES_AYUDA = [
-  { etiqueta: "Como comprar", href: "/catalogo" },
-  { etiqueta: "Metodos de pago", href: "/catalogo" },
-  { etiqueta: "Envios", href: "/catalogo" },
+// Informacion legal exigida por la normativa peruana (Ley 29571 / Ley 29733).
+const ENLACES_LEGALES = [
+  { etiqueta: "Términos y Condiciones", href: "/terminos" },
+  { etiqueta: "Política de Privacidad", href: "/privacidad" },
+  { etiqueta: "Libro de Reclamaciones", href: "/libro-de-reclamaciones" },
 ];
 
 interface RedSocial {
@@ -78,9 +79,13 @@ function construirRedes(config: {
  */
 export async function PieDePagina() {
   let redes: RedSocial[] = [];
+  let razonSocial: string | null = null;
+  let ruc: string | null = null;
   try {
     const config = await obtenerConfiguracion();
     redes = construirRedes(config);
+    razonSocial = config.razonSocial;
+    ruc = config.ruc;
   } catch {
     redes = [];
   }
@@ -125,12 +130,12 @@ export async function PieDePagina() {
             </ul>
           </nav>
 
-          <nav aria-label="Ayuda">
+          <nav aria-label="Legal">
             <h2 className="titulo-ui text-sm font-semibold uppercase tracking-wide text-texto-fuerte">
-              Ayuda
+              Legal
             </h2>
             <ul className="mt-4 space-y-2">
-              {ENLACES_AYUDA.map((enlace) => (
+              {ENLACES_LEGALES.map((enlace) => (
                 <li key={enlace.etiqueta}>
                   <Link
                     href={enlace.href}
@@ -169,7 +174,8 @@ export async function PieDePagina() {
 
         <div className="mt-10 border-t border-acento/10 pt-6">
           <p className="text-xs text-texto">
-            &copy; {ANIO_ACTUAL} Valentino Benites. Todos los derechos reservados.
+            &copy; {ANIO_ACTUAL} {razonSocial ?? "Valentino Benites"}
+            {ruc ? ` · RUC ${ruc}` : ""}. Todos los derechos reservados.
           </p>
         </div>
       </div>

@@ -7,6 +7,18 @@ export class ActualizarConfiguracionDto {
 
   @IsOptional()
   @IsString()
+  razonSocial?: string;
+
+  @IsOptional()
+  @IsString()
+  ruc?: string;
+
+  @IsOptional()
+  @IsString()
+  direccion?: string;
+
+  @IsOptional()
+  @IsString()
   datosYape?: string;
 
   @IsOptional()

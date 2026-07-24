@@ -67,7 +67,7 @@ export function FormularioCheckout({ configuracion }: PropsFormularioCheckout) {
     formState: { errors, isSubmitting },
   } = useForm<DatosCheckout>({
     resolver: zodResolver(esquemaCheckout),
-    defaultValues: { nombreCliente: "", telefono: "" },
+    defaultValues: { nombreCliente: "", telefono: "", aceptaPrivacidad: false },
   });
 
   if (!hidratado) {
@@ -285,6 +285,42 @@ export function FormularioCheckout({ configuracion }: PropsFormularioCheckout) {
           <ResumenPedido lineas={lineas} total={total} />
 
           <BloqueConfianza variante="lista" />
+
+          <div>
+            <label className="flex items-start gap-2.5 text-sm text-texto">
+              <input
+                type="checkbox"
+                className="mt-0.5 h-4 w-4 shrink-0 accent-acento"
+                {...register("aceptaPrivacidad")}
+              />
+              <span>
+                He leído y acepto la{" "}
+                <a
+                  href="/privacidad"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-medium text-acento underline"
+                >
+                  Política de Privacidad
+                </a>{" "}
+                y los{" "}
+                <a
+                  href="/terminos"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-medium text-acento underline"
+                >
+                  Términos y Condiciones
+                </a>
+                .
+              </span>
+            </label>
+            {errors.aceptaPrivacidad && (
+              <p role="alert" className="mt-2 text-sm text-oferta">
+                {errors.aceptaPrivacidad.message}
+              </p>
+            )}
+          </div>
 
           {errorEnvio && (
             <p

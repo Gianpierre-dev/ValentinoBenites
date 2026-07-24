@@ -165,9 +165,53 @@ model ItemPedido {
   @@map("items_pedido")
 }
 
+// Libro de Reclamaciones virtual (Ley 29571 + DS 011-2011, mod. DS 101-2022):
+// obligatorio para proveedores que venden por pagina web. RECLAMO = disconformidad
+// con el producto/servicio; QUEJA = malestar con la atencion. Plazo legal de
+// respuesta: 15 dias habiles.
+enum TipoReclamo {
+  RECLAMO
+  QUEJA
+}
+
+enum EstadoReclamo {
+  PENDIENTE
+  RESPONDIDO
+}
+
+model Reclamo {
+  id               String        @id @default(cuid())
+  codigo           String        @unique // hoja de reclamacion: LR-2026-0001
+  tipo             TipoReclamo
+  nombreCompleto   String
+  documento        String // DNI o carnet de extranjeria
+  domicilio        String
+  telefono         String
+  email            String?
+  esMenorDeEdad    Boolean       @default(false)
+  apoderado        String? // padre/madre o apoderado, obligatorio si es menor
+  descripcionBien  String // producto o servicio materia del reclamo
+  montoReclamado   Decimal?      @db.Decimal(10, 2)
+  detalle          String
+  pedidoConsumidor String // lo que el consumidor solicita
+  respuesta        String?
+  estado           EstadoReclamo @default(PENDIENTE)
+  creadoEn         DateTime      @default(now())
+  respondidoEn     DateTime?
+  actualizadoEn    DateTime      @updatedAt
+
+  @@index([estado])
+  @@map("reclamos")
+}
+
 model Configuracion {
   id        String   @id @default(cuid())
   whatsapp  String?
+  // Identificacion legal del proveedor (Codigo del Consumidor): se muestra en el
+  // footer y en la hoja del Libro de Reclamaciones. Administrable desde el admin.
+  razonSocial String?
+  ruc         String?
+  direccion   String?
   datosYape String?
   datosPlin String?
   // QR de pago (URLs de imagen subidas a Wasabi). Se muestran al cliente en el
