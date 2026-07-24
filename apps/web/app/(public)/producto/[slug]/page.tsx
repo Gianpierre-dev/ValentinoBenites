@@ -5,6 +5,7 @@ import { IconChevronRight } from "@tabler/icons-react";
 import { Eyebrow, Revelar } from "@/components/ui";
 import { CompradorProducto, GrillaProductos } from "@/components/tienda";
 import { ErrorApi, listarProductos, obtenerProducto } from "@/lib/api";
+import { NOMBRE_SITIO, URL_SITIO } from "@/lib/sitio";
 import type { Producto } from "@/lib/tipos";
 
 const MAX_RELACIONADOS = 4;
@@ -43,11 +44,103 @@ export async function generateMetadata({
 
   if (!producto) return { title: "Producto no encontrado" };
 
+  const imagen = imagenPrincipal(producto);
+  const descripcion =
+    producto.descripcion ??
+    `Compra ${producto.nombre} en ${NOMBRE_SITIO}: hecho a pedido para ti en el color que elijas.`;
+
   return {
     title: producto.nombre,
-    description:
-      producto.descripcion ?? `Compra ${producto.nombre} en Valentino Benites.`,
+    description: descripcion,
+    alternates: { canonical: `/producto/${producto.slug}` },
+    openGraph: {
+      title: producto.nombre,
+      description: descripcion,
+      type: "website",
+      ...(imagen ? { images: [{ url: imagen }] } : {}),
+    },
   };
+}
+
+/** Primera foto del modelo (o de su primera variante) para OG y schema. */
+function imagenPrincipal(producto: Producto): string | null {
+  return (
+    producto.imagenes?.[0]?.url ??
+    producto.variantes?.[0]?.imagenesEfectivas?.[0]?.url ??
+    null
+  );
+}
+
+/**
+ * Datos estructurados schema.org: Product (precio, moneda, disponibilidad y
+ * colores) + BreadcrumbList. Habilitan los rich results de Google (precio y
+ * foto en el buscador). Hecho a pedido con entrega en ~24 h -> InStock.
+ */
+function datosEstructurados(producto: Producto) {
+  const imagen = imagenPrincipal(producto);
+  const urlProducto = `${URL_SITIO}/producto/${producto.slug}`;
+
+  const schemaProducto = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: producto.nombre,
+    description:
+      producto.descripcion ??
+      `${producto.nombre}, elaborado a pedido por ${NOMBRE_SITIO}.`,
+    ...(imagen ? { image: [imagen] } : {}),
+    ...(producto.material ? { material: producto.material } : {}),
+    ...(producto.variantes.length > 0
+      ? { color: producto.variantes.map((variante) => variante.color).join(", ") }
+      : {}),
+    brand: { "@type": "Brand", name: NOMBRE_SITIO },
+    offers: {
+      "@type": "Offer",
+      url: urlProducto,
+      price: (producto.precioOferta ?? producto.precio).toFixed(2),
+      priceCurrency: "PEN",
+      availability: "https://schema.org/InStock",
+      itemCondition: "https://schema.org/NewCondition",
+    },
+  };
+
+  const schemaMigas = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Inicio", item: URL_SITIO },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "Catálogo",
+        item: `${URL_SITIO}/catalogo`,
+      },
+      ...(producto.categoria
+        ? [
+            {
+              "@type": "ListItem",
+              position: 3,
+              name: producto.categoria.nombre,
+              item: `${URL_SITIO}/catalogo?categoria=${producto.categoria.slug}`,
+            },
+            {
+              "@type": "ListItem",
+              position: 4,
+              name: producto.nombre,
+              item: urlProducto,
+            },
+          ]
+        : [
+            {
+              "@type": "ListItem",
+              position: 3,
+              name: producto.nombre,
+              item: urlProducto,
+            },
+          ]),
+    ],
+  };
+
+  return [schemaProducto, schemaMigas];
 }
 
 /**
@@ -66,6 +159,17 @@ export default async function PaginaProducto({
 
   return (
     <>
+      {datosEstructurados(producto).map((schema, indice) => (
+        <script
+          key={indice}
+          type="application/ld+json"
+          // Se escapa "<" para que un texto con "</script>" no pueda cerrar el
+          // bloque e inyectar HTML (mitigacion estandar de XSS en JSON-LD).
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(schema).replace(/</g, "\\u003c"),
+          }}
+        />
+      ))}
       <div className="bg-gradient-to-b from-perla to-fondo">
         <div className="mx-auto max-w-7xl px-4 py-10 pb-24 sm:px-6 sm:pb-10 lg:py-14 lg:px-8 lg:pb-14">
           <nav

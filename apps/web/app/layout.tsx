@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Fraunces, Inter } from "next/font/google";
+import { NOMBRE_SITIO, URL_SITIO } from "@/lib/sitio";
 import "./globals.css";
 
 // Inter: cuerpo y UI. Fraunces: serif display para titulares grandes (h1/h2).
@@ -19,19 +20,23 @@ const fuenteDisplay = Fraunces({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://esvalentinobenites.com"),
+  metadataBase: new URL(URL_SITIO),
   title: {
-    default: "Valentino Benites | Moda y accesorios para mujer",
-    template: "%s | Valentino Benites",
+    default: `${NOMBRE_SITIO} | Carteras y accesorios artesanales para mujer`,
+    template: `%s | ${NOMBRE_SITIO}`,
   },
   description:
-    "Tienda de moda y accesorios para mujer. Carteras, calzado y mas, con estilo y calidad.",
+    "Carteras, bandoleras y accesorios artesanales de cuero para mujer, hechos a pedido en el Perú. Elige tu modelo y color; lo confeccionamos para ti en 24 horas.",
+  alternates: { canonical: "/" },
   openGraph: {
-    title: "Valentino Benites",
-    description: "Moda y accesorios para mujer.",
+    title: NOMBRE_SITIO,
+    description:
+      "Carteras y accesorios artesanales para mujer, hechos a pedido en el Perú.",
     type: "website",
     locale: "es_PE",
+    siteName: NOMBRE_SITIO,
   },
+  robots: { index: true, follow: true },
 };
 
 export default function RootLayout({
@@ -41,10 +46,27 @@ export default function RootLayout({
 }>) {
   return (
     <html
-      lang="es"
+      lang="es-PE"
       className={`${fuenteSans.variable} ${fuenteDisplay.variable} h-full antialiased`}
     >
-      <body className="flex min-h-full flex-col bg-fondo text-texto">{children}</body>
+      <body className="flex min-h-full flex-col bg-fondo text-texto">
+        <script
+          type="application/ld+json"
+          // Contenido estatico propio; se escapa "<" por higiene (JSON-LD).
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "OnlineStore",
+              name: NOMBRE_SITIO,
+              url: URL_SITIO,
+              logo: `${URL_SITIO}/logo-valentino.png`,
+              description:
+                "Carteras y accesorios artesanales para mujer, hechos a pedido en el Perú.",
+            }).replace(/</g, "\\u003c"),
+          }}
+        />
+        {children}
+      </body>
     </html>
   );
 }
