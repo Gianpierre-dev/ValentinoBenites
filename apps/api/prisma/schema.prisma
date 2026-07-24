@@ -241,6 +241,16 @@ model Configuracion {
   @@map("configuracion")
 }
 
+// Suscriptores del newsletter. El registro implica consentimiento informado
+// (Ley 28493 antispam): el formulario lo declara junto a la politica de privacidad.
+model Suscriptor {
+  id       String   @id @default(cuid())
+  email    String   @unique
+  creadoEn DateTime @default(now())
+
+  @@map("suscriptores")
+}
+
 model Usuario {
   id           String   @id @default(cuid())
   email        String   @unique

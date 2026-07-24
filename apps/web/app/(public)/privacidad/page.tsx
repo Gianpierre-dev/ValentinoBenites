@@ -60,6 +60,15 @@ export default function PaginaPrivacidad() {
               se usan únicamente para atender y responder tu reclamo o queja,
               conforme a la Ley N.º 29571.
             </li>
+            <li>
+              <span className="font-medium text-texto-fuerte">
+                Correo del newsletter:
+              </span>{" "}
+              si te suscribes voluntariamente, usamos tu correo solo para
+              enviarte novedades y ofertas de la tienda, conforme a la Ley
+              N.º 28493. Puedes darte de baja en cualquier momento
+              escribiéndonos por nuestros canales de contacto.
+            </li>
           </ul>
           <p className="mt-2">
             No vendemos ni cedemos tus datos personales a terceros. No usamos

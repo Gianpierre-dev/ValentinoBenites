@@ -13,6 +13,7 @@ import { MigracionModule } from './migracion/migracion.module';
 import { ConfiguracionModule } from './configuracion/configuracion.module';
 import { ReclamosModule } from './reclamos/reclamos.module';
 import { NotificacionesModule } from './notificaciones/notificaciones.module';
+import { SuscriptoresModule } from './suscriptores/suscriptores.module';
 import { StorageModule } from './storage/storage.module';
 
 @Module({
@@ -31,6 +32,7 @@ import { StorageModule } from './storage/storage.module';
     ConfiguracionModule,
     NotificacionesModule,
     ReclamosModule,
+    SuscriptoresModule,
     StorageModule,
   ],
   providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],

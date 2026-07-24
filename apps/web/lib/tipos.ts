@@ -314,6 +314,13 @@ export interface ReclamoEntrada {
   pedidoConsumidor: string;
 }
 
+/** Suscriptor del newsletter (alta publica; listado solo admin). */
+export interface Suscriptor {
+  id: string;
+  email: string;
+  creadoEn: string;
+}
+
 /** Datos editables de una categoria (crear/actualizar desde el admin). */
 export interface CategoriaEntrada {
   nombre: string;

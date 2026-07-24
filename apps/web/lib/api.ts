@@ -21,6 +21,7 @@ import type {
   ProductoEntrada,
   Reclamo,
   ReclamoEntrada,
+  Suscriptor,
   ResultadoAplicacion,
   RespuestaLogin,
   Variante,
@@ -365,6 +366,21 @@ export function responderReclamo(
     cuerpo: { respuesta },
     autenticado: true,
   });
+}
+
+/* ---------------------------------------------------------------- */
+/* Newsletter                                                       */
+/* ---------------------------------------------------------------- */
+
+export function suscribirNewsletter(email: string): Promise<{ suscrito: boolean }> {
+  return peticion<{ suscrito: boolean }>("/suscriptores", {
+    metodo: "POST",
+    cuerpo: { email },
+  });
+}
+
+export function listarSuscriptores(): Promise<Suscriptor[]> {
+  return peticion<Suscriptor[]>("/suscriptores", { autenticado: true });
 }
 
 /* ---------------------------------------------------------------- */
