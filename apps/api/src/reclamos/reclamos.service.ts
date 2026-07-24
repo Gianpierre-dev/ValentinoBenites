@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
+import { NotificacionesService } from '../notificaciones/notificaciones.service';
 import { CrearReclamoDto } from './dto/crear-reclamo.dto';
 import { ResponderReclamoDto } from './dto/responder-reclamo.dto';
 
@@ -15,7 +16,10 @@ import { ResponderReclamoDto } from './dto/responder-reclamo.dto';
  */
 @Injectable()
 export class ReclamosService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly notificaciones: NotificacionesService,
+  ) {}
 
   async crear(dto: CrearReclamoDto) {
     // Igual que en pedidos: el codigo unico tiene una ventana de carrera entre
@@ -23,7 +27,7 @@ export class ReclamosService {
     for (let intento = 0; intento < 5; intento += 1) {
       const codigo = await this.generarCodigoUnico();
       try {
-        return await this.prisma.reclamo.create({
+        const reclamo = await this.prisma.reclamo.create({
           data: {
             codigo,
             tipo: dto.tipo,
@@ -43,6 +47,16 @@ export class ReclamosService {
             pedidoConsumidor: dto.pedidoConsumidor,
           },
         });
+        // Aviso a la duena (el plazo de 15 dias habiles corre desde ahora).
+        // Fire-and-forget: el registro del reclamo nunca depende del email.
+        void this.notificaciones.avisarNuevoReclamo({
+          codigo: reclamo.codigo,
+          tipo: reclamo.tipo,
+          nombreCompleto: reclamo.nombreCompleto,
+          telefono: reclamo.telefono,
+          descripcionBien: reclamo.descripcionBien,
+        });
+        return reclamo;
       } catch (error) {
         if (
           error instanceof Prisma.PrismaClientKnownRequestError &&

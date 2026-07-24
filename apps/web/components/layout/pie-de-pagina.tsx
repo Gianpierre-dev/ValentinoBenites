@@ -74,6 +74,53 @@ function construirRedes(config: {
 }
 
 /**
+ * Aviso oficial del Libro de Reclamaciones (DS 011-2011: debe ser un aviso
+ * facilmente identificable). Reproduce el formato estandar peruano: recuadro
+ * con el icono del libro abierto y la leyenda, enlazado a la hoja virtual.
+ */
+function AvisoLibroReclamaciones() {
+  return (
+    <Link
+      href="/libro-de-reclamaciones"
+      className="mt-5 inline-flex items-center gap-3 rounded-xl border-2 border-texto-fuerte/80 bg-superficie px-4 py-3 transition-colors hover:border-acento"
+    >
+      <svg
+        width="34"
+        height="26"
+        viewBox="0 0 34 26"
+        fill="none"
+        aria-hidden="true"
+        className="shrink-0 text-texto-fuerte"
+      >
+        <path
+          d="M17 4.5C14.5 2.5 10.5 1.5 6.5 1.5c-1.7 0-3.4.2-5 .6V21c1.6-.4 3.3-.6 5-.6 4 0 8 1 10.5 3 2.5-2 6.5-3 10.5-3 1.7 0 3.4.2 5 .6V2.1c-1.6-.4-3.3-.6-5-.6-4 0-8 1-10.5 3Z"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinejoin="round"
+        />
+        <path d="M17 4.5V23.4" stroke="currentColor" strokeWidth="2" />
+        <path
+          d="M6 7h6M6 11h6M6 15h6M22 7h6M22 11h6M22 15h6"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+        />
+      </svg>
+      <span className="text-left">
+        <span className="block text-[11px] font-bold uppercase leading-tight tracking-wide text-texto-fuerte">
+          Libro de
+          <br />
+          Reclamaciones
+        </span>
+        <span className="mt-0.5 block text-[10px] leading-tight text-texto">
+          Virtual · Ley N.º 29571
+        </span>
+      </span>
+    </Link>
+  );
+}
+
+/**
  * Footer multicolumna estilo paez: marca, navegacion, ayuda y redes.
  * Las redes se leen de Configuracion; degrada sin romper si la API no responde.
  */
@@ -146,6 +193,7 @@ export async function PieDePagina() {
                 </li>
               ))}
             </ul>
+            <AvisoLibroReclamaciones />
           </nav>
 
           {redes.length > 0 && (

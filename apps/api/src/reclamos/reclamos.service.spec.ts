@@ -33,11 +33,15 @@ const dtoBase: CrearReclamoDto = {
 
 describe('ReclamosService (Libro de Reclamaciones)', () => {
   let prisma: PrismaMock;
+  let notificaciones: { avisarNuevoReclamo: jest.Mock };
   let service: ReclamosService;
 
   beforeEach(() => {
     prisma = crearPrismaMock();
-    service = new ReclamosService(prisma as never);
+    notificaciones = {
+      avisarNuevoReclamo: jest.fn().mockResolvedValue(undefined),
+    };
+    service = new ReclamosService(prisma as never, notificaciones as never);
   });
 
   it('crea la hoja con codigo LR-YYYY-NNNN y estado PENDIENTE por defecto', async () => {
@@ -56,6 +60,10 @@ describe('ReclamosService (Libro de Reclamaciones)', () => {
     expect(data.tipo).toBe('RECLAMO');
     expect(data.esMenorDeEdad).toBe(false);
     expect(data.montoReclamado).toBeNull();
+    // El aviso a la duena se dispara al registrar (el plazo legal corre desde ahi).
+    expect(notificaciones.avisarNuevoReclamo).toHaveBeenCalledWith(
+      expect.objectContaining({ codigo: reclamo.codigo, tipo: 'RECLAMO' }),
+    );
   });
 
   it('guarda el apoderado cuando el consumidor es menor de edad', async () => {

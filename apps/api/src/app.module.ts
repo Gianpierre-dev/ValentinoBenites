@@ -12,6 +12,7 @@ import { PagosModule } from './pagos/pagos.module';
 import { MigracionModule } from './migracion/migracion.module';
 import { ConfiguracionModule } from './configuracion/configuracion.module';
 import { ReclamosModule } from './reclamos/reclamos.module';
+import { NotificacionesModule } from './notificaciones/notificaciones.module';
 import { StorageModule } from './storage/storage.module';
 
 @Module({
@@ -28,6 +29,7 @@ import { StorageModule } from './storage/storage.module';
     PagosModule,
     MigracionModule,
     ConfiguracionModule,
+    NotificacionesModule,
     ReclamosModule,
     StorageModule,
   ],
