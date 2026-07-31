@@ -17,14 +17,16 @@ interface PropsNavCategorias {
 export function NavCategorias({ categorias }: PropsNavCategorias) {
   const [abierto, setAbierto] = useState(false);
 
-  // Siempre se ofrece "Catalogo"; las categorias se agregan solo si existen.
+  // Siempre se ofrecen "Catalogo" y "Nosotros" (la historia de marca es parte
+  // de la venta); las categorias se intercalan solo si existen.
   const items = [
-    { clave: "catalogo", etiqueta: "Catalogo", href: "/catalogo" },
+    { clave: "catalogo", etiqueta: "Catálogo", href: "/catalogo" },
     ...categorias.map((categoria) => ({
       clave: categoria.id,
       etiqueta: categoria.nombre,
       href: `/catalogo?categoria=${categoria.slug}`,
     })),
+    { clave: "nosotros", etiqueta: "Nosotros", href: "/nosotros" },
   ];
 
   return (

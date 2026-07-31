@@ -13,8 +13,17 @@ const ANIO_ACTUAL = new Date().getFullYear();
 
 const ENLACES_TIENDA = [
   { etiqueta: "Inicio", href: "/" },
-  { etiqueta: "Catalogo", href: "/catalogo" },
-  { etiqueta: "Carrito", href: "/carrito" },
+  { etiqueta: "Catálogo", href: "/catalogo" },
+  { etiqueta: "Nosotros", href: "/nosotros" },
+  { etiqueta: "Contacto", href: "/contacto" },
+];
+
+// Contenido de ayuda: responde las dudas previas a la compra.
+const ENLACES_AYUDA = [
+  { etiqueta: "Cómo comprar", href: "/como-comprar" },
+  { etiqueta: "Preguntas frecuentes", href: "/preguntas-frecuentes" },
+  { etiqueta: "Envíos y entregas", href: "/envios" },
+  { etiqueta: "Cambios y devoluciones", href: "/cambios-y-devoluciones" },
 ];
 
 // Informacion legal exigida por la normativa peruana (Ley 29571 / Ley 29733).
@@ -140,7 +149,7 @@ export async function PieDePagina() {
   return (
     <footer className="mt-16 border-t border-acento/10 bg-rosa-fuerte">
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-5">
           <div>
             <div className="flex items-center gap-2.5">
               <Image
@@ -155,8 +164,15 @@ export async function PieDePagina() {
               </p>
             </div>
             <p className="mt-3 max-w-xs text-sm text-texto">
-              Moda y accesorios para mujer. Calidad y estilo en cada detalle.
+              Carteras y accesorios con telares andinos tejidos en el Perú,
+              confeccionados a pedido.
             </p>
+            <Link
+              href="/nosotros"
+              className="mt-3 inline-block text-sm font-medium text-acento underline underline-offset-4"
+            >
+              Conoce nuestra historia
+            </Link>
           </div>
 
           <nav aria-label="Tienda">
@@ -165,6 +181,24 @@ export async function PieDePagina() {
             </h2>
             <ul className="mt-4 space-y-2">
               {ENLACES_TIENDA.map((enlace) => (
+                <li key={enlace.etiqueta}>
+                  <Link
+                    href={enlace.href}
+                    className="text-sm text-texto transition-colors hover:text-acento"
+                  >
+                    {enlace.etiqueta}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </nav>
+
+          <nav aria-label="Ayuda">
+            <h2 className="titulo-ui text-sm font-semibold uppercase tracking-wide text-texto-fuerte">
+              Ayuda
+            </h2>
+            <ul className="mt-4 space-y-2">
+              {ENLACES_AYUDA.map((enlace) => (
                 <li key={enlace.etiqueta}>
                   <Link
                     href={enlace.href}
