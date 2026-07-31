@@ -383,6 +383,14 @@ export function listarSuscriptores(): Promise<Suscriptor[]> {
   return peticion<Suscriptor[]>("/suscriptores", { autenticado: true });
 }
 
+/** Da de baja a un suscriptor que lo solicito (Ley 28493). */
+export function eliminarSuscriptor(id: string): Promise<{ eliminado: boolean }> {
+  return peticion<{ eliminado: boolean }>(`/suscriptores/${id}`, {
+    metodo: "DELETE",
+    autenticado: true,
+  });
+}
+
 /* ---------------------------------------------------------------- */
 /* Storage (subida de archivos a Wasabi)                            */
 /* ---------------------------------------------------------------- */

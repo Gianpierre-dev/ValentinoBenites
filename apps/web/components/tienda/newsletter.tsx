@@ -94,7 +94,7 @@ export function Newsletter() {
               >
                 Política de Privacidad
               </Link>
-              . Puedes darte de baja cuando quieras.
+              . Puedes darte de baja escribiéndonos cuando quieras.
             </p>
           </form>
         )}

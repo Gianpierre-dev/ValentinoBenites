@@ -1,12 +1,23 @@
+import { NotFoundException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { SuscriptoresService } from './suscriptores.service';
 
 type PrismaMock = {
-  suscriptor: { create: jest.Mock; findMany: jest.Mock };
+  suscriptor: {
+    create: jest.Mock;
+    findMany: jest.Mock;
+    findUnique: jest.Mock;
+    delete: jest.Mock;
+  };
 };
 
 const crearPrismaMock = (): PrismaMock => ({
-  suscriptor: { create: jest.fn(), findMany: jest.fn() },
+  suscriptor: {
+    create: jest.fn(),
+    findMany: jest.fn(),
+    findUnique: jest.fn(),
+    delete: jest.fn(),
+  },
 });
 
 describe('SuscriptoresService (newsletter)', () => {
@@ -41,5 +52,29 @@ describe('SuscriptoresService (newsletter)', () => {
     await expect(
       service.suscribir({ email: 'maria@mail.com' }),
     ).resolves.toEqual({ suscrito: true });
+  });
+
+  it('da de baja a un suscriptor existente (mecanismo Ley 28493)', async () => {
+    prisma.suscriptor.findUnique.mockResolvedValue({
+      id: 'sus-1',
+      email: 'maria@mail.com',
+    });
+    prisma.suscriptor.delete.mockResolvedValue({});
+
+    await expect(service.eliminar('sus-1')).resolves.toEqual({
+      eliminado: true,
+    });
+    expect(prisma.suscriptor.delete).toHaveBeenCalledWith({
+      where: { id: 'sus-1' },
+    });
+  });
+
+  it('eliminar lanza NotFound si el suscriptor no existe', async () => {
+    prisma.suscriptor.findUnique.mockResolvedValue(null);
+
+    await expect(service.eliminar('no-existe')).rejects.toBeInstanceOf(
+      NotFoundException,
+    );
+    expect(prisma.suscriptor.delete).not.toHaveBeenCalled();
   });
 });

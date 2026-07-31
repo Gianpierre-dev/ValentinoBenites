@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { IconCopy, IconMail } from "@tabler/icons-react";
-import { listarSuscriptores } from "@/lib/api";
+import { IconCopy, IconMail, IconTrash } from "@tabler/icons-react";
+import { eliminarSuscriptor, listarSuscriptores } from "@/lib/api";
 import type { Suscriptor } from "@/lib/tipos";
 import {
   EncabezadoPagina,
@@ -11,6 +11,7 @@ import {
   VistaVacia,
   useToast,
   useRecurso,
+  mensajeDeError,
 } from "@/components/admin";
 import { Tarjeta, Boton } from "@/components/ui";
 
@@ -20,8 +21,33 @@ import { Tarjeta, Boton } from "@/components/ui";
  */
 export default function PaginaSuscriptores() {
   const { mostrarExito, mostrarError } = useToast();
-  const { estado, recargar } = useRecurso<Suscriptor[]>(listarSuscriptores);
+  const { estado, recargar, fijarDatos } =
+    useRecurso<Suscriptor[]>(listarSuscriptores);
   const [copiando, setCopiando] = useState(false);
+  const [eliminandoId, setEliminandoId] = useState<string | null>(null);
+
+  /**
+   * Baja solicitada por la persona (Ley 28493): la admin la ejecuta aqui.
+   * Se confirma porque el borrado es definitivo.
+   */
+  async function darDeBaja(suscriptor: Suscriptor) {
+    if (estado.tipo !== "listo") return;
+    const confirmado = window.confirm(
+      `¿Dar de baja a ${suscriptor.email}? Dejará de estar en tu lista de correos.`,
+    );
+    if (!confirmado) return;
+
+    setEliminandoId(suscriptor.id);
+    try {
+      await eliminarSuscriptor(suscriptor.id);
+      fijarDatos(estado.datos.filter((item) => item.id !== suscriptor.id));
+      mostrarExito(`${suscriptor.email} se dio de baja.`);
+    } catch (error) {
+      mostrarError(mensajeDeError(error));
+    } finally {
+      setEliminandoId(null);
+    }
+  }
 
   async function copiarCorreos() {
     if (estado.tipo !== "listo") return;
@@ -42,7 +68,7 @@ export default function PaginaSuscriptores() {
     <>
       <EncabezadoPagina
         titulo="Suscriptores"
-        descripcion="Correos registrados en el newsletter de la tienda."
+        descripcion="Correos registrados en el newsletter. Si alguien pide darse de baja, elimínalo desde aquí."
       />
 
       {estado.tipo === "cargando" && (
@@ -80,12 +106,26 @@ export default function PaginaSuscriptores() {
                 key={suscriptor.id}
                 className="flex items-center justify-between gap-3 py-2.5"
               >
-                <span className="flex items-center gap-2 text-texto-fuerte">
-                  <IconMail className="h-4 w-4 text-texto/50" aria-hidden />
-                  {suscriptor.email}
+                <span className="flex min-w-0 items-center gap-2 text-texto-fuerte">
+                  <IconMail
+                    className="h-4 w-4 shrink-0 text-texto/50"
+                    aria-hidden
+                  />
+                  <span className="truncate">{suscriptor.email}</span>
                 </span>
-                <span className="text-xs text-texto/60">
-                  {formatearFecha(suscriptor.creadoEn)}
+                <span className="flex shrink-0 items-center gap-3">
+                  <span className="text-xs text-texto/60">
+                    {formatearFecha(suscriptor.creadoEn)}
+                  </span>
+                  <Boton
+                    variante="fantasma"
+                    tamano="sm"
+                    cargando={eliminandoId === suscriptor.id}
+                    aria-label={`Dar de baja a ${suscriptor.email}`}
+                    onClick={() => void darDeBaja(suscriptor)}
+                  >
+                    <IconTrash className="h-4 w-4 text-oferta" aria-hidden />
+                  </Boton>
                 </span>
               </li>
             ))}

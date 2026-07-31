@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { SuscriptoresService } from './suscriptores.service';
@@ -19,5 +27,12 @@ export class SuscriptoresController {
   @UseGuards(JwtAuthGuard)
   listar() {
     return this.suscriptoresService.listar();
+  }
+
+  // Baja de un suscriptor que la solicito (Ley 28493).
+  @Delete(':id')
+  @UseGuards(JwtAuthGuard)
+  eliminar(@Param('id') id: string) {
+    return this.suscriptoresService.eliminar(id);
   }
 }
