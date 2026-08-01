@@ -192,7 +192,9 @@ export default function PaginaConfiguracion() {
 
             <p className="text-sm text-texto/60">
               Sube el QR de cada billetera. El cliente lo ve en el checkout para
-              escanear y pagar.
+              escanear y pagar. Usa una imagen grande y nítida (al menos{" "}
+              {LADO_MINIMO_QR}×{LADO_MINIMO_QR} píxeles): si es pequeña, la
+              cámara del cliente no podrá leerla.
             </p>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <CargadorQR
@@ -336,10 +338,35 @@ interface PropsCargadorQR {
   alError: (mensaje: string) => void;
 }
 
+/**
+ * Lado minimo recomendado para un QR de pago. Se muestra a 224 px en el
+ * checkout; por debajo de esto la imagen se estira, los modulos se emborronan
+ * y la camara del cliente no logra leerlo.
+ */
+const LADO_MINIMO_QR = 500;
+
+/** Mide una imagen en el navegador antes de subirla. */
+function medirImagen(archivo: File): Promise<{ ancho: number; alto: number }> {
+  return new Promise((resolver, rechazar) => {
+    const url = URL.createObjectURL(archivo);
+    const imagen = new window.Image();
+    imagen.onload = () => {
+      URL.revokeObjectURL(url);
+      resolver({ ancho: imagen.naturalWidth, alto: imagen.naturalHeight });
+    };
+    imagen.onerror = () => {
+      URL.revokeObjectURL(url);
+      rechazar(new Error("No se pudo leer la imagen."));
+    };
+    imagen.src = url;
+  });
+}
+
 /** Sube/previsualiza una imagen de QR de pago (una sola, opcional). */
 function CargadorQR({ etiqueta, url, alCambiar, alError }: PropsCargadorQR) {
   const refInput = useRef<HTMLInputElement>(null);
   const [subiendo, setSubiendo] = useState(false);
+  const [aviso, setAviso] = useState<string | null>(null);
 
   async function subir(archivos: FileList | null) {
     const archivo = archivos?.[0];
@@ -352,6 +379,22 @@ function CargadorQR({ etiqueta, url, alCambiar, alError }: PropsCargadorQR) {
       alError("La imagen supera el limite de 5 MB.");
       return;
     }
+
+    // Aviso (no bloqueante): un QR pequeño se sube igual, pero es probable que
+    // el cliente no pueda escanearlo desde su celular.
+    setAviso(null);
+    try {
+      const { ancho, alto } = await medirImagen(archivo);
+      const lado = Math.min(ancho, alto);
+      if (lado < LADO_MINIMO_QR) {
+        setAviso(
+          `Esta imagen mide ${ancho}×${alto} px. Puede verse borrosa y que no se pueda escanear. Recomendado: al menos ${LADO_MINIMO_QR}×${LADO_MINIMO_QR} px.`,
+        );
+      }
+    } catch {
+      // Si no se pudo medir, se continúa: la subida no depende de esta ayuda.
+    }
+
     setSubiendo(true);
     try {
       const subido = await subirArchivo(archivo);
@@ -405,6 +448,14 @@ function CargadorQR({ etiqueta, url, alCambiar, alError }: PropsCargadorQR) {
           )}
         </div>
       </div>
+      {aviso && (
+        <p
+          role="alert"
+          className="rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-xs leading-relaxed text-amber-800"
+        >
+          {aviso}
+        </p>
+      )}
       <input
         ref={refInput}
         type="file"

@@ -22,9 +22,21 @@ export const esquemaCheckout = z.object({
 
 export type DatosCheckout = z.infer<typeof esquemaCheckout>;
 
-/** Solo deja digitos de un numero (para armar el enlace wa.me). */
-function soloDigitos(valor: string): string {
-  return valor.replace(/\D/g, "");
+/** Codigo de pais del Peru: wa.me exige el numero en formato internacional. */
+const CODIGO_PAIS_PERU = "51";
+
+/**
+ * Normaliza un numero al formato que exige wa.me (internacional, sin "+").
+ * Un celular peruano se escribe naturalmente con 9 digitos ("945399776"); asi
+ * tal cual, wa.me no lo resuelve. Se le antepone el 51 cuando corresponde, para
+ * que cargar el numero "como se dice" en el panel siga funcionando.
+ */
+export function normalizarNumeroWhatsApp(valor: string): string {
+  const digitos = valor.replace(/\D/g, "");
+  if (digitos === "") return "";
+  // Celular peruano local (9 digitos, empieza en 9) -> anteponer el pais.
+  if (/^9\d{8}$/.test(digitos)) return `${CODIGO_PAIS_PERU}${digitos}`;
+  return digitos;
 }
 
 /**
@@ -93,7 +105,7 @@ export function construirEnlaceWhatsApp(
   mensaje: string,
 ): string | null {
   if (!numeroNegocio) return null;
-  const numero = soloDigitos(numeroNegocio);
+  const numero = normalizarNumeroWhatsApp(numeroNegocio);
   if (!numero) return null;
   return `https://wa.me/${numero}?text=${encodeURIComponent(mensaje)}`;
 }

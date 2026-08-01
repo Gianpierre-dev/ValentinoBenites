@@ -482,12 +482,18 @@ function PagoDigital({
 
       {qr && (
         <figure className="mt-4 flex flex-col items-center rounded-xl border border-borde bg-fondo p-4">
+          {/*
+            `unoptimized`: un QR no debe pasar por el optimizador. La recompresion
+            con perdida emborrona los modulos (los cuadraditos) y la camara deja
+            de leerlo. Se sirve el archivo original tal cual.
+          */}
           <Image
             src={qr}
             alt={`Código QR de ${billetera}`}
-            width={208}
-            height={208}
-            className="h-52 w-52 object-contain"
+            width={224}
+            height={224}
+            unoptimized
+            className="h-56 w-56 object-contain"
           />
           <figcaption className="mt-2 text-xs text-texto">
             Escanea el QR con tu app de {billetera} para pagar.

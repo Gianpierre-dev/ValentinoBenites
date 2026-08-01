@@ -8,6 +8,7 @@ import {
 } from "@tabler/icons-react";
 import type { ComponentType } from "react";
 import { obtenerConfiguracion } from "@/lib/api";
+import { normalizarNumeroWhatsApp } from "@/lib/checkout";
 
 const ANIO_ACTUAL = new Date().getFullYear();
 
@@ -75,7 +76,7 @@ function construirRedes(config: {
   if (config.whatsapp) {
     redes.push({
       nombre: "WhatsApp",
-      url: `https://wa.me/${config.whatsapp.replace(/\D/g, "")}`,
+      url: `https://wa.me/${normalizarNumeroWhatsApp(config.whatsapp)}`,
       Icono: IconBrandWhatsapp,
     });
   }
