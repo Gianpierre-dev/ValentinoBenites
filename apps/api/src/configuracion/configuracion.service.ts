@@ -28,10 +28,9 @@ export class ConfiguracionService {
       where: { id: actual.id },
       data: {
         whatsapp: dto.whatsapp,
-        datosYape: dto.datosYape,
-        datosPlin: dto.datosPlin,
-        qrYape: dto.qrYape,
-        qrPlin: dto.qrPlin,
+        razonSocial: dto.razonSocial,
+        ruc: dto.ruc,
+        direccion: dto.direccion,
         instagram: dto.instagram,
         facebook: dto.facebook,
         tiktok: dto.tiktok,
