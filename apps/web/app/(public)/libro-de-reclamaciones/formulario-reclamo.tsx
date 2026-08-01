@@ -8,8 +8,15 @@ import { z } from "zod";
 import { IconCheck } from "@tabler/icons-react";
 import { Boton, Input } from "@/components/ui";
 import { crearReclamo, ErrorApi } from "@/lib/api";
-import { cn } from "@/lib/utilidades";
+import { cn, soloDigitos } from "@/lib/utilidades";
 import type { TipoReclamo } from "@/lib/tipos";
+
+/** Un celular peruano tiene 9 digitos; el DNI, 8 (el CE puede llegar a 12). */
+const LARGO_CELULAR = 9;
+const LARGO_DOCUMENTO = 12;
+
+/** Letras (con tildes y ñ), espacios y signos de nombres compuestos. */
+const SOLO_NOMBRE = /^[\p{L}][\p{L}\s'.-]*$/u;
 
 /**
  * Hoja de reclamacion del Libro de Reclamaciones virtual. Campos segun el
@@ -23,7 +30,8 @@ const esquemaReclamo = z.object({
     .string()
     .trim()
     .min(3, "Ingresa tu nombre completo.")
-    .max(120, "El nombre es demasiado largo."),
+    .max(120, "El nombre es demasiado largo.")
+    .regex(SOLO_NOMBRE, "El nombre solo puede tener letras."),
   documento: z
     .string()
     .trim()
@@ -198,8 +206,16 @@ export function FormularioReclamo() {
           <Input
             etiqueta="DNI o carnet de extranjería"
             inputMode="numeric"
+            maxLength={LARGO_DOCUMENTO}
             error={errors.documento?.message}
-            {...register("documento")}
+            {...register("documento", {
+              onChange: (evento: React.ChangeEvent<HTMLInputElement>) => {
+                evento.target.value = soloDigitos(
+                  evento.target.value,
+                  LARGO_DOCUMENTO,
+                );
+              },
+            })}
           />
           <Input
             etiqueta="Domicilio"
@@ -212,8 +228,16 @@ export function FormularioReclamo() {
             placeholder="9XXXXXXXX"
             inputMode="numeric"
             autoComplete="tel"
+            maxLength={LARGO_CELULAR}
             error={errors.telefono?.message}
-            {...register("telefono")}
+            {...register("telefono", {
+              onChange: (evento: React.ChangeEvent<HTMLInputElement>) => {
+                evento.target.value = soloDigitos(
+                  evento.target.value,
+                  LARGO_CELULAR,
+                );
+              },
+            })}
           />
           <Input
             etiqueta="Correo electrónico (opcional)"

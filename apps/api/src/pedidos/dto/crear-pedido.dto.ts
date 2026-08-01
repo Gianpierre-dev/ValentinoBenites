@@ -8,12 +8,23 @@ import {
   IsOptional,
   IsString,
   IsUrl,
+  Matches,
   MaxLength,
   Min,
+  MinLength,
   ValidateIf,
   ValidateNested,
 } from 'class-validator';
 import { MetodoPago } from '@prisma/client';
+
+/**
+ * Letras (con tildes y ñ), espacios y signos de nombres compuestos. Se valida
+ * tambien aqui —no solo en el formulario— porque el cliente es manipulable.
+ */
+const SOLO_NOMBRE = /^[\p{L}][\p{L}\s'.-]*$/u;
+
+/** Celular peruano: 9 digitos que empiezan en 9. */
+const CELULAR_PERUANO = /^9\d{8}$/;
 
 /**
  * Un item del pedido es O BIEN una variante (color) elegida, O BIEN un producto
@@ -43,10 +54,16 @@ export class ItemPedidoDto {
 export class CrearPedidoDto {
   @IsString()
   @IsNotEmpty({ message: 'El nombre del cliente es obligatorio.' })
+  @MinLength(3, { message: 'Ingresa el nombre completo.' })
+  @MaxLength(120, { message: 'El nombre es demasiado largo.' })
+  @Matches(SOLO_NOMBRE, { message: 'El nombre solo puede tener letras.' })
   nombreCliente!: string;
 
   @IsString()
   @IsNotEmpty({ message: 'El telefono es obligatorio.' })
+  @Matches(CELULAR_PERUANO, {
+    message: 'Ingresa un celular valido de 9 digitos que empiece en 9.',
+  })
   telefono!: string;
 
   @IsArray()

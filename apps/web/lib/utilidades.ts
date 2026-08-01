@@ -57,3 +57,13 @@ export function precioMostrableVariante(
     descuento: enOferta ? calcularDescuento(precioBase, precioFinal) : null,
   };
 }
+
+/**
+ * Recorta un valor escrito a solo digitos y a un largo maximo. Se usa en los
+ * campos numericos (celular, documento) para que el navegador no acepte letras
+ * ni mas caracteres de los permitidos MIENTRAS se escribe, en vez de avisar
+ * recien al enviar el formulario.
+ */
+export function soloDigitos(valor: string, largoMaximo: number): string {
+  return valor.replace(/\D/g, "").slice(0, largoMaximo);
+}

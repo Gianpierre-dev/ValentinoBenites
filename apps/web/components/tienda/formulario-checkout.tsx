@@ -18,7 +18,10 @@ import { useCarrito } from "@/store/carrito";
 import { useHidratado } from "@/store/usar-hidratado";
 import { crearPedido, subirArchivo, ErrorApi } from "@/lib/api";
 import type { Configuracion, MetodoPago } from "@/lib/tipos";
-import { cn } from "@/lib/utilidades";
+import { cn, soloDigitos } from "@/lib/utilidades";
+
+/** Un celular peruano tiene 9 digitos. */
+const LARGO_CELULAR = 9;
 import { BloqueConfianza } from "./bloque-confianza";
 import { ResumenPedido } from "./resumen-pedido";
 import {
@@ -234,8 +237,18 @@ export function FormularioCheckout({ configuracion }: PropsFormularioCheckout) {
               placeholder="9XXXXXXXX"
               inputMode="numeric"
               autoComplete="tel"
+              maxLength={LARGO_CELULAR}
               error={errors.telefono?.message}
-              {...register("telefono")}
+              {...register("telefono", {
+                // Se limpia el valor al vuelo: pegar o teclear letras no escribe
+                // nada y no se puede pasar de 9 digitos.
+                onChange: (evento: React.ChangeEvent<HTMLInputElement>) => {
+                  evento.target.value = soloDigitos(
+                    evento.target.value,
+                    LARGO_CELULAR,
+                  );
+                },
+              })}
             />
           </div>
         </BloqueFormulario>

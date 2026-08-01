@@ -25,6 +25,9 @@ export class CrearReclamoDto {
   @IsString()
   @MinLength(3, { message: 'Ingresa tu nombre completo.' })
   @MaxLength(120)
+  @Matches(/^[\p{L}][\p{L}\s'.-]*$/u, {
+    message: 'El nombre solo puede tener letras.',
+  })
   nombreCompleto!: string;
 
   @IsString()

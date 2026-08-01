@@ -2,17 +2,25 @@ import { z } from "zod";
 import type { LineaCarrito } from "@/store/carrito";
 import { formatearPrecio } from "@/lib/utilidades";
 
+/**
+ * Un nombre admite letras (con tildes y ñ), espacios y los signos propios de
+ * nombres compuestos: apostrofo, punto y guion. Deja fuera numeros y simbolos,
+ * para que "333333" no pase como nombre.
+ */
+const SOLO_NOMBRE = /^[\p{L}][\p{L}\s'.-]*$/u;
+
 /** Esquema de validacion de los datos del cliente en el checkout. */
 export const esquemaCheckout = z.object({
   nombreCliente: z
     .string()
     .trim()
     .min(3, "Ingresa tu nombre completo.")
-    .max(120, "El nombre es demasiado largo."),
+    .max(120, "El nombre es demasiado largo.")
+    .regex(SOLO_NOMBRE, "El nombre solo puede tener letras."),
   telefono: z
     .string()
     .trim()
-    .regex(/^9\d{8}$/, "Ingresa un celular valido de 9 digitos (empieza en 9)."),
+    .regex(/^9\d{8}$/, "Ingresa un celular válido de 9 dígitos que empiece en 9."),
   // Ley 29733: el consentimiento debe ser expreso y previo (checkbox no
   // premarcado). Sin aceptar la politica de privacidad no se registra el pedido.
   aceptaPrivacidad: z.boolean().refine((valor) => valor, {
