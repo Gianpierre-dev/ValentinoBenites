@@ -20,10 +20,6 @@ interface FormularioConfig {
   razonSocial: string;
   ruc: string;
   direccion: string;
-  datosYape: string;
-  datosPlin: string;
-  qrYape: string | null;
-  qrPlin: string | null;
   instagram: string;
   facebook: string;
   tiktok: string;
@@ -42,10 +38,6 @@ async function cargarFormulario(): Promise<FormularioConfig> {
     razonSocial: config.razonSocial ?? "",
     ruc: config.ruc ?? "",
     direccion: config.direccion ?? "",
-    datosYape: config.datosYape ?? "",
-    datosPlin: config.datosPlin ?? "",
-    qrYape: config.qrYape,
-    qrPlin: config.qrPlin,
     instagram: config.instagram ?? "",
     facebook: config.facebook ?? "",
     tiktok: config.tiktok ?? "",
@@ -77,10 +69,6 @@ export default function PaginaConfiguracion() {
         razonSocial,
         ruc,
         direccion,
-        datosYape,
-        datosPlin,
-        qrYape,
-        qrPlin,
         instagram,
         facebook,
         tiktok,
@@ -96,10 +84,6 @@ export default function PaginaConfiguracion() {
         razonSocial: razonSocial.trim() || null,
         ruc: ruc.trim() || null,
         direccion: direccion.trim() || null,
-        datosYape: datosYape.trim() || null,
-        datosPlin: datosPlin.trim() || null,
-        qrYape,
-        qrPlin,
         instagram: instagram.trim() || null,
         facebook: facebook.trim() || null,
         tiktok: tiktok.trim() || null,
@@ -169,47 +153,18 @@ export default function PaginaConfiguracion() {
 
           <section className="flex flex-col gap-4">
             <h2 className="border-b border-borde pb-2 text-sm font-semibold uppercase tracking-wide text-texto/70">
-              Contacto y pagos
+              Contacto
             </h2>
             <Input
               etiqueta="Numero de WhatsApp"
-              placeholder="51999888777"
+              placeholder="945399776"
               value={estado.datos.whatsapp}
               onChange={(evento) => actualizarCampo("whatsapp", evento.target.value)}
             />
-            <Input
-              etiqueta="Datos Yape"
-              placeholder="Nombre y numero asociado a Yape"
-              value={estado.datos.datosYape}
-              onChange={(evento) => actualizarCampo("datosYape", evento.target.value)}
-            />
-            <Input
-              etiqueta="Datos Plin"
-              placeholder="Nombre y numero asociado a Plin"
-              value={estado.datos.datosPlin}
-              onChange={(evento) => actualizarCampo("datosPlin", evento.target.value)}
-            />
-
             <p className="text-sm text-texto/60">
-              Sube el QR de cada billetera. El cliente lo ve en el checkout para
-              escanear y pagar. Usa una imagen grande y nítida (al menos{" "}
-              {LADO_MINIMO_QR}×{LADO_MINIMO_QR} píxeles): si es pequeña, la
-              cámara del cliente no podrá leerla.
+              Las billeteras de pago (Yape, Plin y más) se administran en la
+              sección <span className="font-medium">Métodos de pago</span>.
             </p>
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <CargadorQR
-                etiqueta="QR de Yape"
-                url={estado.datos.qrYape}
-                alCambiar={(url) => actualizarCampo("qrYape", url)}
-                alError={mostrarError}
-              />
-              <CargadorQR
-                etiqueta="QR de Plin"
-                url={estado.datos.qrPlin}
-                alCambiar={(url) => actualizarCampo("qrPlin", url)}
-                alError={mostrarError}
-              />
-            </div>
           </section>
 
           <section className="flex flex-col gap-4">
@@ -330,142 +285,6 @@ interface PropsEditorBanners {
 
 const TIPOS_IMAGEN = ["image/jpeg", "image/png", "image/webp", "image/avif"];
 const TAMANO_MAXIMO_BYTES = 5 * 1024 * 1024;
-
-interface PropsCargadorQR {
-  etiqueta: string;
-  url: string | null;
-  alCambiar: (url: string | null) => void;
-  alError: (mensaje: string) => void;
-}
-
-/**
- * Lado minimo recomendado para un QR de pago. Se muestra a 224 px en el
- * checkout; por debajo de esto la imagen se estira, los modulos se emborronan
- * y la camara del cliente no logra leerlo.
- */
-const LADO_MINIMO_QR = 500;
-
-/** Mide una imagen en el navegador antes de subirla. */
-function medirImagen(archivo: File): Promise<{ ancho: number; alto: number }> {
-  return new Promise((resolver, rechazar) => {
-    const url = URL.createObjectURL(archivo);
-    const imagen = new window.Image();
-    imagen.onload = () => {
-      URL.revokeObjectURL(url);
-      resolver({ ancho: imagen.naturalWidth, alto: imagen.naturalHeight });
-    };
-    imagen.onerror = () => {
-      URL.revokeObjectURL(url);
-      rechazar(new Error("No se pudo leer la imagen."));
-    };
-    imagen.src = url;
-  });
-}
-
-/** Sube/previsualiza una imagen de QR de pago (una sola, opcional). */
-function CargadorQR({ etiqueta, url, alCambiar, alError }: PropsCargadorQR) {
-  const refInput = useRef<HTMLInputElement>(null);
-  const [subiendo, setSubiendo] = useState(false);
-  const [aviso, setAviso] = useState<string | null>(null);
-
-  async function subir(archivos: FileList | null) {
-    const archivo = archivos?.[0];
-    if (!archivo) return;
-    if (!TIPOS_IMAGEN.includes(archivo.type)) {
-      alError("El archivo no es una imagen valida.");
-      return;
-    }
-    if (archivo.size > TAMANO_MAXIMO_BYTES) {
-      alError("La imagen supera el limite de 5 MB.");
-      return;
-    }
-
-    // Aviso (no bloqueante): un QR pequeño se sube igual, pero es probable que
-    // el cliente no pueda escanearlo desde su celular.
-    setAviso(null);
-    try {
-      const { ancho, alto } = await medirImagen(archivo);
-      const lado = Math.min(ancho, alto);
-      if (lado < LADO_MINIMO_QR) {
-        setAviso(
-          `Esta imagen mide ${ancho}×${alto} px. Puede verse borrosa y que no se pueda escanear. Recomendado: al menos ${LADO_MINIMO_QR}×${LADO_MINIMO_QR} px.`,
-        );
-      }
-    } catch {
-      // Si no se pudo medir, se continúa: la subida no depende de esta ayuda.
-    }
-
-    setSubiendo(true);
-    try {
-      const subido = await subirArchivo(archivo);
-      alCambiar(subido.url);
-    } catch (error) {
-      alError(mensajeDeError(error));
-    } finally {
-      setSubiendo(false);
-      if (refInput.current) refInput.current.value = "";
-    }
-  }
-
-  return (
-    <div className="flex flex-col gap-2">
-      <span className="text-sm font-medium text-texto-fuerte">{etiqueta}</span>
-      <div className="flex items-center gap-3">
-        <div className="relative h-28 w-28 shrink-0 overflow-hidden rounded-lg border border-borde bg-black/[.02]">
-          {url ? (
-            <Image src={url} alt={etiqueta} fill sizes="112px" className="object-contain p-1" />
-          ) : (
-            <span className="flex h-full items-center justify-center text-xs text-texto/40">
-              Sin QR
-            </span>
-          )}
-        </div>
-        <div className="flex flex-col items-start gap-2">
-          <Boton
-            type="button"
-            variante="secundario"
-            tamano="sm"
-            onClick={() => refInput.current?.click()}
-            disabled={subiendo}
-          >
-            {subiendo ? (
-              <IconLoader2 className="h-4 w-4 animate-spin" aria-hidden />
-            ) : (
-              <IconUpload className="h-4 w-4" aria-hidden />
-            )}
-            {url ? "Cambiar" : "Subir QR"}
-          </Boton>
-          {url && (
-            <Boton
-              type="button"
-              variante="fantasma"
-              tamano="sm"
-              onClick={() => alCambiar(null)}
-            >
-              <IconTrash className="h-4 w-4 text-oferta" aria-hidden />
-              Quitar
-            </Boton>
-          )}
-        </div>
-      </div>
-      {aviso && (
-        <p
-          role="alert"
-          className="rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-xs leading-relaxed text-amber-800"
-        >
-          {aviso}
-        </p>
-      )}
-      <input
-        ref={refInput}
-        type="file"
-        accept="image/*"
-        className="sr-only"
-        onChange={(evento) => subir(evento.target.files)}
-      />
-    </div>
-  );
-}
 
 interface PropsEditorAnuncios {
   mensajes: string[];

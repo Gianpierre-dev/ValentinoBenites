@@ -74,7 +74,13 @@ describe('MigracionService.aplicarAgrupacion (T2.15 / E4.x)', () => {
   it('aplica un grupo: crea una variante por color y absorbe (soft-delete) los productos no cabecera', async () => {
     prisma.producto.findUnique.mockImplementation(({ where }: any) => {
       const productos: Record<string, unknown> = {
-        C: { id: 'C', nombre: 'Bandolera Andina', precio: 120, precioOferta: null, imagenes: [] },
+        C: {
+          id: 'C',
+          nombre: 'Bandolera Andina',
+          precio: 120,
+          precioOferta: null,
+          imagenes: [],
+        },
         A: {
           id: 'A',
           nombre: 'Bandolera Andina Rosa',

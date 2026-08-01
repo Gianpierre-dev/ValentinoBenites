@@ -1,5 +1,5 @@
 import { BadRequestException } from '@nestjs/common';
-import { EstadoPedido, MetodoPago, Prisma } from '@prisma/client';
+import { EstadoPedido, Prisma } from '@prisma/client';
 import { PedidosService } from './pedidos.service';
 
 interface LineaCreada {
@@ -24,6 +24,7 @@ type PedidoCreateArgs = [
 type PrismaMock = {
   variante: { findMany: jest.Mock };
   producto: { findMany: jest.Mock };
+  billetera: { findUnique: jest.Mock };
   pedido: {
     create: jest.Mock<unknown, PedidoCreateArgs>;
     findUnique: jest.Mock;
@@ -36,6 +37,7 @@ const dec = (valor: number) => new Prisma.Decimal(valor);
 const crearPrismaMock = (): PrismaMock => ({
   variante: { findMany: jest.fn() },
   producto: { findMany: jest.fn() },
+  billetera: { findUnique: jest.fn() },
   pedido: {
     create: jest.fn<unknown, PedidoCreateArgs>(),
     findUnique: jest.fn(),
@@ -52,20 +54,23 @@ const varianteVino = {
   precioOferta: null,
   producto: {
     id: 'prod-1',
-    nombre: 'Bandolera Andina',
+    nombre: 'Morral Andino',
     precio: dec(120),
     precioOferta: null,
   },
 };
 
 // Producto "hecho a pedido" para las lineas a coordinar (sin variante elegida).
-const productoAndina = {
+const productoAndino = {
   id: 'prod-1',
-  nombre: 'Bandolera Andina',
+  nombre: 'Morral Andino',
   activo: true,
   precio: dec(120),
   precioOferta: null,
 };
+
+// Billetera activa por defecto para los tests de pago manual.
+const billeteraYape = { id: 'bil-yape', nombre: 'Yape', activo: true };
 
 describe('PedidosService', () => {
   let prisma: PrismaMock;
@@ -77,6 +82,7 @@ describe('PedidosService', () => {
     // Por defecto: sin variantes ni productos hasta que cada test los configure.
     prisma.variante.findMany.mockResolvedValue([]);
     prisma.producto.findMany.mockResolvedValue([]);
+    prisma.billetera.findUnique.mockResolvedValue(billeteraYape);
     // El codigo unico consulta pedido.findUnique buscando colision: devolver null.
     prisma.pedido.findUnique.mockResolvedValue(null);
   });
@@ -89,7 +95,7 @@ describe('PedidosService', () => {
       await service.crear({
         nombreCliente: 'Ana',
         telefono: '999',
-        metodoPago: MetodoPago.YAPE,
+        billeteraId: 'bil-yape',
         items: [{ varianteId: 'var-vino', cantidad: 2 }],
       });
 
@@ -98,13 +104,71 @@ describe('PedidosService', () => {
       expect(linea).toMatchObject({
         varianteId: 'var-vino',
         productoId: 'prod-1',
-        nombreProducto: 'Bandolera Andina',
+        nombreProducto: 'Morral Andino',
         colorElegido: 'Vino',
         cantidad: 2,
       });
       expect(linea.precioUnitario.toNumber()).toBe(120);
       expect(linea.subtotal.toNumber()).toBe(240);
       expect(data.total.toNumber()).toBe(240);
+    });
+
+    it('guarda el NOMBRE de la billetera como snapshot del metodo de pago', async () => {
+      prisma.variante.findMany.mockResolvedValue([varianteVino]);
+      prisma.billetera.findUnique.mockResolvedValue({
+        id: 'bil-agora',
+        nombre: 'Agora',
+        activo: true,
+      });
+      prisma.pedido.create.mockImplementation(({ data }) => data);
+
+      const data = await service.crear({
+        nombreCliente: 'Ana',
+        telefono: '999',
+        billeteraId: 'bil-agora',
+        items: [{ varianteId: 'var-vino', cantidad: 1 }],
+      });
+
+      expect(prisma.billetera.findUnique).toHaveBeenCalledWith({
+        where: { id: 'bil-agora' },
+      });
+      expect(data.metodoPago).toBe('Agora');
+    });
+
+    it('sin billeteraId el pedido se coordina por WhatsApp', async () => {
+      prisma.variante.findMany.mockResolvedValue([varianteVino]);
+      prisma.pedido.create.mockImplementation(({ data }) => data);
+
+      const data = await service.crear({
+        nombreCliente: 'Ana',
+        telefono: '999',
+        items: [{ varianteId: 'var-vino', cantidad: 1 }],
+      });
+
+      // El estado inicial lo fija el default del schema (PENDIENTE_PAGO);
+      // el servicio no debe forzar otro estado ni tocar stock.
+      expect(data.estado).toBeUndefined();
+      expect(data.metodoPago).toBe('WhatsApp');
+      expect(prisma.billetera.findUnique).not.toHaveBeenCalled();
+    });
+
+    it('rechaza una billetera inexistente o inactiva', async () => {
+      prisma.variante.findMany.mockResolvedValue([varianteVino]);
+      prisma.billetera.findUnique.mockResolvedValue({
+        id: 'bil-vieja',
+        nombre: 'Tunki',
+        activo: false,
+      });
+
+      await expect(
+        service.crear({
+          nombreCliente: 'Ana',
+          telefono: '999',
+          billeteraId: 'bil-vieja',
+          items: [{ varianteId: 'var-vino', cantidad: 1 }],
+        }),
+      ).rejects.toBeInstanceOf(BadRequestException);
+      expect(prisma.pedido.create).not.toHaveBeenCalled();
     });
 
     it('aplica el precio override de la variante sobre el precio del modelo', async () => {
@@ -116,29 +180,12 @@ describe('PedidosService', () => {
       await service.crear({
         nombreCliente: 'Ana',
         telefono: '999',
-        metodoPago: MetodoPago.PLIN,
+        billeteraId: 'bil-yape',
         items: [{ varianteId: 'var-vino', cantidad: 1 }],
       });
 
       const data = prisma.pedido.create.mock.calls[0][0].data;
       expect(data.items.create[0].precioUnitario.toNumber()).toBe(150);
-    });
-
-    it('nace en PENDIENTE_PAGO para WhatsApp/Yape/Plin', async () => {
-      prisma.variante.findMany.mockResolvedValue([varianteVino]);
-      prisma.pedido.create.mockImplementation(({ data }) => data);
-
-      const data = await service.crear({
-        nombreCliente: 'Ana',
-        telefono: '999',
-        metodoPago: MetodoPago.WHATSAPP,
-        items: [{ varianteId: 'var-vino', cantidad: 1 }],
-      });
-
-      // El estado inicial lo fija el default del schema (PENDIENTE_PAGO);
-      // el servicio no debe forzar otro estado ni tocar stock.
-      expect(data.estado).toBeUndefined();
-      expect(data.metodoPago).toBe(MetodoPago.WHATSAPP);
     });
 
     it('SUG-01 reintenta con un codigo nuevo si choca la unicidad (P2002) y no propaga 500', async () => {
@@ -155,7 +202,7 @@ describe('PedidosService', () => {
       const data = await service.crear({
         nombreCliente: 'Ana',
         telefono: '999',
-        metodoPago: MetodoPago.YAPE,
+        billeteraId: 'bil-yape',
         items: [{ varianteId: 'var-vino', cantidad: 1 }],
       });
 
@@ -164,13 +211,12 @@ describe('PedidosService', () => {
     });
 
     it('crea una linea "A coordinar" (sin variante) con el precio base del producto', async () => {
-      prisma.producto.findMany.mockResolvedValue([productoAndina]);
+      prisma.producto.findMany.mockResolvedValue([productoAndino]);
       prisma.pedido.create.mockImplementation(({ data }) => data);
 
       await service.crear({
         nombreCliente: 'Ana',
         telefono: '999',
-        metodoPago: MetodoPago.WHATSAPP,
         items: [{ productoId: 'prod-1', cantidad: 2 }],
       });
 
@@ -179,7 +225,7 @@ describe('PedidosService', () => {
       expect(linea).toMatchObject({
         varianteId: null,
         productoId: 'prod-1',
-        nombreProducto: 'Bandolera Andina',
+        nombreProducto: 'Morral Andino',
         colorElegido: 'A coordinar',
         cantidad: 2,
       });
@@ -190,14 +236,14 @@ describe('PedidosService', () => {
 
     it('usa el precioOferta del producto para la linea a coordinar cuando existe', async () => {
       prisma.producto.findMany.mockResolvedValue([
-        { ...productoAndina, precioOferta: dec(99) },
+        { ...productoAndino, precioOferta: dec(99) },
       ]);
       prisma.pedido.create.mockImplementation(({ data }) => data);
 
       await service.crear({
         nombreCliente: 'Ana',
         telefono: '999',
-        metodoPago: MetodoPago.YAPE,
+        billeteraId: 'bil-yape',
         items: [{ productoId: 'prod-1', cantidad: 1 }],
       });
 
@@ -207,13 +253,13 @@ describe('PedidosService', () => {
 
     it('mezcla un item con color elegido y un item a coordinar en el mismo pedido', async () => {
       prisma.variante.findMany.mockResolvedValue([varianteVino]);
-      prisma.producto.findMany.mockResolvedValue([productoAndina]);
+      prisma.producto.findMany.mockResolvedValue([productoAndino]);
       prisma.pedido.create.mockImplementation(({ data }) => data);
 
       await service.crear({
         nombreCliente: 'Ana',
         telefono: '999',
-        metodoPago: MetodoPago.PLIN,
+        billeteraId: 'bil-yape',
         items: [
           { varianteId: 'var-vino', cantidad: 1 },
           { productoId: 'prod-1', cantidad: 1 },
@@ -241,7 +287,7 @@ describe('PedidosService', () => {
         service.crear({
           nombreCliente: 'Ana',
           telefono: '999',
-          metodoPago: MetodoPago.YAPE,
+          billeteraId: 'bil-yape',
           items: [{ productoId: 'inexistente', cantidad: 1 }],
         }),
       ).rejects.toBeInstanceOf(BadRequestException);
@@ -256,7 +302,7 @@ describe('PedidosService', () => {
         service.crear({
           nombreCliente: 'Ana',
           telefono: '999',
-          metodoPago: MetodoPago.YAPE,
+          billeteraId: 'bil-yape',
           items: [{ varianteId: 'inexistente', cantidad: 1 }],
         }),
       ).rejects.toBeInstanceOf(BadRequestException);

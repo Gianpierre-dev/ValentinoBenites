@@ -8,6 +8,8 @@
 
 import type {
   AplicarGrupoEntrada,
+  Billetera,
+  BilleteraEntrada,
   Categoria,
   CategoriaEntrada,
   Configuracion,
@@ -341,6 +343,46 @@ export function actualizarConfiguracion(
   return peticion<Configuracion>("/configuracion", {
     metodo: "PUT",
     cuerpo: datos,
+    autenticado: true,
+  });
+}
+
+/* ---------------------------------------------------------------- */
+/* Billeteras (metodos de pago manuales)                            */
+/* ---------------------------------------------------------------- */
+
+/** Billeteras activas que se muestran en el checkout (publico). */
+export function listarBilleteras(): Promise<Billetera[]> {
+  return peticion<Billetera[]>("/billeteras");
+}
+
+/** Todas las billeteras, incluidas inactivas (panel admin). */
+export function listarBilleterasAdmin(): Promise<Billetera[]> {
+  return peticion<Billetera[]>("/billeteras/todas", { autenticado: true });
+}
+
+export function crearBilletera(datos: BilleteraEntrada): Promise<Billetera> {
+  return peticion<Billetera>("/billeteras", {
+    metodo: "POST",
+    cuerpo: datos,
+    autenticado: true,
+  });
+}
+
+export function actualizarBilletera(
+  id: string,
+  datos: Partial<BilleteraEntrada>,
+): Promise<Billetera> {
+  return peticion<Billetera>(`/billeteras/${id}`, {
+    metodo: "PATCH",
+    cuerpo: datos,
+    autenticado: true,
+  });
+}
+
+export function eliminarBilletera(id: string): Promise<{ eliminado: boolean }> {
+  return peticion<{ eliminado: boolean }>(`/billeteras/${id}`, {
+    metodo: "DELETE",
     autenticado: true,
   });
 }

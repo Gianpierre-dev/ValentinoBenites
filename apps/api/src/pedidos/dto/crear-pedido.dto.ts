@@ -2,7 +2,6 @@ import { Type } from 'class-transformer';
 import {
   ArrayMinSize,
   IsArray,
-  IsEnum,
   IsInt,
   IsNotEmpty,
   IsOptional,
@@ -15,7 +14,6 @@ import {
   ValidateIf,
   ValidateNested,
 } from 'class-validator';
-import { MetodoPago } from '@prisma/client';
 
 /**
  * Letras (con tildes y ñ), espacios y signos de nombres compuestos. Se valida
@@ -72,8 +70,15 @@ export class CrearPedidoDto {
   @Type(() => ItemPedidoDto)
   items!: ItemPedidoDto[];
 
-  @IsEnum(MetodoPago, { message: 'El metodo de pago no es valido.' })
-  metodoPago!: MetodoPago;
+  /**
+   * Billetera elegida para pagar (Yape, Plin, Agora...). Si se omite, el pedido
+   * se coordina por WhatsApp. El backend valida que exista y este activa, y
+   * guarda su NOMBRE como snapshot en el pedido.
+   */
+  @IsOptional()
+  @IsString()
+  @IsNotEmpty()
+  billeteraId?: string;
 
   // El comprobante debe ser una URL https de nuestro propio storage
   // (lo devuelve POST /storage/upload), no una URL arbitraria del cliente.

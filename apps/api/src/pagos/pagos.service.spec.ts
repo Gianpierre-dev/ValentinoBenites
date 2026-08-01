@@ -2,7 +2,8 @@ import {
   BadRequestException,
   ServiceUnavailableException,
 } from '@nestjs/common';
-import { EstadoPedido, MetodoPago } from '@prisma/client';
+import { EstadoPedido } from '@prisma/client';
+import { METODO_IZIPAY } from '../pedidos/metodos-pago';
 import { PagosService } from './pagos.service';
 
 type UpdateArgs = [
@@ -84,7 +85,7 @@ describe('PagosService (Izipay STUB)', () => {
       prisma.pedido.findUnique.mockResolvedValue({
         id: 'ped-1',
         estado: EstadoPedido.PENDIENTE_PAGO,
-        metodoPago: MetodoPago.IZIPAY,
+        metodoPago: METODO_IZIPAY,
       });
 
       const resultado = await service.generarToken({ pedidoId: 'ped-1' });
@@ -108,7 +109,7 @@ describe('PagosService (Izipay STUB)', () => {
       prisma.pedido.findUnique.mockResolvedValue({
         id: 'ped-1',
         estado: EstadoPedido.PAGADO,
-        metodoPago: MetodoPago.IZIPAY,
+        metodoPago: METODO_IZIPAY,
       });
 
       await expect(
@@ -122,7 +123,7 @@ describe('PagosService (Izipay STUB)', () => {
       prisma.pedido.findUnique.mockResolvedValue({
         id: 'ped-1',
         estado: EstadoPedido.PENDIENTE_PAGO,
-        metodoPago: MetodoPago.IZIPAY,
+        metodoPago: METODO_IZIPAY,
       });
       prisma.pedido.update.mockImplementation(({ data }) => ({
         id: 'ped-1',
@@ -163,7 +164,7 @@ describe('PagosService (Izipay STUB)', () => {
       prisma.pedido.findUnique.mockResolvedValue({
         id: 'ped-1',
         estado: EstadoPedido.PENDIENTE_PAGO,
-        metodoPago: MetodoPago.YAPE,
+        metodoPago: 'Yape',
       });
 
       await expect(
@@ -179,7 +180,7 @@ describe('PagosService (Izipay STUB)', () => {
       const pedidoPagado = {
         id: 'ped-1',
         estado: EstadoPedido.PAGADO,
-        metodoPago: MetodoPago.IZIPAY,
+        metodoPago: METODO_IZIPAY,
         referenciaTransaccion: 'IZI-TX-9999',
       };
       prisma.pedido.findUnique.mockResolvedValue(pedidoPagado);
@@ -197,7 +198,7 @@ describe('PagosService (Izipay STUB)', () => {
       prisma.pedido.findUnique.mockResolvedValue({
         id: 'ped-1',
         estado: EstadoPedido.PAGADO,
-        metodoPago: MetodoPago.IZIPAY,
+        metodoPago: METODO_IZIPAY,
         referenciaTransaccion: 'IZI-TX-9999',
       });
 
@@ -214,7 +215,7 @@ describe('PagosService (Izipay STUB)', () => {
       prisma.pedido.findUnique.mockResolvedValue({
         id: 'ped-1',
         estado: EstadoPedido.EN_PRODUCCION,
-        metodoPago: MetodoPago.IZIPAY,
+        metodoPago: METODO_IZIPAY,
         referenciaTransaccion: 'IZI-TX-9999',
       });
 

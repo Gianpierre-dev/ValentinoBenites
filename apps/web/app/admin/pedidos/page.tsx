@@ -12,7 +12,7 @@ import {
   IconBan,
 } from "@tabler/icons-react";
 import { listarPedidos, cambiarEstadoPedido } from "@/lib/api";
-import type { EstadoPedido, MetodoPago, Pedido } from "@/lib/tipos";
+import type { EstadoPedido, Pedido } from "@/lib/tipos";
 import { formatearPrecio } from "@/lib/utilidades";
 import {
   EncabezadoPagina,
@@ -25,12 +25,9 @@ import {
 } from "@/components/admin";
 import { Tarjeta, Etiqueta, Boton } from "@/components/ui";
 
-const ETIQUETA_METODO: Record<MetodoPago, string> = {
-  WHATSAPP: "WhatsApp",
-  YAPE: "Yape",
-  PLIN: "Plin",
-  IZIPAY: "Izipay",
-};
+// El metodo de pago llega como snapshot legible ("WhatsApp", "Yape", "Agora");
+// se muestra tal cual. Solo WhatsApp tiene icono propio (coordinacion vs QR).
+const METODO_WHATSAPP = "WhatsApp";
 
 export default function PaginaPedidos() {
   const { mostrarExito, mostrarError } = useToast();
@@ -148,12 +145,12 @@ function TarjetaPedido({ pedido, actualizando, alCambiarEstado }: PropsTarjetaPe
             {pedido.nombreCliente} · {pedido.telefono}
           </p>
           <p className="mt-0.5 flex items-center gap-1.5 text-xs text-texto/60">
-            {pedido.metodoPago === "WHATSAPP" ? (
+            {pedido.metodoPago === METODO_WHATSAPP ? (
               <IconBrandWhatsapp className="h-4 w-4" aria-hidden />
             ) : (
               <IconQrcode className="h-4 w-4" aria-hidden />
             )}
-            {ETIQUETA_METODO[pedido.metodoPago]} · {formatearFecha(pedido.creadoEn)}
+            {pedido.metodoPago} · {formatearFecha(pedido.creadoEn)}
           </p>
         </div>
         <span className="text-lg font-semibold text-texto-fuerte">

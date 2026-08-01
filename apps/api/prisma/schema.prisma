@@ -11,11 +11,22 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum MetodoPago {
-  WHATSAPP
-  YAPE
-  PLIN
-  IZIPAY // pasarela de pago con tarjeta (integracion por modulo aislado)
+// Billetera digital de pago manual (Yape, Plin, Agora...): muestra QR +
+// instrucciones y el cliente sube su comprobante. Administrable desde el panel
+// SIN deploy: agregar una billetera nueva es crear una fila. Los flujos con
+// codigo propio (WhatsApp = coordinacion, Izipay = pasarela) NO viven aqui.
+model Billetera {
+  id            String   @id @default(cuid())
+  nombre        String // "Yape", "Agora" — snapshot que queda en el pedido
+  slug          String   @unique
+  instrucciones String? // texto bajo el QR ("Yape: 968... - Titular")
+  qrUrl         String? // imagen del QR (subida al storage)
+  activo        Boolean  @default(true)
+  orden         Int      @default(0)
+  creadoEn      DateTime @default(now())
+  actualizadoEn DateTime @updatedAt
+
+  @@map("billeteras")
 }
 
 // Flujo del pedido en el modelo hecho-a-pedido:
@@ -128,7 +139,10 @@ model Pedido {
   nombreCliente String
   telefono      String
   total         Decimal      @db.Decimal(10, 2)
-  metodoPago    MetodoPago
+  // Snapshot legible del medio de pago ("WhatsApp", "Yape", "Agora"). Texto y
+  // no FK a Billetera: el pedido historico no debe romperse si una billetera
+  // se elimina (mismo patron que nombreProducto/colorElegido).
+  metodoPago    String
   estado        EstadoPedido @default(PENDIENTE_PAGO)
   comprobanteUrl String?
   // Pedido payment-agnostic: no conoce la pasarela. Campos genericos de pago.

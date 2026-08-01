@@ -4,7 +4,34 @@
  * (el backend los convierte en sus respuestas).
  */
 
-export type MetodoPago = "WHATSAPP" | "YAPE" | "PLIN" | "IZIPAY";
+/**
+ * Snapshot legible del metodo de pago de un pedido ("WhatsApp", "Yape",
+ * "Agora"...). Es texto libre porque las billeteras son administrables: no hay
+ * un enum cerrado.
+ */
+export type MetodoPago = string;
+
+/** Billetera digital de pago manual (Yape, Plin, Agora...), administrable. */
+export interface Billetera {
+  id: string;
+  nombre: string;
+  slug: string;
+  instrucciones: string | null;
+  qrUrl: string | null;
+  activo: boolean;
+  orden: number;
+  creadoEn: string;
+  actualizadoEn: string;
+}
+
+/** Datos editables de una billetera (crear/actualizar desde el admin). */
+export interface BilleteraEntrada {
+  nombre: string;
+  instrucciones?: string;
+  qrUrl?: string;
+  activo?: boolean;
+  orden?: number;
+}
 
 export type EstadoPedido =
   | "PENDIENTE_PAGO"
@@ -141,10 +168,6 @@ export interface Configuracion {
   razonSocial: string | null;
   ruc: string | null;
   direccion: string | null;
-  datosYape: string | null;
-  datosPlin: string | null;
-  qrYape: string | null;
-  qrPlin: string | null;
   instagram: string | null;
   facebook: string | null;
   tiktok: string | null;
@@ -188,7 +211,8 @@ export interface CrearPedidoEntrada {
   nombreCliente: string;
   telefono: string;
   items: ItemPedidoEntrada[];
-  metodoPago: MetodoPago;
+  /** Billetera elegida (Yape, Plin, Agora...); omitir = coordinar por WhatsApp. */
+  billeteraId?: string;
   comprobanteUrl?: string;
 }
 

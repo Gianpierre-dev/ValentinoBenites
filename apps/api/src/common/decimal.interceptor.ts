@@ -14,7 +14,10 @@ import { serializarDecimal } from './serializar-decimal';
  */
 @Injectable()
 export class DecimalInterceptor implements NestInterceptor {
-  intercept(_contexto: ExecutionContext, next: CallHandler): Observable<unknown> {
+  intercept(
+    _contexto: ExecutionContext,
+    next: CallHandler,
+  ): Observable<unknown> {
     return next.handle().pipe(map((datos) => serializarDecimal(datos)));
   }
 }

@@ -5,6 +5,7 @@ import { CrearPedidoDto } from './dto/crear-pedido.dto';
 import { ActualizarEstadoDto } from './dto/actualizar-estado.dto';
 import { precioEfectivoVariante } from '../variantes/variantes.helpers';
 import { transicionPermitida } from './maquina-estados';
+import { METODO_WHATSAPP } from './metodos-pago';
 
 const INCLUIR_ITEMS = {
   items: { include: { producto: { include: { imagenes: true } } } },
@@ -29,6 +30,7 @@ export class PedidosService {
   constructor(private readonly prisma: PrismaService) {}
 
   async crear(dto: CrearPedidoDto) {
+    const metodoPago = await this.resolverMetodoPago(dto.billeteraId);
     const lineas = await this.calcularLineas(dto);
     const total = lineas.reduce(
       (acumulado, linea) => acumulado.plus(linea.subtotal),
@@ -46,7 +48,7 @@ export class PedidosService {
             codigo,
             nombreCliente: dto.nombreCliente,
             telefono: dto.telefono,
-            metodoPago: dto.metodoPago,
+            metodoPago,
             comprobanteUrl: dto.comprobanteUrl,
             total,
             // El estado inicial (PENDIENTE_PAGO) lo fija el default del schema.
@@ -65,6 +67,24 @@ export class PedidosService {
     throw new BadRequestException(
       'No se pudo generar un codigo de pedido unico. Intenta nuevamente.',
     );
+  }
+
+  /**
+   * Resuelve el snapshot del metodo de pago: sin billeteraId el pedido se
+   * coordina por WhatsApp; con billeteraId debe existir y estar activa (se
+   * valida server-side porque el cliente es manipulable) y el snapshot es su
+   * NOMBRE, para que el pedido sobreviva si la billetera cambia o se elimina.
+   */
+  private async resolverMetodoPago(billeteraId?: string): Promise<string> {
+    if (!billeteraId) return METODO_WHATSAPP;
+
+    const billetera = await this.prisma.billetera.findUnique({
+      where: { id: billeteraId },
+    });
+    if (!billetera || !billetera.activo) {
+      throw new BadRequestException('El medio de pago no está disponible.');
+    }
+    return billetera.nombre;
   }
 
   private esColisionDeCodigo(error: unknown): boolean {

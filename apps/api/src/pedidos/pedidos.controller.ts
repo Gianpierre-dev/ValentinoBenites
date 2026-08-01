@@ -29,10 +29,7 @@ export class PedidosController {
 
   @Patch(':id/estado')
   @UseGuards(JwtAuthGuard)
-  actualizarEstado(
-    @Param('id') id: string,
-    @Body() dto: ActualizarEstadoDto,
-  ) {
+  actualizarEstado(@Param('id') id: string, @Body() dto: ActualizarEstadoDto) {
     return this.pedidosService.actualizarEstado(id, dto);
   }
 }

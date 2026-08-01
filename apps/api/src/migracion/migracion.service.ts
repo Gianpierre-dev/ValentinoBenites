@@ -83,7 +83,9 @@ export class MigracionService {
       );
     }
     if (!grupo.variantes?.length) {
-      throw new BadRequestException('El grupo no tiene variantes para aplicar.');
+      throw new BadRequestException(
+        'El grupo no tiene variantes para aplicar.',
+      );
     }
 
     return this.prisma.$transaction(async (tx) => {

@@ -8,4 +8,5 @@ export { EncabezadoPagina } from "./encabezado-pagina";
 export { VistaCargando, VistaError, VistaVacia } from "./estado-vista";
 export { generarSlug } from "./slug";
 export { SelectorColor } from "./selector-color";
+export { CargadorQR } from "./cargador-qr";
 export { useRecurso, type EstadoRecurso } from "./use-recurso";

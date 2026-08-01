@@ -4,9 +4,10 @@ import {
   ServiceUnavailableException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { EstadoPedido, MetodoPago, Prisma } from '@prisma/client';
+import { EstadoPedido, Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { transicionPermitida } from '../pedidos/maquina-estados';
+import { METODO_IZIPAY } from '../pedidos/metodos-pago';
 import { GenerarTokenDto } from './dto/generar-token.dto';
 import { CallbackIzipayDto } from './dto/callback-izipay.dto';
 
@@ -68,7 +69,7 @@ export class PagosService {
     // WARN-01: el callback de Izipay solo puede tocar pedidos cuyo metodo de
     // pago sea IZIPAY. Un pedido Yape/Plin/WhatsApp jamas debe marcarse pagado
     // por esta via.
-    if (pedido.metodoPago !== MetodoPago.IZIPAY) {
+    if (pedido.metodoPago !== METODO_IZIPAY) {
       throw new BadRequestException(
         'El pedido no corresponde a un pago por Izipay.',
       );

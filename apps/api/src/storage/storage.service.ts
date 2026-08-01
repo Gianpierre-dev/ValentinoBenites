@@ -44,7 +44,10 @@ export class StorageService {
     this.region = this.config.get<string>('WASABI_REGION') ?? '';
     this.bucket = this.config.get<string>('WASABI_BUCKET') ?? '';
     // Sin barras al inicio/fin para construir keys limpias.
-    this.prefijo = (this.config.get<string>('WASABI_PREFIX') ?? '').replace(/^\/+|\/+$/g, '');
+    this.prefijo = (this.config.get<string>('WASABI_PREFIX') ?? '').replace(
+      /^\/+|\/+$/g,
+      '',
+    );
     // URL pública del propio backend: las imágenes se sirven por proxy desde
     // aquí (el bucket no permite acceso público directo).
     this.apiPublicUrl = (
@@ -113,7 +116,10 @@ export class StorageService {
 
     try {
       const respuesta = await this.cliente.send(
-        new GetObjectCommand({ Bucket: this.bucket, Key: this.claveDe(filename) }),
+        new GetObjectCommand({
+          Bucket: this.bucket,
+          Key: this.claveDe(filename),
+        }),
       );
       return {
         cuerpo: respuesta.Body as Readable,

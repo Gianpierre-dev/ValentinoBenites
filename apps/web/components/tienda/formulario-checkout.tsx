@@ -17,7 +17,7 @@ import { Boton, Input, Spinner } from "@/components/ui";
 import { useCarrito } from "@/store/carrito";
 import { useHidratado } from "@/store/usar-hidratado";
 import { crearPedido, subirArchivo, ErrorApi } from "@/lib/api";
-import type { Configuracion, MetodoPago } from "@/lib/tipos";
+import type { Billetera, Configuracion } from "@/lib/tipos";
 import { cn, soloDigitos } from "@/lib/utilidades";
 
 /** Un celular peruano tiene 9 digitos. */
@@ -33,6 +33,8 @@ import {
 
 interface PropsFormularioCheckout {
   configuracion: Configuracion | null;
+  /** Billeteras activas (Yape, Plin, Agora...) administradas desde el panel. */
+  billeteras: Billetera[];
 }
 
 type MetodoSeleccionado = "WHATSAPP" | "DIGITAL";
@@ -46,14 +48,24 @@ type MetodoSeleccionado = "WHATSAPP" | "DIGITAL";
  * Layout de dos columnas: datos + metodo de pago a la izquierda, resumen del
  * pedido (con fotos) y confirmacion en una card sticky a la derecha.
  */
-export function FormularioCheckout({ configuracion }: PropsFormularioCheckout) {
+export function FormularioCheckout({
+  configuracion,
+  billeteras,
+}: PropsFormularioCheckout) {
   const hidratado = useHidratado();
   const lineas = useCarrito((estado) => estado.lineas);
   const total = useCarrito((estado) => estado.total());
   const vaciar = useCarrito((estado) => estado.vaciar);
 
   const [metodo, setMetodo] = useState<MetodoSeleccionado>("WHATSAPP");
-  const [metodoDigital, setMetodoDigital] = useState<MetodoPago>("YAPE");
+  // Billetera elegida dentro del panel digital (la primera activa por defecto).
+  const [billeteraId, setBilleteraId] = useState<string | null>(
+    billeteras[0]?.id ?? null,
+  );
+  const billeteraElegida =
+    billeteras.find((billetera) => billetera.id === billeteraId) ??
+    billeteras[0] ??
+    null;
   const [comprobanteUrl, setComprobanteUrl] = useState<string | null>(null);
   const [subiendo, setSubiendo] = useState(false);
   const [errorComprobante, setErrorComprobante] = useState<string | null>(null);
@@ -140,11 +152,11 @@ export function FormularioCheckout({ configuracion }: PropsFormularioCheckout) {
 
     try {
       // WhatsApp ahora crea un Pedido real (PENDIENTE_PAGO) antes de abrir el chat.
+      // Sin billeteraId: el backend registra el pedido como WhatsApp.
       const pedido = await crearPedido({
         nombreCliente: datos.nombreCliente,
         telefono: datos.telefono,
         items: itemsPedido,
-        metodoPago: "WHATSAPP",
       });
 
       const mensaje = `${mensajeBase}\n\nCódigo de pedido: ${pedido.codigo}`;
@@ -169,6 +181,10 @@ export function FormularioCheckout({ configuracion }: PropsFormularioCheckout) {
   };
 
   const registrarPedidoDigital = async (datos: DatosCheckout) => {
+    if (!billeteraElegida) {
+      setErrorEnvio("No hay billeteras disponibles. Usa la opción de WhatsApp.");
+      return;
+    }
     if (!comprobanteUrl) {
       setErrorComprobante("Sube el comprobante de pago para continuar.");
       return;
@@ -180,7 +196,7 @@ export function FormularioCheckout({ configuracion }: PropsFormularioCheckout) {
         nombreCliente: datos.nombreCliente,
         telefono: datos.telefono,
         items: itemsPedido,
-        metodoPago: metodoDigital,
+        billeteraId: billeteraElegida.id,
         comprobanteUrl,
       });
       vaciar();
@@ -270,20 +286,22 @@ export function FormularioCheckout({ configuracion }: PropsFormularioCheckout) {
               descripcion="Te llevamos a un chat con tu pedido listo para enviar."
               icono={<IconBrandWhatsapp size={24} aria-hidden />}
             />
-            <OpcionMetodo
-              activa={metodo === "DIGITAL"}
-              onClick={() => setMetodo("DIGITAL")}
-              titulo="Yape o Plin"
-              descripcion="Paga con QR y sube tu comprobante para confirmar."
-              icono={<IconQrcode size={24} aria-hidden />}
-            />
+            {billeteras.length > 0 && (
+              <OpcionMetodo
+                activa={metodo === "DIGITAL"}
+                onClick={() => setMetodo("DIGITAL")}
+                titulo={billeteras.map((billetera) => billetera.nombre).join(", ")}
+                descripcion="Paga con QR y sube tu comprobante para confirmar."
+                icono={<IconQrcode size={24} aria-hidden />}
+              />
+            )}
           </div>
 
-          {metodo === "DIGITAL" && (
+          {metodo === "DIGITAL" && billeteraElegida && (
             <PagoDigital
-              configuracion={configuracion}
-              metodoDigital={metodoDigital}
-              alElegirMetodo={setMetodoDigital}
+              billeteras={billeteras}
+              elegida={billeteraElegida}
+              alElegir={setBilleteraId}
               comprobanteUrl={comprobanteUrl}
               subiendo={subiendo}
               errorComprobante={errorComprobante}
@@ -450,45 +468,50 @@ function OpcionMetodo({ activa, onClick, titulo, descripcion, icono }: PropsOpci
 }
 
 interface PropsPagoDigital {
-  configuracion: Configuracion | null;
-  metodoDigital: MetodoPago;
-  alElegirMetodo: (metodo: MetodoPago) => void;
+  billeteras: Billetera[];
+  elegida: Billetera;
+  alElegir: (billeteraId: string) => void;
   comprobanteUrl: string | null;
   subiendo: boolean;
   errorComprobante: string | null;
   alSubir: (evento: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
+/**
+ * Panel de pago manual por billetera. Las pestañas se pintan desde la lista
+ * administrable (Yape, Plin, Agora...): agregar una billetera nueva en el panel
+ * la hace aparecer aqui sin tocar codigo.
+ */
 function PagoDigital({
-  configuracion,
-  metodoDigital,
-  alElegirMetodo,
+  billeteras,
+  elegida,
+  alElegir,
   comprobanteUrl,
   subiendo,
   errorComprobante,
   alSubir,
 }: PropsPagoDigital) {
-  const datos = metodoDigital === "YAPE" ? configuracion?.datosYape : configuracion?.datosPlin;
-  const qr = metodoDigital === "YAPE" ? configuracion?.qrYape : configuracion?.qrPlin;
-  const billetera = metodoDigital === "YAPE" ? "Yape" : "Plin";
+  const datos = elegida.instrucciones;
+  const qr = elegida.qrUrl;
+  const billetera = elegida.nombre;
 
   return (
     <div className="mt-5 rounded-xl border border-borde bg-perla p-5">
-      <div className="flex gap-2" role="group" aria-label="Elegir billetera">
-        {(["YAPE", "PLIN"] as const).map((opcion) => (
+      <div className="flex flex-wrap gap-2" role="group" aria-label="Elegir billetera">
+        {billeteras.map((opcion) => (
           <button
-            key={opcion}
+            key={opcion.id}
             type="button"
-            onClick={() => alElegirMetodo(opcion)}
-            aria-pressed={metodoDigital === opcion}
+            onClick={() => alElegir(opcion.id)}
+            aria-pressed={elegida.id === opcion.id}
             className={cn(
-              "flex-1 rounded-lg border px-4 py-2.5 text-sm font-semibold uppercase tracking-wide transition-all",
-              metodoDigital === opcion
+              "min-w-24 flex-1 rounded-lg border px-4 py-2.5 text-sm font-semibold uppercase tracking-wide transition-all",
+              elegida.id === opcion.id
                 ? "border-acento bg-acento text-acento-contraste shadow-[0_8px_20px_-12px_rgba(125,33,129,0.5)]"
                 : "border-borde bg-fondo text-texto hover:border-acento/40 hover:text-acento",
             )}
           >
-            {opcion === "YAPE" ? "Yape" : "Plin"}
+            {opcion.nombre}
           </button>
         ))}
       </div>

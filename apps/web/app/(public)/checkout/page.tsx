@@ -1,20 +1,23 @@
 import type { Metadata } from "next";
 import { FormularioCheckout } from "@/components/tienda";
-import { obtenerConfiguracion } from "@/lib/api";
-import type { Configuracion } from "@/lib/tipos";
+import { listarBilleteras, obtenerConfiguracion } from "@/lib/api";
+import type { Billetera, Configuracion } from "@/lib/tipos";
 
 export const metadata: Metadata = {
   title: "Checkout",
-  description: "Finaliza tu compra por WhatsApp o con Yape y Plin.",
+  description: "Finaliza tu compra por WhatsApp o pagando con QR.",
 };
 
 /**
- * Checkout del storefront. Server component: carga la configuracion de la tienda
- * (numero de WhatsApp y datos Yape/Plin) y delega el flujo en el formulario cliente,
- * que lee el carrito persistido.
+ * Checkout del storefront. Server component: carga la configuracion (numero de
+ * WhatsApp) y las billeteras activas (Yape, Plin, Agora... administrables desde
+ * el panel), y delega el flujo en el formulario cliente, que lee el carrito.
  */
 export default async function PaginaCheckout() {
-  const configuracion = await cargarConfiguracion();
+  const [configuracion, billeteras] = await Promise.all([
+    cargarConfiguracion(),
+    cargarBilleteras(),
+  ]);
 
   return (
     <div className="relative overflow-hidden bg-gradient-to-b from-rosa-fuerte to-fondo">
@@ -35,7 +38,10 @@ export default async function PaginaCheckout() {
         </header>
 
         <div className="mt-10">
-          <FormularioCheckout configuracion={configuracion} />
+          <FormularioCheckout
+            configuracion={configuracion}
+            billeteras={billeteras}
+          />
         </div>
       </div>
     </div>
@@ -47,5 +53,13 @@ async function cargarConfiguracion(): Promise<Configuracion | null> {
     return await obtenerConfiguracion();
   } catch {
     return null;
+  }
+}
+
+async function cargarBilleteras(): Promise<Billetera[]> {
+  try {
+    return await listarBilleteras();
+  } catch {
+    return [];
   }
 }
