@@ -13,6 +13,7 @@ import { formatearPrecio } from "@/lib/utilidades";
 import { Boton, Etiqueta, Input } from "@/components/ui";
 import { CargadorImagenes, type ImagenCargada } from "./cargador-imagenes";
 import { ModalConfirmacion } from "./modal";
+import { SelectorColor } from "./selector-color";
 import { useToast } from "./proveedor-toast";
 import { mensajeDeError } from "./errores";
 
@@ -103,15 +104,16 @@ export function GestorVariantes({ producto, alCambiar }: PropsGestorVariantes) {
       setErrorColor("El color es obligatorio.");
       return;
     }
-    // La tienda dibuja la bolita del selector con este hex; sin el, la bolita
+    // La tienda dibuja la bolita del selector con este tono; sin el, la bolita
     // cae a la primera foto de la variante (y sin fotos quedaria vacia).
     const hex = borrador.colorHex.trim();
     if (hex === "") {
-      setErrorHex("El codigo hex es obligatorio: pinta la bolita del color en la tienda.");
+      setErrorHex("Elige un color de la paleta para que se vea en la tienda.");
       return;
     }
+    // Defensa por si llegara un valor manipulado: el selector siempre da un hex valido.
     if (!/^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(hex)) {
-      setErrorHex('Formato invalido: usa "#" y 3 o 6 digitos, ej. #7D2181.');
+      setErrorHex("El tono elegido no es valido. Vuelve a elegirlo en la paleta.");
       return;
     }
     const precioTexto = borrador.precio.trim();
@@ -229,27 +231,19 @@ export function GestorVariantes({ producto, alCambiar }: PropsGestorVariantes) {
           <p className="text-sm font-semibold text-texto-fuerte">
             {editando ? `Editar color "${editando.color}"` : "Nuevo color"}
           </p>
+          <SelectorColor
+            nombre={borrador.color}
+            hex={borrador.colorHex}
+            errorNombre={errorColor}
+            errorHex={errorHex}
+            alCambiar={(nombre, hex) => {
+              setBorrador((actual) => ({ ...actual, color: nombre, colorHex: hex }));
+              setErrorColor(undefined);
+              setErrorHex(undefined);
+            }}
+          />
+
           <div className="grid gap-4 sm:grid-cols-2">
-            <Input
-              etiqueta="Color"
-              placeholder="Vino, Rosa, Negro..."
-              value={borrador.color}
-              error={errorColor}
-              onChange={(evento) => {
-                setBorrador((actual) => ({ ...actual, color: evento.target.value }));
-                setErrorColor(undefined);
-              }}
-            />
-            <Input
-              etiqueta="Codigo de color (hex)"
-              placeholder="#7D2181"
-              value={borrador.colorHex}
-              error={errorHex}
-              onChange={(evento) => {
-                setBorrador((actual) => ({ ...actual, colorHex: evento.target.value }));
-                setErrorHex(undefined);
-              }}
-            />
             <Input
               etiqueta="Precio propio (opcional)"
               type="number"

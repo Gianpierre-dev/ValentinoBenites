@@ -7,4 +7,5 @@ export { Tabla, EncabezadoTabla, CuerpoTabla, Th, Td } from "./tabla";
 export { EncabezadoPagina } from "./encabezado-pagina";
 export { VistaCargando, VistaError, VistaVacia } from "./estado-vista";
 export { generarSlug } from "./slug";
+export { SelectorColor } from "./selector-color";
 export { useRecurso, type EstadoRecurso } from "./use-recurso";
