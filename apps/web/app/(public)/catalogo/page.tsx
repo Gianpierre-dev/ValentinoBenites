@@ -12,7 +12,7 @@ import type { Categoria, FiltrosProductos, Producto } from "@/lib/tipos";
 export const metadata: Metadata = {
   title: "Catálogo de carteras y accesorios artesanales",
   description:
-    "Explora todas las carteras, bandoleras, mochilas y accesorios artesanales de Valentino Benites. Hechos a pedido en el color que elijas.",
+    "Explora todas las carteras, morrales y accesorios artesanales de Valentino Benites. Hechos a pedido en el color que elijas.",
   alternates: { canonical: "/catalogo" },
 };
 

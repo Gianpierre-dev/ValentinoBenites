@@ -26,7 +26,7 @@ export const metadata: Metadata = {
     template: `%s | ${NOMBRE_SITIO}`,
   },
   description:
-    "Carteras, bandoleras y accesorios artesanales de cuero para mujer, hechos a pedido en el Perú. Elige tu modelo y color; lo confeccionamos para ti en 24 horas.",
+    "Carteras, morrales y accesorios artesanales de cuero para mujer, hechos a pedido en el Perú. Elige tu modelo y color; lo confeccionamos para ti en 24 horas.",
   alternates: { canonical: "/" },
   openGraph: {
     title: NOMBRE_SITIO,
