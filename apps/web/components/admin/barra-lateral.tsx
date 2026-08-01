@@ -10,7 +10,6 @@ import {
   IconReceipt,
   IconSettings,
   IconLogout,
-  IconArrowMerge,
   IconBook2,
   IconMail,
 } from "@tabler/icons-react";
@@ -30,7 +29,6 @@ const ENLACES: readonly EnlaceNav[] = [
   { href: "/admin/pedidos", etiqueta: "Pedidos", Icono: IconReceipt },
   { href: "/admin/reclamos", etiqueta: "Reclamos", Icono: IconBook2 },
   { href: "/admin/suscriptores", etiqueta: "Suscriptores", Icono: IconMail },
-  { href: "/admin/migracion", etiqueta: "Migracion", Icono: IconArrowMerge },
   { href: "/admin/configuracion", etiqueta: "Configuracion", Icono: IconSettings },
 ];
 

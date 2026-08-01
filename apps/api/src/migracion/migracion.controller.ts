@@ -3,6 +3,14 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { AplicarGrupoDto } from './dto/aplicar-grupo.dto';
 import { MigracionService } from './migracion.service';
 
+/**
+ * Herramienta de migracion del catalogo viejo (un producto por color) al modelo
+ * actual (un modelo con variantes de color). YA CUMPLIO SU PROPOSITO: la
+ * migracion se aplico y su pantalla se retiro del panel, porque el parser sigue
+ * viendo los productos absorbidos (inactivos) y propondria fusiones sobre un
+ * catalogo ya migrado. Se conserva por si hay que migrar otro lote: para volver
+ * a exponerla, recrear la pagina /admin/migracion y su enlace en la barra lateral.
+ */
 @Controller('admin/migracion')
 @UseGuards(JwtAuthGuard)
 export class MigracionController {
