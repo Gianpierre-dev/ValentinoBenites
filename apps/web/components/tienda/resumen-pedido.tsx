@@ -74,21 +74,25 @@ export function ResumenPedido({ lineas, total }: PropsResumenPedido) {
 
       <div className="space-y-3 border-t border-borde px-6 py-5">
         <div className="flex items-center justify-between text-sm">
-          <span className="text-texto">Subtotal</span>
+          <span className="text-texto">Subtotal productos</span>
           <span className="font-medium text-texto-fuerte">
             {formatearPrecio(total)}
           </span>
         </div>
+        <div className="flex items-center justify-between text-sm">
+          <span className="text-texto">Envío</span>
+          <span className="text-texto">Se coordina por WhatsApp</span>
+        </div>
         <div className="flex items-center justify-between border-t border-borde pt-3">
           <span className="text-sm font-semibold uppercase tracking-wide text-texto-fuerte">
-            Total
+            Total productos
           </span>
           <span className="font-display text-2xl font-semibold text-acento">
             {formatearPrecio(total)}
           </span>
         </div>
         <p className="text-xs text-texto">
-          El monto final se confirma al validar tu pedido.
+          El envío se suma al confirmar tu pedido, según tu destino.
         </p>
         <p className="flex items-center gap-1.5 text-xs font-medium text-acento">
           <IconClockHour4 size={13} aria-hidden />

@@ -138,7 +138,17 @@ model Pedido {
   codigo        String       @unique
   nombreCliente String
   telefono      String
+  // subtotal = suma de los productos. costoEnvio lo completa la admin tras
+  // coordinar el envio por WhatsApp (depende del destino y la agencia; muchas
+  // veces lo paga el cliente en destino, por eso el default es 0). total =
+  // subtotal + costoEnvio, y es el numero REAL que se cobra/reporta.
+  subtotal      Decimal      @default(0) @db.Decimal(10, 2)
+  costoEnvio    Decimal      @default(0) @db.Decimal(10, 2)
   total         Decimal      @db.Decimal(10, 2)
+  // Ciudad/departamento que el cliente indica en el checkout (opcional, ayuda a
+  // cotizar). La direccion exacta la completa la admin al coordinar el envio.
+  ciudadEntrega    String?
+  direccionEntrega String?
   // Snapshot legible del medio de pago ("WhatsApp", "Yape", "Agora"). Texto y
   // no FK a Billetera: el pedido historico no debe romperse si una billetera
   // se elimina (mismo patron que nombreProducto/colorElegido).

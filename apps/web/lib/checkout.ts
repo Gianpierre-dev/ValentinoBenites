@@ -21,6 +21,13 @@ export const esquemaCheckout = z.object({
     .string()
     .trim()
     .regex(/^9\d{8}$/, "Ingresa un celular válido de 9 dígitos que empiece en 9."),
+  // Opcional: agiliza la cotización del envío; la dirección exacta se coordina
+  // por WhatsApp.
+  ciudadEntrega: z
+    .string()
+    .trim()
+    .max(120, "La ciudad es demasiado larga.")
+    .optional(),
   // Ley 29733: el consentimiento debe ser expreso y previo (checkbox no
   // premarcado). Sin aceptar la politica de privacidad no se registra el pedido.
   aceptaPrivacidad: z.boolean().refine((valor) => valor, {

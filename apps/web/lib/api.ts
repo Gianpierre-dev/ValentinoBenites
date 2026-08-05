@@ -329,6 +329,18 @@ export function cambiarEstadoPedido(
   });
 }
 
+/** Registra el envío coordinado (costo + dirección); el backend recalcula el total. */
+export function actualizarEnvioPedido(
+  id: string,
+  datos: { costoEnvio: number; direccionEntrega?: string },
+): Promise<Pedido> {
+  return peticion<Pedido>(`/pedidos/${id}/envio`, {
+    metodo: "PATCH",
+    cuerpo: datos,
+    autenticado: true,
+  });
+}
+
 /* ---------------------------------------------------------------- */
 /* Configuracion                                                    */
 /* ---------------------------------------------------------------- */

@@ -145,7 +145,16 @@ export interface Pedido {
   codigo: string;
   nombreCliente: string;
   telefono: string;
+  /** Suma de los productos (sin envío). */
+  subtotal: number;
+  /** Envío coordinado por la admin; 0 hasta que se define. */
+  costoEnvio: number;
+  /** subtotal + costoEnvio: el número real cobrado. */
   total: number;
+  /** Ciudad/departamento que indicó el cliente (opcional). */
+  ciudadEntrega: string | null;
+  /** Dirección exacta que completa la admin al coordinar. */
+  direccionEntrega: string | null;
   metodoPago: MetodoPago;
   estado: EstadoPedido;
   comprobanteUrl: string | null;
@@ -213,6 +222,8 @@ export interface CrearPedidoEntrada {
   items: ItemPedidoEntrada[];
   /** Billetera elegida (Yape, Plin, Agora...); omitir = coordinar por WhatsApp. */
   billeteraId?: string;
+  /** Ciudad/departamento de entrega (opcional, agiliza la cotización del envío). */
+  ciudadEntrega?: string;
   comprobanteUrl?: string;
 }
 

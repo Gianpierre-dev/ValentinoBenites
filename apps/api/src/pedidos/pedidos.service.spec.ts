@@ -310,6 +310,53 @@ describe('PedidosService', () => {
     });
   });
 
+  describe('actualizarEnvio', () => {
+    it('recalcula el total como subtotal + costoEnvio', async () => {
+      prisma.pedido.findUnique.mockResolvedValueOnce({
+        id: 'ped-1',
+        subtotal: dec(84.9),
+        estado: EstadoPedido.PENDIENTE_PAGO,
+      });
+      prisma.pedido.update.mockImplementation(
+        ({ data }: { data: unknown }) => data,
+      );
+
+      const data = (await service.actualizarEnvio('ped-1', {
+        costoEnvio: 15,
+        direccionEntrega: 'Av. Los Incas 123, Arequipa',
+      })) as {
+        total: Prisma.Decimal;
+        costoEnvio: Prisma.Decimal;
+        direccionEntrega: string;
+      };
+
+      expect(data.costoEnvio.toNumber()).toBe(15);
+      expect(data.total.toNumber()).toBe(99.9);
+      expect(data.direccionEntrega).toBe('Av. Los Incas 123, Arequipa');
+    });
+
+    it('rechaza editar el envío de un pedido ya ENVIADO', async () => {
+      prisma.pedido.findUnique.mockResolvedValueOnce({
+        id: 'ped-1',
+        subtotal: dec(84.9),
+        estado: EstadoPedido.ENVIADO,
+      });
+
+      await expect(
+        service.actualizarEnvio('ped-1', { costoEnvio: 15 }),
+      ).rejects.toBeInstanceOf(BadRequestException);
+      expect(prisma.pedido.update).not.toHaveBeenCalled();
+    });
+
+    it('falla si el pedido no existe', async () => {
+      prisma.pedido.findUnique.mockResolvedValueOnce(null);
+
+      await expect(
+        service.actualizarEnvio('no-existe', { costoEnvio: 10 }),
+      ).rejects.toBeInstanceOf(BadRequestException);
+    });
+  });
+
   describe('actualizarEstado', () => {
     it('aplica una transicion valida PENDIENTE_PAGO -> PAGADO', async () => {
       prisma.pedido.findUnique.mockResolvedValueOnce({

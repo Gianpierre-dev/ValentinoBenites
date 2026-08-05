@@ -93,6 +93,13 @@ export class CrearPedidoDto {
   @IsNotEmpty()
   billeteraId?: string;
 
+  // Ciudad/departamento de entrega (opcional): el cliente lo indica para
+  // agilizar la cotizacion del envio. La direccion exacta se coordina luego.
+  @IsOptional()
+  @IsString()
+  @MaxLength(120, { message: 'La ciudad es demasiado larga.' })
+  ciudadEntrega?: string;
+
   // El comprobante debe apuntar a NUESTRO proxy de storage (lo devuelve
   // POST /storage/upload), no a una URL arbitraria del cliente: una URL externa
   // permitiria mostrarle a la admin un comprobante alojado en un dominio ajeno.

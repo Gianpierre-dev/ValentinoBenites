@@ -1,11 +1,20 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
+import { EstadoPedido } from '@prisma/client';
 import { CrearPedidoDto } from './dto/crear-pedido.dto';
 import { ActualizarEstadoDto } from './dto/actualizar-estado.dto';
+import { ActualizarEnvioDto } from './dto/actualizar-envio.dto';
 import { precioEfectivoVariante } from '../variantes/variantes.helpers';
 import { transicionPermitida } from './maquina-estados';
 import { METODO_WHATSAPP } from './metodos-pago';
+
+// Estados terminales/despachados: ya no se puede tocar el envio del pedido.
+const ESTADOS_ENVIO_CERRADO = new Set<EstadoPedido>([
+  EstadoPedido.ENVIADO,
+  EstadoPedido.CANCELADO,
+  EstadoPedido.RECHAZADO,
+]);
 
 const INCLUIR_ITEMS = {
   items: { include: { producto: { include: { imagenes: true } } } },
@@ -32,7 +41,9 @@ export class PedidosService {
   async crear(dto: CrearPedidoDto) {
     const metodoPago = await this.resolverMetodoPago(dto.billeteraId);
     const lineas = await this.calcularLineas(dto);
-    const total = lineas.reduce(
+    // subtotal = suma de productos. El envio (costoEnvio) se coordina despues
+    // por WhatsApp y lo completa la admin; al crear, total = subtotal.
+    const subtotal = lineas.reduce(
       (acumulado, linea) => acumulado.plus(linea.subtotal),
       new Prisma.Decimal(0),
     );
@@ -50,7 +61,9 @@ export class PedidosService {
             telefono: dto.telefono,
             metodoPago,
             comprobanteUrl: dto.comprobanteUrl,
-            total,
+            ciudadEntrega: dto.ciudadEntrega?.trim() || null,
+            subtotal,
+            total: subtotal, // costoEnvio = 0 al crear; total = subtotal.
             // El estado inicial (PENDIENTE_PAGO) lo fija el default del schema.
             items: { create: lineas },
           },
@@ -114,6 +127,34 @@ export class PedidosService {
     return this.prisma.pedido.update({
       where: { id },
       data: { estado: dto.estado },
+      include: INCLUIR_ITEMS,
+    });
+  }
+
+  /**
+   * Registra el envio coordinado por la admin: costo y direccion exacta. El
+   * total se RECALCULA server-side como subtotal + costoEnvio, para que sea la
+   * unica fuente de verdad. Solo tiene sentido mientras el pedido no se despacho
+   * ni se cerro (los estados terminales no admiten cambios de envio).
+   */
+  async actualizarEnvio(id: string, dto: ActualizarEnvioDto) {
+    const pedido = await this.prisma.pedido.findUnique({ where: { id } });
+    if (!pedido) {
+      throw new BadRequestException('El pedido no existe.');
+    }
+    if (ESTADOS_ENVIO_CERRADO.has(pedido.estado)) {
+      throw new BadRequestException(
+        `No se puede editar el envío de un pedido ${pedido.estado}.`,
+      );
+    }
+    const costoEnvio = new Prisma.Decimal(dto.costoEnvio);
+    return this.prisma.pedido.update({
+      where: { id },
+      data: {
+        costoEnvio,
+        direccionEntrega: dto.direccionEntrega?.trim() || null,
+        total: pedido.subtotal.plus(costoEnvio),
+      },
       include: INCLUIR_ITEMS,
     });
   }

@@ -82,7 +82,12 @@ export function FormularioCheckout({
     formState: { errors, isSubmitting },
   } = useForm<DatosCheckout>({
     resolver: zodResolver(esquemaCheckout),
-    defaultValues: { nombreCliente: "", telefono: "", aceptaPrivacidad: false },
+    defaultValues: {
+      nombreCliente: "",
+      telefono: "",
+      ciudadEntrega: "",
+      aceptaPrivacidad: false,
+    },
   });
 
   if (!hidratado) {
@@ -156,6 +161,7 @@ export function FormularioCheckout({
       const pedido = await crearPedido({
         nombreCliente: datos.nombreCliente,
         telefono: datos.telefono,
+        ciudadEntrega: datos.ciudadEntrega || undefined,
         items: itemsPedido,
       });
 
@@ -195,6 +201,7 @@ export function FormularioCheckout({
       const pedido = await crearPedido({
         nombreCliente: datos.nombreCliente,
         telefono: datos.telefono,
+        ciudadEntrega: datos.ciudadEntrega || undefined,
         items: itemsPedido,
         billeteraId: billeteraElegida.id,
         comprobanteUrl,
@@ -266,7 +273,18 @@ export function FormularioCheckout({
                 },
               })}
             />
+            <Input
+              etiqueta="Ciudad o departamento (opcional)"
+              placeholder="Ej. Arequipa"
+              autoComplete="address-level2"
+              error={errors.ciudadEntrega?.message}
+              {...register("ciudadEntrega")}
+            />
           </div>
+          <p className="mt-2 text-xs text-texto/70">
+            El costo del envío se coordina por WhatsApp según tu destino. Indicar
+            tu ciudad nos ayuda a cotizarlo más rápido.
+          </p>
         </BloqueFormulario>
 
         <BloqueFormulario

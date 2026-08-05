@@ -11,6 +11,7 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { PedidosService } from './pedidos.service';
 import { CrearPedidoDto } from './dto/crear-pedido.dto';
 import { ActualizarEstadoDto } from './dto/actualizar-estado.dto';
+import { ActualizarEnvioDto } from './dto/actualizar-envio.dto';
 
 @Controller('pedidos')
 export class PedidosController {
@@ -31,5 +32,11 @@ export class PedidosController {
   @UseGuards(JwtAuthGuard)
   actualizarEstado(@Param('id') id: string, @Body() dto: ActualizarEstadoDto) {
     return this.pedidosService.actualizarEstado(id, dto);
+  }
+
+  @Patch(':id/envio')
+  @UseGuards(JwtAuthGuard)
+  actualizarEnvio(@Param('id') id: string, @Body() dto: ActualizarEnvioDto) {
+    return this.pedidosService.actualizarEnvio(id, dto);
   }
 }
