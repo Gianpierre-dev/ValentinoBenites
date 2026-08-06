@@ -5,6 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
+import * as ExcelJS from 'exceljs';
 import { PrismaService } from '../prisma/prisma.service';
 import { CrearProductoDto } from './dto/crear-producto.dto';
 import { ActualizarProductoDto } from './dto/actualizar-producto.dto';
@@ -62,6 +63,81 @@ export class ProductosService {
     // Contrato simetrico con la ficha: el catalogo tambien trae
     // imagenesEfectivas + precioEfectivo resueltos por el serializer.
     return productos.map((producto) => serializarProductoPublico(producto));
+  }
+
+  /**
+   * Lista TODOS los productos (activos e inactivos) para el panel: la admin
+   * decide aqui cuales trabajar. Los inactivos primero no; se ordenan por
+   * nombre para una vista estable.
+   */
+  async listarTodosAdmin() {
+    const productos = await this.prisma.producto.findMany({
+      include: INCLUIR_RELACIONES,
+      orderBy: { nombre: 'asc' },
+    });
+    return productos.map((producto) => serializarProductoPublico(producto));
+  }
+
+  /**
+   * Genera el catalogo completo como Excel (.xlsx) para revisar offline. Es una
+   * VISTA de solo lectura: la fuente de verdad del estado sigue siendo el panel.
+   */
+  async exportarExcel(): Promise<Buffer> {
+    const productos = await this.prisma.producto.findMany({
+      include: INCLUIR_RELACIONES,
+      orderBy: [{ categoria: { nombre: 'asc' } }, { nombre: 'asc' }],
+    });
+
+    const libro = new ExcelJS.Workbook();
+    libro.creator = 'Valentino Benites';
+    const hoja = libro.addWorksheet('Catalogo', {
+      views: [{ state: 'frozen', ySplit: 1 }], // fila de encabezado fija
+    });
+
+    hoja.columns = [
+      { header: 'Producto', key: 'nombre', width: 34 },
+      { header: 'Categoria', key: 'categoria', width: 16 },
+      { header: 'Precio (S/)', key: 'precio', width: 12 },
+      { header: 'Oferta (S/)', key: 'oferta', width: 12 },
+      { header: 'Colores', key: 'colores', width: 30 },
+      { header: 'Material', key: 'material', width: 26 },
+      { header: 'Estado', key: 'estado', width: 12 },
+    ];
+
+    // Encabezado con color de marca.
+    const cabecera = hoja.getRow(1);
+    cabecera.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+    cabecera.fill = {
+      type: 'pattern',
+      pattern: 'solid',
+      fgColor: { argb: 'FF7D2181' },
+    };
+    cabecera.alignment = { vertical: 'middle' };
+
+    for (const p of productos) {
+      const colores = p.variantes.map((v) => v.color).join(', ');
+      const fila = hoja.addRow({
+        nombre: p.nombre,
+        categoria: p.categoria?.nombre ?? 'Sin categoria',
+        precio: Number(p.precio),
+        oferta: p.precioOferta ? Number(p.precioOferta) : '',
+        colores: colores || '—',
+        material: p.material ?? '—',
+        estado: p.activo ? 'Activo' : 'Inactivo',
+      });
+      // La celda de estado se pinta verde (activo) o gris (inactivo).
+      fila.getCell('estado').fill = {
+        type: 'pattern',
+        pattern: 'solid',
+        fgColor: { argb: p.activo ? 'FFD8F0DC' : 'FFEDEDED' },
+      };
+    }
+
+    // Filtros automaticos sobre todo el rango con datos.
+    hoja.autoFilter = { from: 'A1', to: `G${productos.length + 1}` };
+
+    const buffer = await libro.xlsx.writeBuffer();
+    return Buffer.from(buffer);
   }
 
   async obtenerPorSlug(slug: string) {

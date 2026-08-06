@@ -172,6 +172,32 @@ export function obtenerProducto(slug: string): Promise<Producto> {
   return peticion<Producto>(`/productos/${slug}`);
 }
 
+/** Todos los productos (activos e inactivos) para la gestión del panel. */
+export function listarProductosAdmin(): Promise<Producto[]> {
+  return peticion<Producto[]>("/productos/admin/todos", { autenticado: true });
+}
+
+/** Descarga el catálogo completo como archivo Excel (.xlsx). */
+export async function exportarCatalogoExcel(): Promise<void> {
+  const cabeceras: Record<string, string> = {};
+  const token = obtenerToken();
+  if (token) cabeceras["Authorization"] = `Bearer ${token}`;
+
+  const respuesta = await fetch(`${URL_BASE_API}/productos/admin/exportar`, {
+    headers: cabeceras,
+  });
+  if (!respuesta.ok) {
+    throw new ErrorApi(respuesta.status, "No se pudo generar el Excel.", null);
+  }
+  const blob = await respuesta.blob();
+  const url = URL.createObjectURL(blob);
+  const enlace = document.createElement("a");
+  enlace.href = url;
+  enlace.download = "catalogo-valentino-benites.xlsx";
+  enlace.click();
+  URL.revokeObjectURL(url);
+}
+
 export function crearProducto(datos: ProductoEntrada): Promise<Producto> {
   return peticion<Producto>("/productos", {
     metodo: "POST",
