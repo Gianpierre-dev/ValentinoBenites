@@ -14,6 +14,7 @@ import {
   ValidateIf,
   ValidateNested,
 } from 'class-validator';
+import { RUTA_STORAGE } from '../../common/url-storage';
 
 /**
  * Letras (con tildes y ñ), espacios y signos de nombres compuestos. Se valida
@@ -24,14 +25,6 @@ const SOLO_NOMBRE = /^[\p{L}][\p{L}\s'.-]*$/u;
 /** Celular peruano: 9 digitos que empiezan en 9. */
 const CELULAR_PERUANO = /^9\d{8}$/;
 
-/**
- * El comprobante debe ser una URL de nuestro proxy de storage
- * (`<API_PUBLIC_URL>/api/storage/archivo/<uuid>.<ext>`). Se ancla al path del
- * proxy —no al host, que varia por entorno— para rechazar dominios ajenos sin
- * acoplar el DTO a la URL exacta de produccion.
- */
-const RUTA_COMPROBANTE =
-  /^https:\/\/[^/]+\/api\/storage\/archivo\/[A-Za-z0-9._-]+$/;
 
 /**
  * Un item del pedido es O BIEN una variante (color) elegida, O BIEN un producto
@@ -104,7 +97,7 @@ export class CrearPedidoDto {
   // POST /storage/upload), no a una URL arbitraria del cliente: una URL externa
   // permitiria mostrarle a la admin un comprobante alojado en un dominio ajeno.
   @IsOptional()
-  @Matches(RUTA_COMPROBANTE, {
+  @Matches(RUTA_STORAGE, {
     message: 'El comprobante debe subirse desde la tienda.',
   })
   @MaxLength(2048)

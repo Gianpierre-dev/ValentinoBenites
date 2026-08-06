@@ -8,13 +8,18 @@ import {
   IsNumber,
   IsOptional,
   IsString,
+  Matches,
   Min,
   ValidateNested,
 } from 'class-validator';
+import { RUTA_STORAGE } from '../../common/url-storage';
 
 export class ImagenProductoDto {
+  // La imagen debe ser de nuestro storage (POST /storage/upload), no una URL
+  // arbitraria: se guarda en la base y luego el servidor la fetchea al exportar.
   @IsString()
   @IsNotEmpty({ message: 'La URL de la imagen es obligatoria.' })
+  @Matches(RUTA_STORAGE, { message: 'La imagen debe subirse desde la tienda.' })
   url!: string;
 
   @IsOptional()

@@ -7,6 +7,7 @@ import {
 import { Prisma } from '@prisma/client';
 import * as ExcelJS from 'exceljs';
 import { PrismaService } from '../prisma/prisma.service';
+import { esUrlDeStorage } from '../common/url-storage';
 import { CrearProductoDto } from './dto/crear-producto.dto';
 import { ActualizarProductoDto } from './dto/actualizar-producto.dto';
 import { FiltrarProductosDto } from './dto/filtrar-productos.dto';
@@ -171,9 +172,12 @@ export class ProductosService {
   ): Promise<{ buffer: Buffer; extension: 'jpeg' | 'png' } | null> {
     const url =
       producto.imagenes[0]?.url ?? producto.variantes[0]?.imagenes[0]?.url;
-    if (!url) return null;
+    // Anti-SSRF: solo se descargan imagenes de NUESTRO storage. Sin este chequeo,
+    // una URL de imagen manipulada (ej. a un metadata endpoint o servicio
+    // interno) haria que el servidor la fetchee al exportar el Excel.
+    if (!url || !esUrlDeStorage(url)) return null;
     try {
-      const respuesta = await fetch(url);
+      const respuesta = await fetch(url, { redirect: 'error' });
       if (!respuesta.ok) return null;
       const buffer = Buffer.from(await respuesta.arrayBuffer());
       const extension = /\.png($|\?)/i.test(url) ? 'png' : 'jpeg';
