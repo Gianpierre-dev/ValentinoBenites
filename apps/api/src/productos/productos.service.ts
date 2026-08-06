@@ -95,6 +95,7 @@ export class ProductosService {
     });
 
     hoja.columns = [
+      { header: 'Foto', key: 'foto', width: 12 },
       { header: 'Producto', key: 'nombre', width: 34 },
       { header: 'Categoria', key: 'categoria', width: 16 },
       { header: 'Precio (S/)', key: 'precio', width: 12 },
@@ -114,9 +115,16 @@ export class ProductosService {
     };
     cabecera.alignment = { vertical: 'middle' };
 
-    for (const p of productos) {
+    // Se descargan las portadas en paralelo ANTES de armar las filas; una
+    // descarga fallida deja la celda sin foto pero no rompe el Excel.
+    const portadas = await Promise.all(
+      productos.map((p) => this.descargarPortada(p)),
+    );
+
+    productos.forEach((p, indice) => {
       const colores = p.variantes.map((v) => v.color).join(', ');
       const fila = hoja.addRow({
+        foto: '',
         nombre: p.nombre,
         categoria: p.categoria?.nombre ?? 'Sin categoria',
         precio: Number(p.precio),
@@ -125,19 +133,54 @@ export class ProductosService {
         material: p.material ?? '—',
         estado: p.activo ? 'Activo' : 'Inactivo',
       });
-      // La celda de estado se pinta verde (activo) o gris (inactivo).
       fila.getCell('estado').fill = {
         type: 'pattern',
         pattern: 'solid',
         fgColor: { argb: p.activo ? 'FFD8F0DC' : 'FFEDEDED' },
       };
-    }
+
+      const portada = portadas[indice];
+      if (portada) {
+        fila.height = 60; // deja lugar para la miniatura
+        const idImagen = libro.addImage({
+          buffer: portada.buffer as unknown as ExcelJS.Buffer,
+          extension: portada.extension,
+        });
+        // Ancla la miniatura a la celda "foto" (columna 0, fila = indice+1).
+        hoja.addImage(idImagen, {
+          tl: { col: 0.1, row: indice + 1.1 },
+          ext: { width: 70, height: 70 },
+        });
+      }
+    });
 
     // Filtros automaticos sobre todo el rango con datos.
-    hoja.autoFilter = { from: 'A1', to: `G${productos.length + 1}` };
+    hoja.autoFilter = { from: 'A1', to: `H${productos.length + 1}` };
 
     const buffer = await libro.xlsx.writeBuffer();
     return Buffer.from(buffer);
+  }
+
+  /**
+   * Descarga la foto de portada de un producto (la del modelo o, si no tiene,
+   * la de su primera variante) para embeberla en el Excel. Devuelve null si no
+   * hay foto o si la descarga falla, para que el export nunca se caiga por esto.
+   */
+  private async descargarPortada(
+    producto: Prisma.ProductoGetPayload<{ include: typeof INCLUIR_RELACIONES }>,
+  ): Promise<{ buffer: Buffer; extension: 'jpeg' | 'png' } | null> {
+    const url =
+      producto.imagenes[0]?.url ?? producto.variantes[0]?.imagenes[0]?.url;
+    if (!url) return null;
+    try {
+      const respuesta = await fetch(url);
+      if (!respuesta.ok) return null;
+      const buffer = Buffer.from(await respuesta.arrayBuffer());
+      const extension = /\.png($|\?)/i.test(url) ? 'png' : 'jpeg';
+      return { buffer, extension };
+    } catch {
+      return null;
+    }
   }
 
   async obtenerPorSlug(slug: string) {
