@@ -8,8 +8,11 @@ dist/
 out/
 build/
 
-# Env (NOTA: en estos proyectos el .env SÍ se commitea por decisión de Gian;
-# se ignoran solo los locales de ejemplo temporales)
+# Env: los .env con secretos NUNCA se versionan (este repo se comparte con la
+# clienta). Usar .env.example como plantilla; los valores reales van en Railway.
+.env
+.env.*
+!.env.example
 *.local
 
 # Prisma
