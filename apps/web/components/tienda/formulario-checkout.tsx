@@ -16,7 +16,7 @@ import {
 import { Boton, Input, Spinner } from "@/components/ui";
 import { useCarrito } from "@/store/carrito";
 import { useHidratado } from "@/store/usar-hidratado";
-import { crearPedido, subirArchivo, ErrorApi } from "@/lib/api";
+import { crearPedido, subirComprobante as subirComprobanteApi, ErrorApi } from "@/lib/api";
 import type { Billetera, Configuracion } from "@/lib/tipos";
 import { cn, soloDigitos } from "@/lib/utilidades";
 
@@ -115,7 +115,7 @@ export function FormularioCheckout({
     setErrorComprobante(null);
     setSubiendo(true);
     try {
-      const { url } = await subirArchivo(archivo);
+      const { url } = await subirComprobanteApi(archivo);
       setComprobanteUrl(url);
     } catch (error) {
       setErrorComprobante(mensajeError(error, "No pudimos subir el comprobante."));

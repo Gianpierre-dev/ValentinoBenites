@@ -497,3 +497,24 @@ export async function subirArchivo(archivo: File): Promise<{ url: string }> {
   }
   return datos as { url: string };
 }
+
+/**
+ * Sube el comprobante de pago del checkout. Usa el endpoint público de
+ * comprobantes: el comprador no tiene cuenta, por lo que no se envía token.
+ */
+export async function subirComprobante(archivo: File): Promise<{ url: string }> {
+  const formulario = new FormData();
+  formulario.append("archivo", archivo);
+
+  const respuesta = await fetch(`${URL_BASE_API}/storage/comprobante`, {
+    method: "POST",
+    body: formulario,
+  });
+
+  const datos = await leerCuerpo(respuesta);
+  if (!respuesta.ok) {
+    const mensaje = extraerMensaje(datos) ?? `Error ${respuesta.status}`;
+    throw new ErrorApi(respuesta.status, mensaje, datos);
+  }
+  return datos as { url: string };
+}

@@ -46,6 +46,38 @@ export class StorageController {
   }
 
   /**
+   * Subida pública de comprobantes de pago desde el checkout. Los compradores
+   * no tienen cuenta (modelo sin registro), por lo que este endpoint no exige
+   * JWT; el abuso se mitiga con límite de tamaño, validación del contenido
+   * real del archivo (magic bytes en StorageService) y nombre UUID generado
+   * en el servidor.
+   */
+  @Post('comprobante')
+  @UseInterceptors(
+    FileInterceptor('archivo', {
+      limits: { fileSize: TAMANO_MAXIMO_BYTES, files: 1 },
+      fileFilter: (_req, archivo, callback) => {
+        if (!TIPOS_IMAGEN_PERMITIDOS.includes(archivo.mimetype)) {
+          callback(
+            new BadRequestException(
+              'Solo se permiten imágenes JPG, PNG o WebP.',
+            ),
+            false,
+          );
+          return;
+        }
+        callback(null, true);
+      },
+    }),
+  )
+  subirComprobante(@UploadedFile() archivo: Express.Multer.File) {
+    if (!archivo) {
+      throw new BadRequestException('No se recibio ningun archivo.');
+    }
+    return this.storageService.subir(archivo);
+  }
+
+  /**
    * Proxy público de imágenes: sirve un archivo de la carpeta del proyecto en
    * Wasabi. Es público (las fotos del catálogo se ven sin login) pero restringido
    * a esta carpeta (el filename no puede contener "/" ni "..").
