@@ -152,6 +152,26 @@ export function cerrarSesion(): void {
   borrarToken();
 }
 
+export interface CredencialesEntrada {
+  passwordActual: string;
+  emailNuevo?: string;
+  passwordNueva?: string;
+}
+
+/**
+ * Cambia el correo y/o la contrasena del admin autenticado. El backend exige
+ * la contrasena actual antes de aplicar cualquier cambio.
+ */
+export function actualizarCredenciales(
+  datos: CredencialesEntrada,
+): Promise<{ id: string; email: string; nombre: string | null }> {
+  return peticion("/auth/credenciales", {
+    metodo: "PATCH",
+    cuerpo: datos,
+    autenticado: true,
+  });
+}
+
 /* ---------------------------------------------------------------- */
 /* Productos                                                        */
 /* ---------------------------------------------------------------- */

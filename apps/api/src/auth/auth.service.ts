@@ -1,9 +1,17 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../prisma/prisma.service';
+import { ActualizarCredencialesDto } from './dto/actualizar-credenciales.dto';
 import { LoginDto } from './dto/login.dto';
 import { PayloadJwt } from './jwt.strategy';
+
+const RONDAS_BCRYPT = 10;
 
 export interface UsuarioPublico {
   id: string;
@@ -51,6 +59,64 @@ export class AuthService {
         email: usuario.email,
         nombre: usuario.nombre,
       },
+    };
+  }
+
+  /**
+   * Cambia el correo y/o la contrasena del usuario autenticado. Siempre exige
+   * la contrasena actual: tener una sesion abierta no basta para tomar la
+   * cuenta.
+   */
+  async actualizarCredenciales(
+    usuarioId: string,
+    dto: ActualizarCredencialesDto,
+  ): Promise<UsuarioPublico> {
+    if (!dto.emailNuevo && !dto.passwordNueva) {
+      throw new BadRequestException(
+        'Indica un correo nuevo o una contrasena nueva.',
+      );
+    }
+
+    const usuario = await this.prisma.usuario.findUnique({
+      where: { id: usuarioId },
+    });
+
+    if (!usuario) {
+      throw new UnauthorizedException('Credenciales incorrectas.');
+    }
+
+    const passwordValida = await bcrypt.compare(
+      dto.passwordActual,
+      usuario.passwordHash,
+    );
+
+    if (!passwordValida) {
+      throw new UnauthorizedException('La contrasena actual es incorrecta.');
+    }
+
+    if (dto.emailNuevo && dto.emailNuevo !== usuario.email) {
+      const existente = await this.prisma.usuario.findUnique({
+        where: { email: dto.emailNuevo },
+      });
+      if (existente) {
+        throw new ConflictException('Ese correo ya esta en uso.');
+      }
+    }
+
+    const actualizado = await this.prisma.usuario.update({
+      where: { id: usuario.id },
+      data: {
+        ...(dto.emailNuevo ? { email: dto.emailNuevo } : {}),
+        ...(dto.passwordNueva
+          ? { passwordHash: await bcrypt.hash(dto.passwordNueva, RONDAS_BCRYPT) }
+          : {}),
+      },
+    });
+
+    return {
+      id: actualizado.id,
+      email: actualizado.email,
+      nombre: actualizado.nombre,
     };
   }
 }

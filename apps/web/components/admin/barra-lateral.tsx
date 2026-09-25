@@ -12,6 +12,7 @@ import {
   IconLogout,
   IconBook2,
   IconMail,
+  IconUserCircle,
   IconWallet,
 } from "@tabler/icons-react";
 import { cerrarSesion } from "@/lib/api";
@@ -32,6 +33,7 @@ const ENLACES: readonly EnlaceNav[] = [
   { href: "/admin/reclamos", etiqueta: "Reclamos", Icono: IconBook2 },
   { href: "/admin/suscriptores", etiqueta: "Suscriptores", Icono: IconMail },
   { href: "/admin/configuracion", etiqueta: "Configuracion", Icono: IconSettings },
+  { href: "/admin/cuenta", etiqueta: "Mi cuenta", Icono: IconUserCircle },
 ];
 
 /** Navegacion lateral del panel admin con marcado de la ruta activa. */
