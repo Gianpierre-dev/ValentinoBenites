@@ -1,13 +1,48 @@
-/**
- * Una URL de nuestro proxy de storage:
- * `https://<host>/api/storage/archivo/<archivo>`. Se ancla al PATH del proxy,
- * no al host (que varia por entorno), para aceptar solo archivos propios y
- * rechazar dominios ajenos o IPs internas (defensa anti-SSRF).
- */
-export const RUTA_STORAGE =
-  /^https:\/\/[^/]+\/api\/storage\/archivo\/[A-Za-z0-9._-]+$/;
+import { registerDecorator, type ValidationOptions } from 'class-validator';
 
-/** true si la URL apunta a un archivo de nuestro propio storage. */
+/** Origen por defecto del backend cuando API_PUBLIC_URL no está definida (local). */
+const ORIGEN_POR_DEFECTO = 'http://localhost:4024';
+
+/** Ruta del proxy de storage: `/api/storage/archivo/<archivo>`. */
+const RUTA_ARCHIVO = /^\/api\/storage\/archivo\/[A-Za-z0-9._-]+$/;
+
+function origenDelStorage(): string {
+  return new URL(process.env.API_PUBLIC_URL ?? ORIGEN_POR_DEFECTO).origin;
+}
+
+/**
+ * true si la URL apunta a un archivo de NUESTRO proxy de storage: mismo origen
+ * (protocolo + host + puerto) que API_PUBLIC_URL y ruta del proxy. Anclar solo
+ * la ruta no alcanza: `https://dominio-ajeno/api/storage/archivo/x` también la
+ * cumple (comprobante falso alojado afuera, o un fetch del servidor hacia afuera).
+ */
 export function esUrlDeStorage(url: string): boolean {
-  return RUTA_STORAGE.test(url);
+  let destino: URL;
+  try {
+    destino = new URL(url);
+  } catch {
+    return false;
+  }
+  return (
+    destino.origin === origenDelStorage() &&
+    RUTA_ARCHIVO.test(destino.pathname) &&
+    destino.search === '' &&
+    destino.hash === ''
+  );
+}
+
+/** Decorador de class-validator basado en esUrlDeStorage. */
+export function EsUrlDeStorage(opciones?: ValidationOptions) {
+  return (objeto: object, propiedad: string): void => {
+    registerDecorator({
+      name: 'esUrlDeStorage',
+      target: objeto.constructor,
+      propertyName: propiedad,
+      options: opciones,
+      validator: {
+        validate: (valor: unknown) =>
+          typeof valor === 'string' && esUrlDeStorage(valor),
+      },
+    });
+  };
 }

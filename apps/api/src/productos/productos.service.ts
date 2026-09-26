@@ -13,6 +13,16 @@ import { ActualizarProductoDto } from './dto/actualizar-producto.dto';
 import { FiltrarProductosDto } from './dto/filtrar-productos.dto';
 import { serializarProductoPublico } from './productos.serializer';
 
+/** Minúsculas, sin tildes y con los separadores reducidos a un espacio. */
+function normalizarBusqueda(texto: string): string {
+  return texto
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim();
+}
+
 const INCLUIR_RELACIONES = {
   categoria: true,
   imagenes: { orderBy: { orden: 'asc' as const } },
@@ -38,10 +48,6 @@ export class ProductosService {
       where.destacado = true;
     }
 
-    if (filtros.q) {
-      where.nombre = { contains: filtros.q, mode: 'insensitive' };
-    }
-
     // Rango de precio sobre el precio base del modelo. Cada extremo es opcional:
     // solo agregamos las claves que llegan para no forzar un rango cerrado.
     if (filtros.precioMin !== undefined || filtros.precioMax !== undefined) {
@@ -61,9 +67,25 @@ export class ProductosService {
       orderBy: { creadoEn: 'desc' },
     });
 
+    // La búsqueda se resuelve aquí y no en SQL: ignora tildes y mayúsculas y
+    // exige que cada palabra aparezca en algún lugar ("cartera tortuga"
+    // encuentra "Cartera Gala Tortuga"). El catálogo se lista completo, sin
+    // paginar, así que filtrar en memoria no cambia el costo de la consulta.
+    const terminos = filtros.q
+      ? normalizarBusqueda(filtros.q).split(' ').filter(Boolean)
+      : [];
+    const encontrados = terminos.length
+      ? productos.filter((producto) => {
+          const texto = normalizarBusqueda(
+            `${producto.nombre} ${producto.categoria?.nombre ?? ''} ${producto.material ?? ''}`,
+          );
+          return terminos.every((termino) => texto.includes(termino));
+        })
+      : productos;
+
     // Contrato simetrico con la ficha: el catalogo tambien trae
     // imagenesEfectivas + precioEfectivo resueltos por el serializer.
-    return productos.map((producto) => serializarProductoPublico(producto));
+    return encontrados.map((producto) => serializarProductoPublico(producto));
   }
 
   /**
@@ -188,8 +210,10 @@ export class ProductosService {
   }
 
   async obtenerPorSlug(slug: string) {
-    const producto = await this.prisma.producto.findUnique({
-      where: { slug },
+    // Ficha pública: un producto desactivado ya no se vende, así que su URL
+    // (Google, enlaces compartidos) responde 404 igual que uno inexistente.
+    const producto = await this.prisma.producto.findFirst({
+      where: { slug, activo: true },
       include: INCLUIR_RELACIONES,
     });
 

@@ -18,11 +18,24 @@ import { NotificacionesModule } from './notificaciones/notificaciones.module';
 import { SuscriptoresModule } from './suscriptores/suscriptores.module';
 import { StorageModule } from './storage/storage.module';
 
+const METODOS_SOLO_LECTURA = new Set(['GET', 'HEAD', 'OPTIONS']);
+
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
-    // Límite global: 100 peticiones por minuto por IP.
-    ThrottlerModule.forRoot([{ ttl: 60000, limit: 100 }]),
+    // Límite global de 100 peticiones por minuto por IP, solo para escrituras.
+    // Las lecturas se excluyen porque el SSR de la tienda las hace todas desde
+    // la misma IP del servidor web, y compartirían el cupo entre todos los
+    // visitantes.
+    ThrottlerModule.forRoot({
+      throttlers: [{ ttl: 60000, limit: 100 }],
+      skipIf: (contexto) =>
+        METODOS_SOLO_LECTURA.has(
+          contexto.switchToHttp().getRequest<{ method: string }>().method,
+        ),
+      errorMessage:
+        'Demasiadas solicitudes seguidas. Espera un momento e intenta de nuevo.',
+    }),
     PrismaModule,
     HealthModule,
     AuthModule,

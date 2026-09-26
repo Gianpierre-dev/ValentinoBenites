@@ -10,6 +10,7 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { Throttle } from '@nestjs/throttler';
 import type { Response } from 'express';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { StorageService } from './storage.service';
@@ -52,6 +53,7 @@ export class StorageController {
    * real del archivo (magic bytes en StorageService) y nombre UUID generado
    * en el servidor.
    */
+  @Throttle({ default: { ttl: 60000, limit: 10 } })
   @Post('comprobante')
   @UseInterceptors(
     FileInterceptor('archivo', {
