@@ -70,17 +70,23 @@ interface PropsConfirmacion {
   titulo: string;
   mensaje: string;
   textoConfirmar?: string;
+  /** Texto del botón que cierra sin hacer nada. */
+  textoDescartar?: string;
+  /** false para acciones que no destruyen datos (botón primario en vez de rojo). */
+  destructivo?: boolean;
   cargando?: boolean;
   alConfirmar: () => void;
   alCancelar: () => void;
 }
 
-/** Modal de confirmacion para acciones destructivas (eliminar). */
+/** Modal de confirmacion para acciones irreversibles (eliminar, cambiar un estado). */
 export function ModalConfirmacion({
   abierto,
   titulo,
   mensaje,
   textoConfirmar = "Eliminar",
+  textoDescartar = "Cancelar",
+  destructivo = true,
   cargando = false,
   alConfirmar,
   alCancelar,
@@ -90,9 +96,13 @@ export function ModalConfirmacion({
       <p className="text-sm text-texto">{mensaje}</p>
       <div className="mt-6 flex justify-end gap-2">
         <Boton variante="secundario" onClick={alCancelar} disabled={cargando}>
-          Cancelar
+          {textoDescartar}
         </Boton>
-        <Boton variante="peligro" onClick={alConfirmar} cargando={cargando}>
+        <Boton
+          variante={destructivo ? "peligro" : "primario"}
+          onClick={alConfirmar}
+          cargando={cargando}
+        >
           {textoConfirmar}
         </Boton>
       </div>

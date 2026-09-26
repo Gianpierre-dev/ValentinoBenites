@@ -73,7 +73,7 @@ export class AuthService {
   ): Promise<UsuarioPublico> {
     if (!dto.emailNuevo && !dto.passwordNueva) {
       throw new BadRequestException(
-        'Indica un correo nuevo o una contrasena nueva.',
+        'Indica un correo nuevo o una contraseña nueva.',
       );
     }
 
@@ -91,7 +91,8 @@ export class AuthService {
     );
 
     if (!passwordValida) {
-      throw new UnauthorizedException('La contrasena actual es incorrecta.');
+      // 400 y no 401: la sesión es válida; lo incorrecto es un dato del formulario.
+      throw new BadRequestException('La contraseña actual es incorrecta.');
     }
 
     if (dto.emailNuevo && dto.emailNuevo !== usuario.email) {
@@ -99,7 +100,7 @@ export class AuthService {
         where: { email: dto.emailNuevo },
       });
       if (existente) {
-        throw new ConflictException('Ese correo ya esta en uso.');
+        throw new ConflictException('Ese correo ya está en uso.');
       }
     }
 
@@ -108,7 +109,9 @@ export class AuthService {
       data: {
         ...(dto.emailNuevo ? { email: dto.emailNuevo } : {}),
         ...(dto.passwordNueva
-          ? { passwordHash: await bcrypt.hash(dto.passwordNueva, RONDAS_BCRYPT) }
+          ? {
+              passwordHash: await bcrypt.hash(dto.passwordNueva, RONDAS_BCRYPT),
+            }
           : {}),
       },
     });

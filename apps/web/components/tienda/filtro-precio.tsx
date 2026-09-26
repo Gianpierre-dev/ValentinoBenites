@@ -14,21 +14,42 @@ export function FiltroPrecio() {
   const parametros = useSearchParams();
   const [minimo, setMinimo] = useState(parametros.get("precioMin") ?? "");
   const [maximo, setMaximo] = useState(parametros.get("precioMax") ?? "");
+  const [error, setError] = useState<string | null>(null);
+  const hayRangoAplicado = parametros.has("precioMin") || parametros.has("precioMax");
+
+  const navegar = (params: URLSearchParams) => {
+    const consulta = params.toString();
+    router.push(consulta ? `/catalogo?${consulta}` : "/catalogo");
+  };
 
   const aplicar = (evento: React.FormEvent<HTMLFormElement>) => {
     evento.preventDefault();
+    if (minimo.trim() !== "" && maximo.trim() !== "" && Number(minimo) > Number(maximo)) {
+      setError("El precio «Desde» no puede ser mayor que «Hasta».");
+      return;
+    }
+    setError(null);
     const params = new URLSearchParams(parametros.toString());
     fijarParametro(params, "precioMin", minimo);
     fijarParametro(params, "precioMax", maximo);
-    const consulta = params.toString();
-    router.push(consulta ? `/catalogo?${consulta}` : "/catalogo");
+    navegar(params);
+  };
+
+  const limpiar = () => {
+    setMinimo("");
+    setMaximo("");
+    setError(null);
+    const params = new URLSearchParams(parametros.toString());
+    params.delete("precioMin");
+    params.delete("precioMax");
+    navegar(params);
   };
 
   return (
     <form
       onSubmit={aplicar}
       aria-label="Filtrar por rango de precio"
-      className="flex items-end gap-2"
+      className="flex flex-wrap items-end gap-2"
     >
       <CampoPrecio
         id="precio-min"
@@ -49,6 +70,20 @@ export function FiltroPrecio() {
         <IconCurrencyDollar size={16} aria-hidden />
         Aplicar
       </button>
+      {hayRangoAplicado && (
+        <button
+          type="button"
+          onClick={limpiar}
+          className="inline-flex h-11 items-center rounded-lg border border-borde px-4 text-sm font-medium text-texto-fuerte transition-colors hover:border-acento/40 hover:text-acento focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-acento"
+        >
+          Limpiar
+        </button>
+      )}
+      {error && (
+        <p role="alert" className="w-full text-sm text-oferta">
+          {error}
+        </p>
+      )}
     </form>
   );
 }

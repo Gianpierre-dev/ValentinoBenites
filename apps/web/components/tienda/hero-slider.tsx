@@ -16,7 +16,7 @@ const INTERVALO_AUTOPLAY_MS = 5500;
 /** Texto por defecto del hero si la clienta aún no configuró el suyo. */
 const TITULO_FALLBACK = "Moda que te *acompaña* todos los días";
 const SUBTITULO_FALLBACK =
-  "Carteras y accesorios de cuero para mujer. Piezas elegantes, hechas para durar y pensadas para tu día a día.";
+  "Carteras y accesorios de cuero ecológico para mujer. Piezas elegantes, hechas para durar y pensadas para tu día a día.";
 
 interface HeroSliderProps {
   /** Banners administrados por la clienta (Configuración → Banners de la home). */

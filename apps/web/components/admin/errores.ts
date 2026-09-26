@@ -4,5 +4,5 @@ import { ErrorApi } from "@/lib/api";
 export function mensajeDeError(error: unknown): string {
   if (error instanceof ErrorApi) return error.message;
   if (error instanceof Error) return error.message;
-  return "Ocurrio un error inesperado. Intenta nuevamente.";
+  return "Ocurrió un error inesperado. Intenta nuevamente.";
 }

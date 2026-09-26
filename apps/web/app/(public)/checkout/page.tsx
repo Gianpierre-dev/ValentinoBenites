@@ -27,22 +27,8 @@ export default async function PaginaCheckout() {
         className="pointer-events-none absolute -left-24 top-0 h-72 w-72 rounded-full bg-acento/10 blur-3xl"
       />
       <div className="relative mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:py-14 lg:px-8">
-        <header className="max-w-xl">
-          <h1 className="text-3xl font-semibold tracking-tight text-texto-fuerte sm:text-4xl">
-            Finalizar compra
-          </h1>
-          <p className="mt-3 text-texto">
-            Completa tus datos y elige cómo quieres pagar. Revisa tu pedido en el
-            resumen antes de confirmar.
-          </p>
-        </header>
-
-        <div className="mt-10">
-          <FormularioCheckout
-            configuracion={configuracion}
-            billeteras={billeteras}
-          />
-        </div>
+        {/* El encabezado vive en el formulario: en la confirmación no corresponde. */}
+        <FormularioCheckout configuracion={configuracion} billeteras={billeteras} />
       </div>
     </div>
   );

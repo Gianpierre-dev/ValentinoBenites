@@ -31,7 +31,7 @@ function AreaProtegida({ children }: { children: ReactNode }) {
   if (estado === "verificando") {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <Spinner tamano="lg" etiqueta="Verificando sesion" />
+        <Spinner tamano="lg" etiqueta="Verificando sesión" />
       </div>
     );
   }

@@ -7,7 +7,7 @@ import { IconX, IconTrash, IconShoppingBag } from "@tabler/icons-react";
 import { Boton } from "@/components/ui";
 import { useCarrito } from "@/store/carrito";
 import { useHidratado } from "@/store/usar-hidratado";
-import { formatearPrecio } from "@/lib/utilidades";
+import { colorVisible, formatearPrecio, nombreConColor } from "@/lib/utilidades";
 import { SelectorCantidad } from "./selector-cantidad";
 
 /** Selectores enfocables dentro del panel, para el atrapado de foco basico. */
@@ -41,6 +41,9 @@ export function CarritoDrawer() {
     if (!visible) return;
 
     const overflowPrevio = document.body.style.overflow;
+    // Al cerrar, el foco vuelve a donde estaba (el botón que abrió el carrito).
+    const enfocadoPrevio =
+      document.activeElement instanceof HTMLElement ? document.activeElement : null;
     document.body.style.overflow = "hidden";
     botonCerrarRef.current?.focus();
 
@@ -73,14 +76,16 @@ export function CarritoDrawer() {
     return () => {
       document.body.style.overflow = overflowPrevio;
       document.removeEventListener("keydown", alPresionarTecla);
+      enfocadoPrevio?.focus();
     };
   }, [visible, cerrar]);
 
   const vacio = lineas.length === 0;
 
   return (
+    // `inert` (no solo aria-hidden): cerrado, el panel sale del recorrido con Tab.
     <div
-      aria-hidden={!visible}
+      inert={!visible}
       className={`fixed inset-0 z-50 ${visible ? "" : "pointer-events-none"}`}
     >
       {/* Overlay oscuro */}
@@ -125,14 +130,14 @@ export function CarritoDrawer() {
             />
             <div>
               <p className="text-base font-semibold text-texto-fuerte">
-                Tu carrito esta vacio
+                Tu carrito está vacío
               </p>
               <p className="mt-1 text-sm text-texto">
                 Descubre nuestros productos y encuentra algo para ti.
               </p>
             </div>
             <Link href="/catalogo" onClick={cerrar}>
-              <Boton tamano="md">Ver catalogo</Boton>
+              <Boton tamano="md">Ver catálogo</Boton>
             </Link>
           </div>
         ) : (
@@ -170,14 +175,16 @@ export function CarritoDrawer() {
                         >
                           {linea.nombre}
                         </Link>
-                        <p className="mt-0.5 text-xs text-texto">
-                          Color: {linea.color}
-                        </p>
+                        {colorVisible(linea.nombre, linea.color) && (
+                          <p className="mt-0.5 text-xs text-texto">
+                            Color: {linea.color}
+                          </p>
+                        )}
                       </div>
                       <button
                         type="button"
                         onClick={() => quitar(linea.clave)}
-                        aria-label={`Quitar ${linea.nombre} (${linea.color}) del carrito`}
+                        aria-label={`Quitar ${nombreConColor(linea.nombre, linea.color)} del carrito`}
                         className="shrink-0 text-texto/60 transition-colors hover:text-oferta"
                       >
                         <IconTrash size={18} aria-hidden />
@@ -210,7 +217,7 @@ export function CarritoDrawer() {
                 </span>
               </div>
               <p className="mt-1 text-xs text-texto/70">
-                Envio y descuentos se calculan al finalizar la compra.
+                El envío se coordina por WhatsApp según tu destino.
               </p>
               <div className="mt-4 flex flex-col gap-2">
                 <Link href="/checkout" onClick={cerrar} className="block">

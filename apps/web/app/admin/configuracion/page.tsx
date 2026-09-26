@@ -96,7 +96,7 @@ export default function PaginaConfiguracion() {
           .map((mensaje) => mensaje.trim())
           .filter((mensaje) => mensaje.length > 0),
       });
-      mostrarExito("Configuracion guardada.");
+      mostrarExito("Configuración guardada.");
     } catch (error) {
       mostrarError(mensajeDeError(error));
     } finally {
@@ -107,7 +107,7 @@ export default function PaginaConfiguracion() {
   return (
     <>
       <EncabezadoPagina
-        titulo="Configuracion"
+        titulo="Configuración"
         descripcion="Datos de contacto, pagos y banners de la tienda."
       />
 
@@ -156,7 +156,7 @@ export default function PaginaConfiguracion() {
               Contacto
             </h2>
             <Input
-              etiqueta="Numero de WhatsApp"
+              etiqueta="Número de WhatsApp"
               placeholder="945399776"
               value={estado.datos.whatsapp}
               onChange={(evento) => actualizarCampo("whatsapp", evento.target.value)}
@@ -309,7 +309,7 @@ function EditorAnuncios({ mensajes, alCambiar }: PropsEditorAnuncios) {
 
       {mensajes.length === 0 && (
         <p className="text-sm text-texto/60">
-          Aun no hay mensajes. Agrega el primero.
+          Aún no hay mensajes. Agrega el primero.
         </p>
       )}
 
@@ -319,7 +319,7 @@ function EditorAnuncios({ mensajes, alCambiar }: PropsEditorAnuncios) {
             <div className="flex-1">
               <Input
                 aria-label={`Mensaje ${indice + 1}`}
-                placeholder="Envíos gratis a todo el Perú"
+                placeholder="Envíos a todo el Perú"
                 value={mensaje}
                 onChange={(evento) => actualizarMensaje(indice, evento.target.value)}
               />
@@ -393,7 +393,7 @@ function EditorBanners({ banners, alCambiar, alError }: PropsEditorBanners) {
       </h2>
 
       {banners.length === 0 && (
-        <p className="text-sm text-texto/60">Aun no hay banners. Agrega el primero.</p>
+        <p className="text-sm text-texto/60">Aún no hay banners. Agrega el primero.</p>
       )}
 
       <div className="flex flex-col gap-4">

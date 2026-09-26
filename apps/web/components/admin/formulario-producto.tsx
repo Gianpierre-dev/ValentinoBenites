@@ -112,7 +112,7 @@ export function FormularioProducto({
 
       <div className="flex flex-col gap-1.5">
         <label htmlFor="campo-descripcion" className="text-sm font-medium text-texto-fuerte">
-          Descripcion
+          Descripción
         </label>
         <textarea
           id="campo-descripcion"
@@ -125,7 +125,7 @@ export function FormularioProducto({
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <Input
           etiqueta="Material — opcional"
-          placeholder="Ej. Cuero genuino"
+          placeholder="Ej. Cuero ecológico negro"
           error={errors.material?.message}
           {...register("material")}
         />

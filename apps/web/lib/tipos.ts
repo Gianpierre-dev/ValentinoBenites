@@ -225,6 +225,33 @@ export interface CrearPedidoEntrada {
   /** Ciudad/departamento de entrega (opcional, agiliza la cotización del envío). */
   ciudadEntrega?: string;
   comprobanteUrl?: string;
+  /** Consentimiento de la Política de Privacidad y los Términos (Ley 29733). */
+  aceptaTerminos: boolean;
+  /** Una por intento de compra: evita pedidos duplicados ante reintentos. */
+  claveIdempotencia: string;
+}
+
+/** Línea del carrito resuelta por el servidor antes de pagar. */
+export interface LineaCotizada {
+  varianteId: string | null;
+  productoId: string | null;
+  cantidad: number;
+  /** false si el producto se retiró o ya no existe. */
+  disponible: boolean;
+  /** null si el producto ya no existe (no hay nombre que mostrar). */
+  nombreProducto: string | null;
+  colorElegido: string | null;
+  /** Precio vigente; null si la línea no está disponible. */
+  precioUnitario: number | null;
+  subtotal: number | null;
+}
+
+export interface Cotizacion {
+  lineas: LineaCotizada[];
+  /** Suma de las líneas disponibles: el monto que se va a registrar. */
+  subtotal: number;
+  disponible: boolean;
+  metodoPagoDisponible: boolean;
 }
 
 /** Filtros del listado publico de productos. */

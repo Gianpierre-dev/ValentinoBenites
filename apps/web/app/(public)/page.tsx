@@ -58,9 +58,13 @@ export default async function PaginaInicio() {
   );
 }
 
+/** La portada muestra una selección; el resto está a un clic en "Ver todo". */
+const MAX_DESTACADOS_PORTADA = 8;
+
 async function cargarDestacados(): Promise<Producto[]> {
   try {
-    return await listarProductos({ destacados: true });
+    const destacados = await listarProductos({ destacados: true });
+    return destacados.slice(0, MAX_DESTACADOS_PORTADA);
   } catch {
     return [];
   }
@@ -98,11 +102,11 @@ const BENEFICIOS = [
   {
     icono: IconShieldLock,
     titulo: "Pago seguro",
-    detalle: "Yape, Plin o WhatsApp. Tu compra protegida.",
+    detalle: "Paga con Yape o Plin, o coordina tu pago por WhatsApp.",
   },
   {
     icono: IconAward,
-    titulo: "Cuero genuino",
+    titulo: "Cuero ecológico y telares andinos",
     detalle: "Materiales de calidad, terminaciones cuidadas.",
   },
 ] as const;

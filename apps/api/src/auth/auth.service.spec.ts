@@ -1,8 +1,4 @@
-import {
-  BadRequestException,
-  ConflictException,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { BadRequestException, ConflictException } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { AuthService } from './auth.service';
 
@@ -49,7 +45,7 @@ describe('AuthService.actualizarCredenciales', () => {
     ).rejects.toBeInstanceOf(BadRequestException);
   });
 
-  it('rechaza si la contrasena actual es incorrecta', async () => {
+  it('rechaza con 400 (no 401) si la contrasena actual es incorrecta', async () => {
     prisma.usuario.findUnique.mockResolvedValue(usuario);
 
     await expect(
@@ -57,7 +53,7 @@ describe('AuthService.actualizarCredenciales', () => {
         passwordActual: 'equivocada',
         passwordNueva: 'NuevaClave1',
       }),
-    ).rejects.toBeInstanceOf(UnauthorizedException);
+    ).rejects.toBeInstanceOf(BadRequestException);
     expect(prisma.usuario.update).not.toHaveBeenCalled();
   });
 

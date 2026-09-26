@@ -7,7 +7,7 @@ import { Boton, Spinner } from "@/components/ui";
 import { SelectorCantidad } from "@/components/tienda";
 import { useCarrito } from "@/store/carrito";
 import { useHidratado } from "@/store/usar-hidratado";
-import { formatearPrecio } from "@/lib/utilidades";
+import { colorVisible, formatearPrecio, nombreConColor } from "@/lib/utilidades";
 
 /**
  * Carrito de compras: lista de items con edicion de cantidad, eliminacion,
@@ -81,9 +81,9 @@ export default function PaginaCarrito() {
                       >
                         {linea.nombre}
                       </Link>
-                      <p className="mt-1 text-sm text-texto">
-                        Color: {linea.color}
-                      </p>
+                      {colorVisible(linea.nombre, linea.color) && (
+                        <p className="mt-1 text-sm text-texto">Color: {linea.color}</p>
+                      )}
                       <p className="mt-0.5 text-sm text-texto">
                         {formatearPrecio(linea.precioUnitario)} c/u
                       </p>
@@ -91,7 +91,7 @@ export default function PaginaCarrito() {
                     <button
                       type="button"
                       onClick={() => quitar(linea.clave)}
-                      aria-label={`Quitar ${linea.nombre} (${linea.color}) del carrito`}
+                      aria-label={`Quitar ${nombreConColor(linea.nombre, linea.color)} del carrito`}
                       className="flex h-9 w-9 items-center justify-center rounded-full text-texto/60 transition-colors hover:bg-oferta/10 hover:text-oferta"
                     >
                       <IconTrash size={18} aria-hidden />
@@ -135,6 +135,9 @@ export default function PaginaCarrito() {
                   {formatearPrecio(total)}
                 </span>
               </div>
+              <p className="mt-2 text-xs text-texto">
+                El envío se coordina por WhatsApp según tu destino.
+              </p>
               <Link href="/checkout" className="mt-6 block">
                 <Boton tamano="lg" className="w-full">
                   Continuar al pago
@@ -158,13 +161,13 @@ function CarritoVacio() {
     <div className="mx-auto flex max-w-7xl flex-col items-center px-4 py-24 text-center sm:px-6 lg:px-8">
       <IconShoppingBag size={48} stroke={1.25} aria-hidden className="text-texto/40" />
       <h1 className="mt-6 text-2xl font-semibold tracking-tight text-texto-fuerte">
-        Tu carrito esta vacio
+        Tu carrito está vacío
       </h1>
       <p className="mt-2 text-texto">
-        Agrega productos desde el catalogo para continuar.
+        Agrega productos desde el catálogo para continuar.
       </p>
       <Link href="/catalogo" className="mt-6">
-        <Boton tamano="lg">Ver catalogo</Boton>
+        <Boton tamano="lg">Ver catálogo</Boton>
       </Link>
     </div>
   );

@@ -67,3 +67,30 @@ export function precioMostrableVariante(
 export function soloDigitos(valor: string, largoMaximo: number): string {
   return valor.replace(/\D/g, "").slice(0, largoMaximo);
 }
+
+/**
+ * Normaliza un celular peruano pegado con formato: quita todo lo que no es
+ * dígito y el prefijo de país ("+51 999 999 999" -> "999999999").
+ */
+export function normalizarCelular(valor: string, largo: number): string {
+  const digitos = valor.replace(/\D/g, "");
+  const sinPais =
+    digitos.length > largo && digitos.startsWith("51") ? digitos.slice(2) : digitos;
+  return sinPais.slice(0, largo);
+}
+
+/**
+ * Color a mostrar junto al nombre de un producto, o null si no aporta: cuando
+ * el color de la variante es el mismo nombre del producto, repetirlo solo
+ * duplica el texto ("Cartera X · Color: Cartera X").
+ */
+export function colorVisible(nombreProducto: string, color: string | null): string | null {
+  if (!color) return null;
+  return color.trim().toLowerCase() === nombreProducto.trim().toLowerCase() ? null : color;
+}
+
+/** "Nombre (color)", o solo el nombre si el color no aporta. */
+export function nombreConColor(nombreProducto: string, color: string | null): string {
+  const visible = colorVisible(nombreProducto, color);
+  return visible ? `${nombreProducto} (${visible})` : nombreProducto;
+}

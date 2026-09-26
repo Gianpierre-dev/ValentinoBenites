@@ -44,7 +44,7 @@ export default async function PaginaCatalogo({
       <div className="mx-auto max-w-7xl px-4 py-10 pb-24 sm:px-6 sm:pb-10 lg:px-8">
         <header className="flex flex-col gap-6">
           <h1 className="text-3xl font-semibold tracking-tight text-texto-fuerte">
-            Catalogo
+            Catálogo
           </h1>
           <Suspense fallback={null}>
             <div className="flex flex-col gap-5">

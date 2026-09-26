@@ -1,6 +1,6 @@
 import { z } from "zod";
-import type { LineaCarrito } from "@/store/carrito";
-import { formatearPrecio } from "@/lib/utilidades";
+import type { Pedido } from "@/lib/tipos";
+import { colorVisible, formatearPrecio } from "@/lib/utilidades";
 
 /**
  * Un nombre admite letras (con tildes y ñ), espacios y los signos propios de
@@ -31,7 +31,8 @@ export const esquemaCheckout = z.object({
   // Ley 29733: el consentimiento debe ser expreso y previo (checkbox no
   // premarcado). Sin aceptar la politica de privacidad no se registra el pedido.
   aceptaPrivacidad: z.boolean().refine((valor) => valor, {
-    message: "Debes aceptar la Política de Privacidad para continuar.",
+    message:
+      "Debes aceptar la Política de Privacidad y los Términos y Condiciones para continuar.",
   }),
 });
 
@@ -55,34 +56,29 @@ export function normalizarNumeroWhatsApp(valor: string): string {
 }
 
 /**
- * Arma el mensaje de WhatsApp pre-formateado con el detalle del pedido.
- * El total es referencial; el backend recalcula al registrar el pedido.
+ * Arma el mensaje de WhatsApp con el pedido YA registrado: líneas, precios y
+ * total salen de la respuesta del servidor, no del carrito local.
  */
-export function construirMensajeWhatsApp(
-  datos: DatosCheckout,
-  lineas: LineaCarrito[],
-  total: number,
-): string {
-  const detalle = lineas
-    .map(
-      (linea) =>
-        `• ${linea.nombre} (${linea.color}) x${linea.cantidad} — ${formatearPrecio(
-          linea.precioUnitario * linea.cantidad,
-        )}`,
-    )
+export function construirMensajeWhatsApp(pedido: Pedido): string {
+  const detalle = pedido.items
+    .map((item) => {
+      const color = colorVisible(item.nombreProducto, item.colorElegido);
+      const nombre = color ? `${item.nombreProducto} (${color})` : item.nombreProducto;
+      return `• ${nombre} x${item.cantidad} — ${formatearPrecio(item.subtotal)}`;
+    })
     .join("\n");
 
   return [
-    "*Hola, quiero hacer un pedido:*",
+    `*Hola, quiero coordinar mi pedido ${pedido.codigo}:*`,
     "",
     detalle,
     "",
-    `*Total:* ${formatearPrecio(total)}`,
+    `*Total productos:* ${formatearPrecio(pedido.total)}`,
+    "_El envío se coordina según mi destino._",
     "",
-    "_Productos hechos a pedido, listos en ~24 h._",
-    "",
-    `Nombre: ${datos.nombreCliente}`,
-    `Celular: ${datos.telefono}`,
+    `Nombre: ${pedido.nombreCliente}`,
+    `Celular: ${pedido.telefono}`,
+    ...(pedido.ciudadEntrega ? [`Ciudad: ${pedido.ciudadEntrega}`] : []),
   ].join("\n");
 }
 

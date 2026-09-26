@@ -11,7 +11,7 @@ import { Boton, Input } from "@/components/ui";
 import { mensajeDeError } from "@/components/admin";
 
 const esquemaLogin = z.object({
-  email: z.string().min(1, "Ingresa tu correo").email("Correo no valido"),
+  email: z.string().min(1, "Ingresa tu correo").email("Correo no válido"),
   password: z.string().min(1, "Ingresa tu contrasena"),
 });
 
@@ -50,7 +50,7 @@ export default function PaginaLogin() {
           </span>
           <p className="mt-2 flex items-center justify-center gap-1.5 text-sm text-texto/70">
             <IconLock className="h-4 w-4" aria-hidden />
-            Panel de gestion
+            Panel de gestión
           </p>
         </div>
 
@@ -68,7 +68,7 @@ export default function PaginaLogin() {
             {...register("email")}
           />
           <Input
-            etiqueta="Contrasena"
+            etiqueta="Contraseña"
             type="password"
             autoComplete="current-password"
             placeholder="••••••••"
@@ -83,7 +83,7 @@ export default function PaginaLogin() {
           )}
 
           <Boton type="submit" cargando={isSubmitting} className="mt-2 w-full">
-            Iniciar sesion
+            Iniciar sesión
           </Boton>
         </form>
       </div>

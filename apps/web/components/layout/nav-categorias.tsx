@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { IconMenu2, IconX } from "@tabler/icons-react";
 import type { Categoria } from "@/lib/tipos";
 import { cn } from "@/lib/utilidades";
@@ -16,6 +16,19 @@ interface PropsNavCategorias {
  */
 export function NavCategorias({ categorias }: PropsNavCategorias) {
   const [abierto, setAbierto] = useState(false);
+  const botonMenuRef = useRef<HTMLButtonElement>(null);
+
+  // Esc cierra el menú móvil y devuelve el foco al botón que lo abrió.
+  useEffect(() => {
+    if (!abierto) return;
+    const alPresionarTecla = (evento: KeyboardEvent) => {
+      if (evento.key !== "Escape") return;
+      setAbierto(false);
+      botonMenuRef.current?.focus();
+    };
+    document.addEventListener("keydown", alPresionarTecla);
+    return () => document.removeEventListener("keydown", alPresionarTecla);
+  }, [abierto]);
 
   // Siempre se ofrecen "Catalogo" y "Nosotros" (la historia de marca es parte
   // de la venta); las categorias se intercalan solo si existen.
@@ -31,7 +44,7 @@ export function NavCategorias({ categorias }: PropsNavCategorias) {
 
   return (
     <>
-      <nav aria-label="Categorias" className="hidden md:block">
+      <nav aria-label="Categorías" className="hidden md:block">
         <ul className="flex items-center gap-6">
           {items.map((item) => (
             <li key={item.clave}>
@@ -47,8 +60,9 @@ export function NavCategorias({ categorias }: PropsNavCategorias) {
       </nav>
 
       <button
+        ref={botonMenuRef}
         type="button"
-        aria-label={abierto ? "Cerrar menu" : "Abrir menu"}
+        aria-label={abierto ? "Cerrar menú" : "Abrir menú"}
         aria-expanded={abierto}
         onClick={() => setAbierto((previo) => !previo)}
         className="inline-flex h-11 w-11 items-center justify-center text-texto-fuerte md:hidden"
@@ -62,7 +76,7 @@ export function NavCategorias({ categorias }: PropsNavCategorias) {
           abierto ? "block" : "hidden",
         )}
       >
-        <nav aria-label="Categorias" className="px-4 py-2">
+        <nav aria-label="Categorías" className="px-4 py-2">
           <ul className="flex flex-col">
             {items.map((item) => (
               <li key={item.clave}>

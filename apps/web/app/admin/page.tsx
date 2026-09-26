@@ -52,7 +52,7 @@ export default function PaginaResumen() {
           />
           <TarjetaConteo
             href="/admin/categorias"
-            etiqueta="Categorias"
+            etiqueta="Categorías"
             valor={estado.datos.categorias}
             Icono={IconCategory}
           />

@@ -13,11 +13,13 @@ import type {
   Categoria,
   CategoriaEntrada,
   Configuracion,
+  Cotizacion,
   CrearPedidoEntrada,
   EstadoPedido,
   FiltrosProductos,
   GrupoPropuesto,
   ImagenVarianteEntrada,
+  ItemPedidoEntrada,
   Pedido,
   Producto,
   ProductoEntrada,
@@ -96,7 +98,7 @@ async function peticion<T>(ruta: string, opciones: OpcionesPeticion = {}): Promi
     if (token) cabeceras["Authorization"] = `Bearer ${token}`;
   }
 
-  const respuesta = await fetch(`${URL_BASE_API}${ruta}${construirQuery(query)}`, {
+  const respuesta = await ejecutarFetch(`${URL_BASE_API}${ruta}${construirQuery(query)}`, {
     method: metodo,
     headers: cabeceras,
     body: cuerpo !== undefined ? JSON.stringify(cuerpo) : undefined,
@@ -105,14 +107,47 @@ async function peticion<T>(ruta: string, opciones: OpcionesPeticion = {}): Promi
 
   if (respuesta.status === 204) return undefined as T;
 
+  if (autenticado && respuesta.status === 401) cerrarSesionExpirada();
+
   const datos = await leerCuerpo(respuesta);
 
   if (!respuesta.ok) {
-    const mensaje = extraerMensaje(datos) ?? `Error ${respuesta.status}`;
-    throw new ErrorApi(respuesta.status, mensaje, datos);
+    throw new ErrorApi(respuesta.status, mensajeDeRespuesta(respuesta.status, datos), datos);
   }
 
   return datos as T;
+}
+
+const MENSAJE_SESION_EXPIRADA = "Tu sesión expiró. Inicia sesión de nuevo.";
+
+/**
+ * Un 401 en una ruta de admin significa token vencido o inválido: se descarta
+ * y se vuelve al login, en vez de dejar el panel mostrando errores sin salida.
+ */
+function cerrarSesionExpirada(): never {
+  borrarToken();
+  if (typeof window !== "undefined" && !window.location.pathname.startsWith("/admin/login")) {
+    window.location.assign("/admin/login");
+  }
+  throw new ErrorApi(401, MENSAJE_SESION_EXPIRADA, null);
+}
+
+/** Tiempo máximo de espera de una petición: sin él, un fetch colgado bloquea el checkout. */
+const TIEMPO_MAXIMO_MS = 20_000;
+
+const MENSAJE_SIN_CONEXION =
+  "No pudimos conectarnos con la tienda. Revisa tu conexión e intenta de nuevo.";
+
+const MENSAJE_SERVIDOR_CAIDO =
+  "La tienda no está disponible en este momento. Intenta de nuevo en unos minutos.";
+
+/** fetch con tiempo límite; los errores de red se traducen a un mensaje legible. */
+async function ejecutarFetch(url: string, init: RequestInit): Promise<Response> {
+  try {
+    return await fetch(url, { ...init, signal: AbortSignal.timeout(TIEMPO_MAXIMO_MS) });
+  } catch (error) {
+    throw new ErrorApi(0, MENSAJE_SIN_CONEXION, error);
+  }
 }
 
 async function leerCuerpo(respuesta: Response): Promise<unknown> {
@@ -122,14 +157,32 @@ async function leerCuerpo(respuesta: Response): Promise<unknown> {
   return texto.length > 0 ? texto : null;
 }
 
+/**
+ * Mensaje de error para mostrar al usuario. Solo se usa el texto del backend
+ * cuando viene como JSON de la API: un 502 del proxy devuelve HTML, que no se
+ * debe mostrar tal cual.
+ */
+function mensajeDeRespuesta(estado: number, datos: unknown): string {
+  const mensaje = extraerMensaje(datos);
+  if (mensaje) return mensaje;
+  return estado >= 500 ? MENSAJE_SERVIDOR_CAIDO : `Error ${estado}`;
+}
+
 function extraerMensaje(datos: unknown): string | null {
-  if (typeof datos === "string") return datos;
   if (datos && typeof datos === "object" && "message" in datos) {
     const mensaje = (datos as { message: unknown }).message;
-    if (typeof mensaje === "string") return mensaje;
-    if (Array.isArray(mensaje)) return mensaje.join(", ");
+    if (typeof mensaje === "string") return limpiarMensaje(mensaje);
+    if (Array.isArray(mensaje)) return mensaje.map((m) => limpiarMensaje(String(m))).join(" ");
   }
   return null;
+}
+
+/**
+ * El ValidationPipe antepone la ruta del campo a los errores anidados
+ * ("items.0.La cantidad..."): para el usuario solo importa el mensaje.
+ */
+function limpiarMensaje(mensaje: string): string {
+  return mensaje.replace(/^(?:[a-zA-Z]+\.\d+\.)+/, "");
 }
 
 /* ---------------------------------------------------------------- */
@@ -206,6 +259,7 @@ export async function exportarCatalogoExcel(): Promise<void> {
   const respuesta = await fetch(`${URL_BASE_API}/productos/admin/exportar`, {
     headers: cabeceras,
   });
+  if (respuesta.status === 401) cerrarSesionExpirada();
   if (!respuesta.ok) {
     throw new ErrorApi(respuesta.status, "No se pudo generar el Excel.", null);
   }
@@ -360,6 +414,20 @@ export function crearPedido(datos: CrearPedidoEntrada): Promise<Pedido> {
   });
 }
 
+/**
+ * Resuelve el carrito contra el servidor sin crear nada: precios vigentes y
+ * líneas que ya no se venden. El checkout la consulta antes de mostrar el pago.
+ */
+export function cotizarPedido(datos: {
+  items: ItemPedidoEntrada[];
+  billeteraId?: string;
+}): Promise<Cotizacion> {
+  return peticion<Cotizacion>("/pedidos/cotizar", {
+    metodo: "POST",
+    cuerpo: datos,
+  });
+}
+
 export function listarPedidos(): Promise<Pedido[]> {
   return peticion<Pedido[]>("/pedidos", { autenticado: true });
 }
@@ -504,16 +572,16 @@ export async function subirArchivo(archivo: File): Promise<{ url: string }> {
   const token = obtenerToken();
   if (token) cabeceras["Authorization"] = `Bearer ${token}`;
 
-  const respuesta = await fetch(`${URL_BASE_API}/storage/upload`, {
+  const respuesta = await ejecutarFetch(`${URL_BASE_API}/storage/upload`, {
     method: "POST",
     headers: cabeceras,
     body: formulario,
   });
+  if (respuesta.status === 401) cerrarSesionExpirada();
 
   const datos = await leerCuerpo(respuesta);
   if (!respuesta.ok) {
-    const mensaje = extraerMensaje(datos) ?? `Error ${respuesta.status}`;
-    throw new ErrorApi(respuesta.status, mensaje, datos);
+    throw new ErrorApi(respuesta.status, mensajeDeRespuesta(respuesta.status, datos), datos);
   }
   return datos as { url: string };
 }
@@ -526,15 +594,14 @@ export async function subirComprobante(archivo: File): Promise<{ url: string }> 
   const formulario = new FormData();
   formulario.append("archivo", archivo);
 
-  const respuesta = await fetch(`${URL_BASE_API}/storage/comprobante`, {
+  const respuesta = await ejecutarFetch(`${URL_BASE_API}/storage/comprobante`, {
     method: "POST",
     body: formulario,
   });
 
   const datos = await leerCuerpo(respuesta);
   if (!respuesta.ok) {
-    const mensaje = extraerMensaje(datos) ?? `Error ${respuesta.status}`;
-    throw new ErrorApi(respuesta.status, mensaje, datos);
+    throw new ErrorApi(respuesta.status, mensajeDeRespuesta(respuesta.status, datos), datos);
   }
   return datos as { url: string };
 }

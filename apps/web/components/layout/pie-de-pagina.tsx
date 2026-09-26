@@ -234,7 +234,7 @@ export async function PieDePagina() {
           {redes.length > 0 && (
             <div>
               <h2 className="titulo-ui text-sm font-semibold uppercase tracking-wide text-texto-fuerte">
-                Siguenos
+                Síguenos
               </h2>
               <ul className="mt-4 flex items-center gap-4">
                 {redes.map(({ nombre, url, Icono }) => (

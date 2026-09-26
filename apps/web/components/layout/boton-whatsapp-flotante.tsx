@@ -1,3 +1,6 @@
+"use client";
+
+import { usePathname } from "next/navigation";
 import { IconBrandWhatsapp } from "@tabler/icons-react";
 
 interface BotonWhatsappFlotanteProps {
@@ -6,15 +9,24 @@ interface BotonWhatsappFlotanteProps {
 }
 
 /**
- * Boton flotante (FAB) de WhatsApp, fijo abajo a la derecha en todo el
- * storefront publico. Verde de marca WhatsApp (#25D366), accesible y con
- * micro-animacion de hover que respeta prefers-reduced-motion.
+ * Rutas donde el botón flotante sobra: tienen sus propias acciones de WhatsApp
+ * y sus botones finales (Confirmar pedido, Continuar al pago), que taparía.
+ */
+const RUTAS_SIN_BOTON = ["/carrito", "/checkout"];
+
+/**
+ * Boton flotante (FAB) de WhatsApp, fijo abajo a la derecha en el storefront
+ * publico. Verde de marca WhatsApp (#25D366), accesible y con micro-animacion
+ * de hover que respeta prefers-reduced-motion.
  *
  * z-40 deliberado: queda por DEBAJO del overlay del carrito-drawer (z-50) para
  * no competir con el cuando esta abierto. Solo se renderiza si hay numero
  * configurado (la decision se toma en el layout que arma el href).
  */
 export function BotonWhatsappFlotante({ href }: BotonWhatsappFlotanteProps) {
+  const ruta = usePathname();
+  if (RUTAS_SIN_BOTON.some((prefijo) => ruta.startsWith(prefijo))) return null;
+
   return (
     <a
       href={href}

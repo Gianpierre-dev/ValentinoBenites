@@ -39,7 +39,7 @@ export function CompradorProducto({ producto }: PropsCompradorProducto) {
         <div className="flex flex-col gap-4 lg:pt-4">
           <EncabezadoProducto producto={producto} />
           <p className="rounded-xl border border-borde bg-perla px-4 py-3 text-sm text-texto">
-            Este producto aun no tiene colores disponibles.
+            Este producto aún no tiene colores disponibles.
           </p>
         </div>
       </div>

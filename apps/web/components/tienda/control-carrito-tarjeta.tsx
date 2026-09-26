@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { IconMinus, IconPlus, IconShoppingBagPlus } from "@tabler/icons-react";
-import { useCarrito } from "@/store/carrito";
+import { CANTIDAD_MAXIMA, useCarrito } from "@/store/carrito";
 import type { Producto } from "@/lib/tipos";
 
 interface PropsControlCarritoTarjeta {
@@ -45,7 +45,7 @@ export function ControlCarritoTarjeta({ producto }: PropsControlCarritoTarjeta) 
   };
   const subir = (evento: React.MouseEvent<HTMLButtonElement>) => {
     cortar(evento);
-    setCantidad((n) => n + 1);
+    setCantidad((n) => Math.min(CANTIDAD_MAXIMA, n + 1));
   };
   const alAgregar = (evento: React.MouseEvent<HTMLButtonElement>) => {
     cortar(evento);
@@ -68,8 +68,9 @@ export function ControlCarritoTarjeta({ producto }: PropsControlCarritoTarjeta) 
         <button
           type="button"
           onClick={bajar}
+          disabled={cantidad <= 1}
           aria-label="Quitar uno"
-          className="inline-flex h-10 w-10 items-center justify-center rounded-full text-texto-fuerte transition-colors hover:bg-acento/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-acento motion-reduce:transition-none sm:h-8 sm:w-8"
+          className="inline-flex h-10 w-10 items-center justify-center rounded-full text-texto-fuerte transition-colors hover:bg-acento/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-acento disabled:cursor-not-allowed disabled:opacity-40 motion-reduce:transition-none sm:h-8 sm:w-8"
         >
           <IconMinus size={16} aria-hidden />
         </button>
@@ -82,8 +83,9 @@ export function ControlCarritoTarjeta({ producto }: PropsControlCarritoTarjeta) 
         <button
           type="button"
           onClick={subir}
+          disabled={cantidad >= CANTIDAD_MAXIMA}
           aria-label="Agregar uno más"
-          className="inline-flex h-10 w-10 items-center justify-center rounded-full text-texto-fuerte transition-colors hover:bg-acento/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-acento motion-reduce:transition-none sm:h-8 sm:w-8"
+          className="inline-flex h-10 w-10 items-center justify-center rounded-full text-texto-fuerte transition-colors hover:bg-acento/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-acento disabled:cursor-not-allowed disabled:opacity-40 motion-reduce:transition-none sm:h-8 sm:w-8"
         >
           <IconPlus size={16} aria-hidden />
         </button>

@@ -83,8 +83,8 @@ export default function PaginaCategorias() {
   return (
     <>
       <EncabezadoPagina
-        titulo="Categorias"
-        descripcion="Organiza tu catalogo en categorias."
+        titulo="Categorías"
+        descripcion="Organiza tu catálogo en categorías."
         acciones={
           <Boton onClick={() => setCreando(true)}>
             <IconPlus className="h-4 w-4" aria-hidden />
@@ -97,7 +97,7 @@ export default function PaginaCategorias() {
       {estado.tipo === "error" && <VistaError mensaje={estado.mensaje} alReintentar={cargar} />}
 
       {estado.tipo === "listo" && estado.datos.length === 0 && (
-        <VistaVacia>Aun no tienes categorias. Crea la primera.</VistaVacia>
+        <VistaVacia>Aún no tienes categorías. Crea la primera.</VistaVacia>
       )}
 
       {estado.tipo === "listo" && estado.datos.length > 0 && (
@@ -164,7 +164,7 @@ export default function PaginaCategorias() {
       <ModalConfirmacion
         abierto={aEliminar !== null}
         titulo="Eliminar categoria"
-        mensaje={`Se eliminara "${aEliminar?.nombre ?? ""}". Esta accion no se puede deshacer.`}
+        mensaje={`Se eliminará "${aEliminar?.nombre ?? ""}". Esta acción no se puede deshacer.`}
         cargando={eliminando}
         alConfirmar={confirmarEliminar}
         alCancelar={() => setAEliminar(null)}

@@ -113,12 +113,12 @@ export function GestorVariantes({ producto, alCambiar }: PropsGestorVariantes) {
     }
     // Defensa por si llegara un valor manipulado: el selector siempre da un hex valido.
     if (!/^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(hex)) {
-      setErrorHex("El tono elegido no es valido. Vuelve a elegirlo en la paleta.");
+      setErrorHex("El tono elegido no es válido. Vuelve a elegirlo en la paleta.");
       return;
     }
     const precioTexto = borrador.precio.trim();
     if (precioTexto !== "" && !Number.isFinite(Number(precioTexto))) {
-      mostrarError("El precio debe ser un numero valido.");
+      mostrarError("El precio debe ser un número válido.");
       return;
     }
 
@@ -175,7 +175,7 @@ export function GestorVariantes({ producto, alCambiar }: PropsGestorVariantes) {
 
       {variantes.length === 0 && !formularioAbierto && (
         <p className="border border-dashed border-borde px-4 py-6 text-center text-sm text-texto/60">
-          Este producto aun no tiene colores. Agrega al menos uno para poder venderlo.
+          Este producto aún no tiene colores. Agrega al menos uno para poder venderlo.
         </p>
       )}
 

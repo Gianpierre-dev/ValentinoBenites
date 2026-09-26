@@ -32,7 +32,7 @@ export class CrearReclamoDto {
 
   @IsString()
   @Matches(/^[0-9A-Za-z-]{8,12}$/, {
-    message: 'Ingresa un DNI o carnet de extranjeria valido.',
+    message: 'Ingresa un DNI o carné de extranjería válido.',
   })
   documento!: string;
 
@@ -43,12 +43,12 @@ export class CrearReclamoDto {
 
   @IsString()
   @Matches(/^9\d{8}$/, {
-    message: 'Ingresa un celular valido de 9 digitos (empieza en 9).',
+    message: 'Ingresa un celular válido de 9 dígitos (empieza en 9).',
   })
   telefono!: string;
 
   @IsOptional()
-  @IsEmail({}, { message: 'Ingresa un correo valido.' })
+  @IsEmail({}, { message: 'Ingresa un correo válido.' })
   email?: string;
 
   @IsOptional()
@@ -75,7 +75,7 @@ export class CrearReclamoDto {
 
   @IsString()
   @MinLength(10, {
-    message: 'Detalla tu reclamo o queja (minimo 10 caracteres).',
+    message: 'Detalla tu reclamo o queja (mínimo 10 caracteres).',
   })
   @MaxLength(3000)
   detalle!: string;

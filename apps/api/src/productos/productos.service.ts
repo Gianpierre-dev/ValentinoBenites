@@ -294,7 +294,7 @@ export class ProductosService {
       where: { id: categoriaId },
     });
     if (!categoria) {
-      throw new BadRequestException('La categoria indicada no existe.');
+      throw new BadRequestException('La categoría indicada no existe.');
     }
   }
 

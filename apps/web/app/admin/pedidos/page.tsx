@@ -13,12 +13,13 @@ import {
 } from "@tabler/icons-react";
 import { listarPedidos, cambiarEstadoPedido, actualizarEnvioPedido } from "@/lib/api";
 import type { EstadoPedido, Pedido } from "@/lib/tipos";
-import { formatearPrecio } from "@/lib/utilidades";
+import { colorVisible, formatearPrecio } from "@/lib/utilidades";
 import {
   EncabezadoPagina,
   VistaCargando,
   VistaError,
   VistaVacia,
+  ModalConfirmacion,
   useToast,
   useRecurso,
   mensajeDeError,
@@ -33,6 +34,11 @@ export default function PaginaPedidos() {
   const { mostrarExito, mostrarError } = useToast();
   const { estado, recargar, fijarDatos } = useRecurso<Pedido[]>(listarPedidos);
   const [actualizandoId, setActualizandoId] = useState<string | null>(null);
+  // Cambio de estado a la espera de confirmación: todos son irreversibles.
+  const [porConfirmar, setPorConfirmar] = useState<{
+    pedido: Pedido;
+    destino: EstadoPedido;
+  } | null>(null);
 
   async function cambiarEstado(pedido: Pedido, nuevoEstado: EstadoPedido) {
     if (estado.tipo !== "listo") return;
@@ -78,7 +84,7 @@ export default function PaginaPedidos() {
       {estado.tipo === "error" && <VistaError mensaje={estado.mensaje} alReintentar={recargar} />}
 
       {estado.tipo === "listo" && estado.datos.length === 0 && (
-        <VistaVacia>Aun no has recibido pedidos.</VistaVacia>
+        <VistaVacia>Aún no has recibido pedidos.</VistaVacia>
       )}
 
       {estado.tipo === "listo" && estado.datos.length > 0 && (
@@ -88,14 +94,52 @@ export default function PaginaPedidos() {
               key={pedido.id}
               pedido={pedido}
               actualizando={actualizandoId === pedido.id}
-              alCambiarEstado={cambiarEstado}
+              alCambiarEstado={(p, destino) => setPorConfirmar({ pedido: p, destino })}
               alGuardarEnvio={guardarEnvio}
             />
           ))}
         </div>
       )}
+
+      <ModalConfirmacion
+        abierto={porConfirmar !== null}
+        titulo={porConfirmar ? ACCION_POR_ESTADO[porConfirmar.destino].etiqueta : ""}
+        mensaje={porConfirmar ? mensajeConfirmacion(porConfirmar.pedido, porConfirmar.destino) : ""}
+        textoConfirmar={porConfirmar ? ACCION_POR_ESTADO[porConfirmar.destino].etiqueta : undefined}
+        textoDescartar="Volver"
+        destructivo={porConfirmar ? Boolean(ACCION_POR_ESTADO[porConfirmar.destino].destructivo) : false}
+        cargando={porConfirmar !== null && actualizandoId === porConfirmar.pedido.id}
+        alConfirmar={() => {
+          if (!porConfirmar) return;
+          void cambiarEstado(porConfirmar.pedido, porConfirmar.destino).then(() =>
+            setPorConfirmar(null),
+          );
+        }}
+        alCancelar={() => setPorConfirmar(null)}
+      />
     </>
   );
+}
+
+/** Qué implica cada cambio de estado; todos son irreversibles. */
+function mensajeConfirmacion(pedido: Pedido, destino: EstadoPedido): string {
+  const total = formatearPrecio(pedido.total);
+  switch (destino) {
+    case "PAGADO":
+      return `Vas a marcar el pedido ${pedido.codigo} como pagado. Verifica antes que el comprobante sea de ${total}. No se puede deshacer.`;
+    case "EN_PRODUCCION":
+      return `Vas a pasar el pedido ${pedido.codigo} a producción. No se puede volver a "Pagado".`;
+    case "ENVIADO":
+      return `Vas a marcar el pedido ${pedido.codigo} como enviado. Después ya no podrás editar el envío ni el estado.`;
+    case "CANCELADO":
+      return pedido.estado === "PENDIENTE_PAGO"
+        ? `Vas a cancelar el pedido ${pedido.codigo}. No se puede deshacer.`
+        : `Vas a cancelar el pedido ${pedido.codigo}, que ya estaba pagado: coordina con el cliente la devolución de ${total}. No se puede deshacer.`;
+    case "RECHAZADO":
+      return `Vas a rechazar el pago del pedido ${pedido.codigo} (por ejemplo, si el comprobante no es válido). No se puede deshacer.`;
+    default:
+      return `Vas a cambiar el estado del pedido ${pedido.codigo}.`;
+  }
 }
 
 const ETIQUETA_ESTADO: Record<EstadoPedido, string> = {
@@ -137,10 +181,10 @@ interface AccionEstado {
 
 const ACCION_POR_ESTADO: Record<EstadoPedido, AccionEstado> = {
   PAGADO: { etiqueta: "Marcar pagado", Icono: IconCheck, variante: "secundario" },
-  EN_PRODUCCION: { etiqueta: "Pasar a produccion", Icono: IconTool, variante: "secundario" },
+  EN_PRODUCCION: { etiqueta: "Pasar a producción", Icono: IconTool, variante: "secundario" },
   ENVIADO: { etiqueta: "Marcar enviado", Icono: IconTruck, variante: "secundario" },
-  RECHAZADO: { etiqueta: "Rechazar", Icono: IconX, variante: "peligro", destructivo: true },
-  CANCELADO: { etiqueta: "Cancelar", Icono: IconBan, variante: "peligro", destructivo: true },
+  RECHAZADO: { etiqueta: "Rechazar pago", Icono: IconX, variante: "peligro", destructivo: true },
+  CANCELADO: { etiqueta: "Cancelar pedido", Icono: IconBan, variante: "peligro", destructivo: true },
   PENDIENTE_PAGO: { etiqueta: "Volver a pendiente", Icono: IconCheck, variante: "secundario" },
 };
 
@@ -192,7 +236,7 @@ function TarjetaPedido({
           <li key={item.id} className="flex items-center justify-between py-2">
             <span className="text-texto">
               {item.cantidad} × {item.nombreProducto}
-              {item.colorElegido && (
+              {colorVisible(item.nombreProducto, item.colorElegido) && (
                 <span className="text-texto/60"> · Color: {item.colorElegido}</span>
               )}
             </span>
@@ -209,9 +253,7 @@ function TarjetaPedido({
         <div className="mt-1 flex justify-between text-texto">
           <dt>Envío</dt>
           <dd>
-            {pedido.costoEnvio > 0
-              ? formatearPrecio(pedido.costoEnvio)
-              : "Por coordinar"}
+            {etiquetaEnvio(pedido)}
           </dd>
         </div>
         <div className="mt-1 flex justify-between font-semibold text-texto-fuerte">
@@ -327,7 +369,7 @@ function BloqueEnvio({ pedido, actualizando, alGuardar }: PropsBloqueEnvio) {
               etiqueta="Costo de envío (S/)"
               type="number"
               min={0}
-              step="0.5"
+              step="0.01"
               inputMode="decimal"
               placeholder="0.00"
               value={costo}
@@ -359,6 +401,15 @@ function BloqueEnvio({ pedido, actualizando, alGuardar }: PropsBloqueEnvio) {
       )}
     </section>
   );
+}
+
+/**
+ * El envío en 0 puede ser "todavía no se coordinó" o "sin costo": se distingue
+ * por si la admin ya registró la dirección de entrega.
+ */
+function etiquetaEnvio(pedido: Pedido): string {
+  if (pedido.costoEnvio > 0) return formatearPrecio(pedido.costoEnvio);
+  return pedido.direccionEntrega ? "Sin costo" : "Por coordinar";
 }
 
 function formatearFecha(iso: string): string {

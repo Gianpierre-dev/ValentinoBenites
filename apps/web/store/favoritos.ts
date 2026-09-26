@@ -8,6 +8,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { Producto } from "@/lib/tipos";
+import { sincronizarEntrePestanas } from "./sincronizar-pestanas";
 
 /** Item de favoritos: datos minimos para la tarjeta del listado. */
 export interface ItemFavorito {
@@ -81,3 +82,5 @@ export const useFavoritos = create<EstadoFavoritos>()(
     },
   ),
 );
+
+sincronizarEntrePestanas(CLAVE_PERSISTENCIA, () => useFavoritos.persist.rehydrate());

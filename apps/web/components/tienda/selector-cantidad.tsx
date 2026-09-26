@@ -1,28 +1,28 @@
 "use client";
 
 import { IconMinus, IconPlus } from "@tabler/icons-react";
+import { CANTIDAD_MAXIMA } from "@/store/carrito";
 
 interface PropsSelectorCantidad {
   cantidad: number;
   alCambiar: (cantidad: number) => void;
-  /** Stock disponible; si es 0 no se aplica tope superior. */
+  /** Tope superior; por defecto, el máximo por producto que acepta un pedido. */
   maximo?: number;
   idEtiqueta?: string;
 }
 
 /**
- * Control accesible para elegir cantidad: botones de menos/mas con tope en el stock.
- * Nunca baja de 1.
+ * Control accesible para elegir cantidad: botones de menos/mas, entre 1 y el
+ * máximo por producto.
  */
 export function SelectorCantidad({
   cantidad,
   alCambiar,
-  maximo = 0,
+  maximo = CANTIDAD_MAXIMA,
   idEtiqueta,
 }: PropsSelectorCantidad) {
-  const hayTope = maximo > 0;
   const puedeBajar = cantidad > 1;
-  const puedeSubir = !hayTope || cantidad < maximo;
+  const puedeSubir = cantidad < maximo;
 
   const bajar = () => {
     if (puedeBajar) alCambiar(cantidad - 1);

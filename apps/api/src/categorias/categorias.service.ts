@@ -63,7 +63,7 @@ export class CategoriasService {
   private async obtenerOFallar(id: string) {
     const categoria = await this.prisma.categoria.findUnique({ where: { id } });
     if (!categoria) {
-      throw new NotFoundException('La categoria no existe.');
+      throw new NotFoundException('La categoría no existe.');
     }
     return categoria;
   }
@@ -73,7 +73,7 @@ export class CategoriasService {
       error instanceof Prisma.PrismaClientKnownRequestError &&
       error.code === 'P2002'
     ) {
-      throw new ConflictException('Ya existe una categoria con ese slug.');
+      throw new ConflictException('Ya existe una categoría con ese slug.');
     }
   }
 }

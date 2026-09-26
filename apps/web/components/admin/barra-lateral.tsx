@@ -27,12 +27,12 @@ interface EnlaceNav {
 const ENLACES: readonly EnlaceNav[] = [
   { href: "/admin", etiqueta: "Resumen", Icono: IconLayoutDashboard },
   { href: "/admin/productos", etiqueta: "Productos", Icono: IconShoppingBag },
-  { href: "/admin/categorias", etiqueta: "Categorias", Icono: IconCategory },
+  { href: "/admin/categorias", etiqueta: "Categorías", Icono: IconCategory },
   { href: "/admin/pedidos", etiqueta: "Pedidos", Icono: IconReceipt },
-  { href: "/admin/metodos-pago", etiqueta: "Metodos de pago", Icono: IconWallet },
+  { href: "/admin/metodos-pago", etiqueta: "Métodos de pago", Icono: IconWallet },
   { href: "/admin/reclamos", etiqueta: "Reclamos", Icono: IconBook2 },
   { href: "/admin/suscriptores", etiqueta: "Suscriptores", Icono: IconMail },
-  { href: "/admin/configuracion", etiqueta: "Configuracion", Icono: IconSettings },
+  { href: "/admin/configuracion", etiqueta: "Configuración", Icono: IconSettings },
   { href: "/admin/cuenta", etiqueta: "Mi cuenta", Icono: IconUserCircle },
 ];
 
@@ -65,10 +65,10 @@ export function BarraLateral() {
             Valentino Benites
           </span>
         </Link>
-        <p className="mt-1 text-xs uppercase tracking-wide text-texto/60">Panel de gestion</p>
+        <p className="mt-1 text-xs uppercase tracking-wide text-texto/60">Panel de gestión</p>
       </div>
 
-      <nav aria-label="Navegacion del panel" className="flex flex-1 flex-col gap-1 p-3">
+      <nav aria-label="Navegación del panel" className="flex flex-1 flex-col gap-1 p-3">
         {ENLACES.map(({ href, etiqueta, Icono }) => {
           const activo = href === "/admin" ? pathname === href : pathname.startsWith(href);
           return (
@@ -97,7 +97,7 @@ export function BarraLateral() {
           className="flex w-full items-center gap-3 px-3 py-2.5 text-sm text-texto transition-colors hover:bg-black/[.04]"
         >
           <IconLogout className="h-5 w-5" aria-hidden />
-          Cerrar sesion
+          Cerrar sesión
         </button>
       </div>
     </aside>

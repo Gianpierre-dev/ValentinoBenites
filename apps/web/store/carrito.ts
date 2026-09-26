@@ -11,15 +11,20 @@
  * Guarda lo minimo para pintar el carrito sin volver a llamar a la API; el total
  * final del pedido lo recalcula el backend.
  *
- * Modelo hecho-a-pedido: no hay stock ni topes de inventario (cantidad minima 1).
+ * Modelo hecho-a-pedido: no hay stock. La cantidad va de 1 a CANTIDAD_MAXIMA, el
+ * mismo tope que aplica el backend por linea.
  */
 
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import type { Producto, Variante } from "@/lib/tipos";
+import type { LineaCotizada, Producto, Variante } from "@/lib/tipos";
+import { sincronizarEntrePestanas } from "./sincronizar-pestanas";
 
 /** Snapshot de color para una linea agregada sin color (multi-color). */
 export const COLOR_A_COORDINAR = "A coordinar";
+
+/** Tope de unidades por linea: el mismo que valida el backend. */
+export const CANTIDAD_MAXIMA = 999;
 
 /** Linea del carrito: datos minimos para pintarla + cantidad. */
 export interface LineaCarrito {
@@ -57,6 +62,11 @@ interface EstadoCarrito {
   quitar: (clave: string) => void;
   cambiarCantidad: (clave: string, cantidad: number) => void;
   vaciar: () => void;
+  /**
+   * Aplica la cotizacion del servidor: actualiza el precio de cada linea al
+   * vigente y quita las que ya no se venden. Devuelve los nombres quitados.
+   */
+  sincronizarConCotizacion: (lineasCotizadas: LineaCotizada[]) => string[];
   /** Abre el panel lateral del carrito. */
   abrir: () => void;
   /** Cierra el panel lateral del carrito. */
@@ -79,9 +89,15 @@ function precioEfectivoProducto(producto: Producto): number {
   return producto.precioOferta ?? producto.precio;
 }
 
-/** La cantidad nunca baja de 1 (sin tope superior: hecho a pedido). */
+/** La cantidad queda entre 1 y CANTIDAD_MAXIMA, y siempre entera. */
 function normalizarCantidad(cantidad: number): number {
-  return cantidad < 1 ? 1 : cantidad;
+  if (!Number.isFinite(cantidad) || cantidad < 1) return 1;
+  return Math.min(Math.floor(cantidad), CANTIDAD_MAXIMA);
+}
+
+/** Clave de la linea del carrito que corresponde a una linea cotizada. */
+function claveDeCotizada(linea: LineaCotizada): string {
+  return linea.varianteId ?? claveCoordinar(linea.productoId ?? "");
 }
 
 /**
@@ -170,6 +186,30 @@ export const useCarrito = create<EstadoCarrito>()(
 
       vaciar: () => set({ lineas: [] }),
 
+      sincronizarConCotizacion: (lineasCotizadas) => {
+        const porClave = new Map(
+          lineasCotizadas.map((linea) => [claveDeCotizada(linea), linea]),
+        );
+        const actuales = get().lineas;
+        const quitadas: string[] = [];
+        const lineas = actuales.flatMap((linea) => {
+          const cotizada = porClave.get(linea.clave);
+          if (!cotizada) return [linea];
+          if (!cotizada.disponible || cotizada.precioUnitario === null) {
+            quitadas.push(linea.nombre);
+            return [];
+          }
+          return linea.precioUnitario === cotizada.precioUnitario
+            ? [linea]
+            : [{ ...linea, precioUnitario: cotizada.precioUnitario }];
+        });
+        const cambio =
+          lineas.length !== actuales.length ||
+          lineas.some((linea, i) => linea !== actuales[i]);
+        if (cambio) set({ lineas });
+        return quitadas;
+      },
+
       abrir: () => set({ abierto: true }),
 
       cerrar: () => set({ abierto: false }),
@@ -191,3 +231,5 @@ export const useCarrito = create<EstadoCarrito>()(
     },
   ),
 );
+
+sincronizarEntrePestanas(CLAVE_PERSISTENCIA, () => useCarrito.persist.rehydrate());

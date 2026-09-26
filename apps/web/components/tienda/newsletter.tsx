@@ -47,7 +47,7 @@ export function Newsletter() {
           id="titulo-newsletter"
           className="text-3xl font-extrabold sm:text-4xl"
         >
-          Suscribete y entérate primero
+          Suscríbete y entérate primero
         </h2>
         <p className="mt-3 text-texto">
           Recibe novedades, lanzamientos y ofertas exclusivas en tu correo.
@@ -72,7 +72,7 @@ export function Newsletter() {
                 value={email}
                 onChange={(evento) => setEmail(evento.target.value)}
                 placeholder="tu@correo.com"
-                aria-label="Correo electronico"
+                aria-label="Correo electrónico"
                 className="sm:flex-1"
               />
               <Boton type="submit" tamano="lg" cargando={enviando}>

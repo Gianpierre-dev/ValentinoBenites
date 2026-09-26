@@ -3,11 +3,13 @@
 import Image from "next/image";
 import { IconShoppingBag, IconClockHour4 } from "@tabler/icons-react";
 import type { LineaCarrito } from "@/store/carrito";
-import { formatearPrecio } from "@/lib/utilidades";
+import { colorVisible, formatearPrecio } from "@/lib/utilidades";
 
 interface PropsResumenPedido {
   lineas: LineaCarrito[];
   total: number;
+  /** true mientras el servidor confirma los precios vigentes. */
+  calculando?: boolean;
 }
 
 /**
@@ -15,7 +17,7 @@ interface PropsResumenPedido {
  * producto con su foto miniatura, cantidad y subtotal de linea, mas el total
  * destacado. Solo lectura (la edicion de cantidades vive en el carrito).
  */
-export function ResumenPedido({ lineas, total }: PropsResumenPedido) {
+export function ResumenPedido({ lineas, total, calculando = false }: PropsResumenPedido) {
   const unidades = lineas.reduce((suma, linea) => suma + linea.cantidad, 0);
 
   return (
@@ -59,7 +61,9 @@ export function ResumenPedido({ lineas, total }: PropsResumenPedido) {
               <p className="text-sm font-medium leading-snug text-texto-fuerte">
                 {linea.nombre}
               </p>
-              <p className="text-xs text-texto">Color: {linea.color}</p>
+              {colorVisible(linea.nombre, linea.color) && (
+                <p className="text-xs text-texto">Color: {linea.color}</p>
+              )}
               <p className="text-xs text-texto">
                 {linea.cantidad} × {formatearPrecio(linea.precioUnitario)}
               </p>
@@ -87,8 +91,15 @@ export function ResumenPedido({ lineas, total }: PropsResumenPedido) {
           <span className="text-sm font-semibold uppercase tracking-wide text-texto-fuerte">
             Total productos
           </span>
-          <span className="font-display text-2xl font-semibold text-acento">
-            {formatearPrecio(total)}
+          <span
+            aria-live="polite"
+            className="font-display text-2xl font-semibold text-acento"
+          >
+            {calculando ? (
+              <span className="text-base font-normal text-texto">Calculando…</span>
+            ) : (
+              formatearPrecio(total)
+            )}
           </span>
         </div>
         <p className="text-xs text-texto">

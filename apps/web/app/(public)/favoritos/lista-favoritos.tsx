@@ -76,8 +76,14 @@ export function ListaFavoritos({ numeroWhatsapp }: PropsListaFavoritos) {
               item.precioOferta !== null && item.precioOferta < item.precio;
 
             return (
-              <li key={item.productoId} className="group relative">
-                <div className="flex h-full flex-col overflow-hidden rounded-2xl border border-borde bg-fondo shadow-[0_1px_3px_rgba(17,17,17,0.04)] transition-all duration-300 ease-out group-hover:-translate-y-1 group-hover:border-acento/30 group-hover:shadow-[0_18px_40px_-12px_rgba(125,33,129,0.28)]">
+              // El desplazamiento va en el <li> y no en el panel: un transform en el
+              // panel lo vuelve un contexto de apilamiento y el botón "Quitar"
+              // queda debajo del enlace que cubre la tarjeta.
+              <li
+                key={item.productoId}
+                className="group relative transition-transform duration-300 ease-out hover:-translate-y-1"
+              >
+                <div className="flex h-full flex-col overflow-hidden rounded-2xl border border-borde bg-fondo shadow-[0_1px_3px_rgba(17,17,17,0.04)] transition-[box-shadow,border-color] duration-300 ease-out group-hover:border-acento/30 group-hover:shadow-[0_18px_40px_-12px_rgba(125,33,129,0.28)]">
                   <div className="relative aspect-[3/4] overflow-hidden bg-perla">
                     {item.imagenUrl ? (
                       <Image

@@ -29,8 +29,12 @@ export function TarjetaProducto({ producto }: PropsTarjetaProducto) {
   const descuento = calcularDescuento(producto.precio, producto.precioOferta);
 
   return (
-    <article className="group relative h-full">
-      <div className="flex h-full flex-col overflow-hidden rounded-2xl border border-borde bg-superficie shadow-[0_2px_6px_-2px_rgba(17,17,17,0.08),0_12px_28px_-16px_rgba(125,33,129,0.22)] transition-[transform,box-shadow,border-color] duration-500 ease-suave group-hover:-translate-y-1.5 group-hover:border-acento/30 group-hover:shadow-[0_30px_54px_-22px_rgba(125,33,129,0.34)]">
+    // El desplazamiento del hover va en el <article>, que contiene al panel y al
+    // enlace: un transform en el panel lo convierte en un contexto de apilamiento
+    // propio y sus botones (z-20) quedan debajo del enlace (z-10), así que un clic
+    // en "Agregar" o en el corazón abre la ficha.
+    <article className="group relative h-full transition-transform duration-500 ease-suave hover:-translate-y-1.5">
+      <div className="flex h-full flex-col overflow-hidden rounded-2xl border border-borde bg-superficie shadow-[0_2px_6px_-2px_rgba(17,17,17,0.08),0_12px_28px_-16px_rgba(125,33,129,0.22)] transition-[box-shadow,border-color] duration-500 ease-suave group-hover:border-acento/30 group-hover:shadow-[0_30px_54px_-22px_rgba(125,33,129,0.34)]">
         <div className="relative aspect-[3/4] overflow-hidden bg-perla">
           {imagen ? (
             <Image

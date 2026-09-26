@@ -1,5 +1,5 @@
 /** Mensaje mostrado si la clienta aun no configuro ninguno. */
-const MENSAJE_FALLBACK = "Envíos gratis a todo el Perú";
+const MENSAJE_FALLBACK = "Envíos a todo el Perú";
 
 /** Separador visual entre mensajes dentro de la tira. */
 const SEPARADOR = "•";

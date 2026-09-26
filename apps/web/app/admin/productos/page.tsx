@@ -169,7 +169,7 @@ export default function PaginaProductos() {
       {estado.tipo === "error" && <VistaError mensaje={estado.mensaje} alReintentar={cargar} />}
 
       {estado.tipo === "listo" && estado.datos.productos.length === 0 && (
-        <VistaVacia>Aun no tienes productos. Crea el primero.</VistaVacia>
+        <VistaVacia>Aún no tienes productos. Crea el primero.</VistaVacia>
       )}
 
       {estado.tipo === "listo" && estado.datos.productos.length > 0 && (
@@ -285,7 +285,7 @@ export default function PaginaProductos() {
       <ModalConfirmacion
         abierto={aEliminar !== null}
         titulo="Eliminar producto"
-        mensaje={`Se eliminara "${aEliminar?.nombre ?? ""}". Esta accion no se puede deshacer.`}
+        mensaje={`Se eliminará "${aEliminar?.nombre ?? ""}". Esta acción no se puede deshacer.`}
         cargando={eliminando}
         alConfirmar={confirmarEliminar}
         alCancelar={() => setAEliminar(null)}

@@ -18,7 +18,7 @@ export function IconoCarrito() {
     <button
       type="button"
       onClick={abrir}
-      aria-label={`Abrir carrito${montado && cantidad > 0 ? `, ${cantidad} productos` : ""}`}
+      aria-label={`Abrir carrito${montado && cantidad > 0 ? `, ${cantidad} ${cantidad === 1 ? "producto" : "productos"}` : ""}`}
       className="relative inline-flex h-11 w-11 items-center justify-center text-texto-fuerte transition-colors hover:text-acento sm:h-10 sm:w-10"
     >
       <IconShoppingBag size={22} stroke={1.5} aria-hidden />
