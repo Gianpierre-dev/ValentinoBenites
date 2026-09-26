@@ -85,7 +85,7 @@ export function ListaFavoritos({ numeroWhatsapp }: PropsListaFavoritos) {
                         alt={item.nombre}
                         fill
                         sizes="(min-width: 1024px) 25vw, 50vw"
-                        className="object-cover transition-transform duration-500 ease-out group-hover:scale-[1.06]"
+                        className="object-contain transition-transform duration-500 ease-out group-hover:scale-[1.06]"
                       />
                     ) : (
                       <div className="flex h-full items-center justify-center text-xs uppercase tracking-wide text-texto/50">

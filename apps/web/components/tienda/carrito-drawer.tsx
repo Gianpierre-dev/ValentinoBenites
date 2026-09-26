@@ -151,7 +151,7 @@ export function CarritoDrawer() {
                         alt={linea.nombre}
                         fill
                         sizes="80px"
-                        className="object-cover"
+                        className="object-contain"
                       />
                     ) : (
                       <span className="flex h-full items-center justify-center text-[10px] uppercase text-texto/50">

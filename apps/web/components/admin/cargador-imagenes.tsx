@@ -76,7 +76,7 @@ export function CargadorImagenes({ imagenes, alCambiar }: PropsCargadorImagenes)
               alt={`Imagen ${indice + 1} del producto`}
               fill
               sizes="96px"
-              className="object-cover"
+              className="object-contain"
             />
             <button
               type="button"

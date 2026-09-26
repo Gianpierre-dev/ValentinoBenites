@@ -63,7 +63,7 @@ export default function PaginaCarrito() {
                       alt={linea.nombre}
                       fill
                       sizes="96px"
-                      className="object-cover transition-transform duration-500 ease-out hover:scale-105"
+                      className="object-contain transition-transform duration-500 ease-out hover:scale-105"
                     />
                   ) : (
                     <div className="flex h-full items-center justify-center text-[10px] uppercase text-texto/50">

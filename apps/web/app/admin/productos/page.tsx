@@ -321,7 +321,7 @@ function Miniatura({ producto }: { producto: Producto }) {
         alt={producto.nombre}
         fill
         sizes="48px"
-        className="object-cover"
+        className="object-contain"
       />
     </div>
   );

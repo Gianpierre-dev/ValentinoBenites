@@ -325,7 +325,7 @@ function MiniaturaVariante({ variante }: { variante: Variante }) {
         alt={variante.color}
         fill
         sizes="48px"
-        className="object-cover"
+        className="object-contain"
       />
     </div>
   );

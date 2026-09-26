@@ -25,7 +25,7 @@ export function RellenoBolita({ variante }: { variante: Variante }) {
 
   const foto = variante.imagenesEfectivas?.[0]?.url ?? null;
   if (foto) {
-    return <Image src={foto} alt="" fill sizes="32px" className="object-cover" />;
+    return <Image src={foto} alt="" fill sizes="32px" className="object-contain" />;
   }
 
   return <span aria-hidden className="block h-full w-full bg-perla" />;

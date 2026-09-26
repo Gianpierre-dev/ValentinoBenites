@@ -116,7 +116,7 @@ export default async function PaginaNosotros() {
                           alt={producto.nombre}
                           fill
                           sizes="(min-width: 640px) 33vw, 100vw"
-                          className="object-cover transition-transform duration-700 ease-suave group-hover:scale-[1.05]"
+                          className="object-contain transition-transform duration-700 ease-suave group-hover:scale-[1.05]"
                         />
                       </div>
                       <span className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent p-4 text-sm font-medium text-white">

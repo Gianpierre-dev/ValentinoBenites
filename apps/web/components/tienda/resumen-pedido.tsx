@@ -40,7 +40,7 @@ export function ResumenPedido({ lineas, total }: PropsResumenPedido) {
                   alt={linea.nombre}
                   fill
                   sizes="64px"
-                  className="object-cover"
+                  className="object-contain"
                 />
               ) : (
                 <div className="flex h-full items-center justify-center text-[10px] uppercase text-texto/50">
