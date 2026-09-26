@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -65,6 +65,7 @@ export function FormularioCheckout({
   billeteras,
 }: PropsFormularioCheckout) {
   const hidratado = useHidratado();
+  const pedidoEnUrl = useSearchParams().get(PARAMETRO_PEDIDO);
   const lineas = useCarrito((estado) => estado.lineas);
   const totalLocal = useCarrito((estado) => estado.total());
   const vaciar = useCarrito((estado) => estado.vaciar);
@@ -85,7 +86,11 @@ export function FormularioCheckout({
     billeteras.find((billetera) => billetera.id === billeteraId) ??
     billeteras[0] ??
     null;
-  const [comprobanteUrl, setComprobanteUrl] = useState<string | null>(null);
+  // El comprobante recuerda el monto que se mostraba al subirlo: si el pedido
+  // cambia después, ese comprobante ya no corresponde y hay que subir otro.
+  const [comprobante, setComprobante] = useState<{ url: string; monto: number } | null>(
+    null,
+  );
   const [subiendo, setSubiendo] = useState(false);
   const [errorComprobante, setErrorComprobante] = useState<string | null>(null);
   const [errorEnvio, setErrorEnvio] = useState<string | null>(null);
@@ -94,7 +99,7 @@ export function FormularioCheckout({
   );
   // Una clave por intento de compra: si la respuesta se pierde y el cliente
   // reintenta, el servidor devuelve el mismo pedido en vez de duplicarlo.
-  const [claveIdempotencia] = useState(() => crypto.randomUUID());
+  const [claveIdempotencia] = useState(generarClaveIdempotencia);
 
   // Pestana reservada de forma sincrona para WhatsApp (fix del popup en movil):
   // se abre dentro del gesto del usuario ANTES del await de creacion del pedido.
@@ -122,7 +127,10 @@ export function FormularioCheckout({
     );
   }
 
-  if (confirmacion) {
+  // La confirmación se muestra solo mientras la URL apunta a ese pedido: al
+  // volver a /checkout (el router no remonta la página por un cambio de query)
+  // vuelve el formulario.
+  if (confirmacion && pedidoEnUrl === confirmacion.codigo) {
     return <Confirmacion confirmacion={confirmacion} />;
   }
 
@@ -132,18 +140,29 @@ export function FormularioCheckout({
 
   // Monto que ve el cliente: el del servidor en cuanto está disponible.
   const montoMostrado = cotizacion?.subtotal ?? null;
+  const comprobanteVigente =
+    comprobante !== null && comprobante.monto === montoMostrado ? comprobante : null;
+  const comprobanteDesactualizado = comprobante !== null && comprobanteVigente === null;
+  // Con billetera no se puede pagar ni confirmar sin el monto confirmado por el servidor.
+  const pagoDigitalBloqueado = metodo === "DIGITAL" && (cotizando || montoMostrado === null);
 
   const subirComprobante = async (
     evento: React.ChangeEvent<HTMLInputElement>,
   ) => {
     const archivo = evento.target.files?.[0];
+    evento.target.value = "";
     if (!archivo) return;
+    if (montoMostrado === null) {
+      setErrorComprobante("Espera a que calculemos el monto a pagar antes de subir el comprobante.");
+      return;
+    }
+    const montoPagado = montoMostrado;
 
     setErrorComprobante(null);
     setSubiendo(true);
     try {
       const { url } = await subirComprobanteApi(archivo);
-      setComprobanteUrl(url);
+      setComprobante({ url, monto: montoPagado });
     } catch (error) {
       setErrorComprobante(mensajeError(error, "No pudimos subir el comprobante."));
     } finally {
@@ -156,6 +175,8 @@ export function FormularioCheckout({
   // no la bloquee cuando luego navegamos tras crear el pedido.
   const reservarVentanaWhatsApp = () => {
     if (metodo !== "WHATSAPP") return;
+    // Un doble clic no debe abrir dos pestañas.
+    if (ventanaWhatsAppRef.current && !ventanaWhatsAppRef.current.closed) return;
     ventanaWhatsAppRef.current = window.open("about:blank", "_blank");
   };
 
@@ -175,8 +196,8 @@ export function FormularioCheckout({
     if (!vigente.disponible) {
       return "Actualizamos tu carrito porque algunos productos ya no están disponibles. Revisa el resumen antes de confirmar.";
     }
-    if (!esWhatsApp && montoMostrado !== null && vigente.subtotal !== montoMostrado) {
-      return `El total de tu pedido cambió a ${formatearPrecio(vigente.subtotal)}. Revisa el monto antes de confirmar.`;
+    if (!esWhatsApp && comprobante && vigente.subtotal !== comprobante.monto) {
+      return `El total de tu pedido cambió a ${formatearPrecio(vigente.subtotal)} y tu comprobante es de ${formatearPrecio(comprobante.monto)}. Sube un comprobante por el monto correcto para continuar.`;
     }
     return null;
   };
@@ -204,9 +225,13 @@ export function FormularioCheckout({
       cancelar("No hay medios de pago disponibles. Usa la opción de WhatsApp.");
       return;
     }
-    if (!esWhatsApp && !comprobanteUrl) {
+    if (!esWhatsApp && !comprobanteVigente) {
       ventana?.close();
-      setErrorComprobante("Sube el comprobante de pago para continuar.");
+      setErrorComprobante(
+        comprobanteDesactualizado
+          ? "El total de tu pedido cambió. Sube un comprobante por el monto actual para continuar."
+          : "Sube el comprobante de pago para continuar.",
+      );
       return;
     }
 
@@ -226,7 +251,7 @@ export function FormularioCheckout({
         claveIdempotencia,
         ...(esWhatsApp
           ? {}
-          : { billeteraId: billeteraElegida?.id, comprobanteUrl: comprobanteUrl ?? undefined }),
+          : { billeteraId: billeteraElegida?.id, comprobanteUrl: comprobanteVigente?.url }),
       });
 
       const enlaceWhatsApp = esWhatsApp
@@ -373,7 +398,8 @@ export function FormularioCheckout({
                 alElegir={setBilleteraId}
                 monto={montoMostrado}
                 errorMonto={errorCotizacion}
-                comprobanteUrl={comprobanteUrl}
+                comprobante={comprobante}
+                comprobanteDesactualizado={comprobanteDesactualizado}
                 subiendo={subiendo}
                 errorComprobante={errorComprobante}
                 alSubir={subirComprobante}
@@ -441,6 +467,7 @@ export function FormularioCheckout({
               type="submit"
               tamano="lg"
               cargando={isSubmitting}
+              disabled={pagoDigitalBloqueado}
               onClick={reservarVentanaWhatsApp}
               className="w-full"
             >
@@ -564,7 +591,8 @@ interface PropsPagoDigital {
   /** Monto calculado por el servidor; null mientras se calcula. */
   monto: number | null;
   errorMonto: string | null;
-  comprobanteUrl: string | null;
+  comprobante: { url: string; monto: number } | null;
+  comprobanteDesactualizado: boolean;
   subiendo: boolean;
   errorComprobante: string | null;
   alSubir: (evento: React.ChangeEvent<HTMLInputElement>) => void;
@@ -582,7 +610,8 @@ function PagoDigital({
   alElegir,
   monto,
   errorMonto,
-  comprobanteUrl,
+  comprobante,
+  comprobanteDesactualizado,
   subiendo,
   errorComprobante,
   alSubir,
@@ -590,6 +619,7 @@ function PagoDigital({
   const datos = elegida.instrucciones;
   const qr = elegida.qrUrl;
   const billetera = elegida.nombre;
+  const comprobanteUrl = comprobante?.url ?? null;
 
   return (
     <div className="mt-5 rounded-xl border border-borde bg-perla p-5">
@@ -659,7 +689,7 @@ function PagoDigital({
         </figure>
       )}
 
-      {datos && (
+      {monto !== null && datos && (
         <p className="mt-4 whitespace-pre-line rounded-lg border border-borde bg-fondo px-4 py-3 text-sm text-texto">
           {datos}
         </p>
@@ -695,7 +725,7 @@ function PagoDigital({
           type="file"
           accept={TIPOS_COMPROBANTE}
           onChange={alSubir}
-          disabled={subiendo}
+          disabled={subiendo || monto === null}
           className="sr-only"
         />
 
@@ -710,6 +740,14 @@ function PagoDigital({
               className="object-contain"
             />
           </div>
+        )}
+
+        {comprobanteDesactualizado && comprobante && monto !== null && (
+          <p role="alert" className="mt-3 text-sm text-oferta">
+            Tu pedido cambió: el comprobante que subiste es de{" "}
+            {formatearPrecio(comprobante.monto)} y el total ahora es{" "}
+            {formatearPrecio(monto)}. Sube un comprobante por el monto correcto.
+          </p>
         )}
 
         {errorComprobante && (
@@ -803,6 +841,20 @@ function Confirmacion({ confirmacion }: { confirmacion: ConfirmacionPedido }) {
       </Boton>
     </div>
   );
+}
+
+/**
+ * Clave por intento de compra. crypto.randomUUID solo existe en contextos seguros
+ * (https o localhost): al probar desde otro equipo de la red local por http se
+ * arma un UUID v4 con getRandomValues, que sí está disponible.
+ */
+function generarClaveIdempotencia(): string {
+  if (typeof crypto.randomUUID === "function") return crypto.randomUUID();
+  const bytes = crypto.getRandomValues(new Uint8Array(16));
+  bytes[6] = (bytes[6] & 0x0f) | 0x40;
+  bytes[8] = (bytes[8] & 0x3f) | 0x80;
+  const hex = [...bytes].map((b) => b.toString(16).padStart(2, "0")).join("");
+  return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
 }
 
 function mensajeError(error: unknown, respaldo: string): string {

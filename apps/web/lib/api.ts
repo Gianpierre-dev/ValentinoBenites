@@ -135,6 +135,9 @@ function cerrarSesionExpirada(): never {
 /** Tiempo máximo de espera de una petición: sin él, un fetch colgado bloquea el checkout. */
 const TIEMPO_MAXIMO_MS = 20_000;
 
+/** Las subidas (hasta 5 MB) necesitan más margen en conexiones móviles lentas. */
+const TIEMPO_SUBIDA_MS = 90_000;
+
 const MENSAJE_SIN_CONEXION =
   "No pudimos conectarnos con la tienda. Revisa tu conexión e intenta de nuevo.";
 
@@ -142,19 +145,28 @@ const MENSAJE_SERVIDOR_CAIDO =
   "La tienda no está disponible en este momento. Intenta de nuevo en unos minutos.";
 
 /** fetch con tiempo límite; los errores de red se traducen a un mensaje legible. */
-async function ejecutarFetch(url: string, init: RequestInit): Promise<Response> {
+async function ejecutarFetch(
+  url: string,
+  init: RequestInit,
+  tiempoMaximoMs: number = TIEMPO_MAXIMO_MS,
+): Promise<Response> {
   try {
-    return await fetch(url, { ...init, signal: AbortSignal.timeout(TIEMPO_MAXIMO_MS) });
+    return await fetch(url, { ...init, signal: AbortSignal.timeout(tiempoMaximoMs) });
   } catch (error) {
     throw new ErrorApi(0, MENSAJE_SIN_CONEXION, error);
   }
 }
 
 async function leerCuerpo(respuesta: Response): Promise<unknown> {
-  const tipo = respuesta.headers.get("content-type") ?? "";
-  if (tipo.includes("application/json")) return respuesta.json();
-  const texto = await respuesta.text();
-  return texto.length > 0 ? texto : null;
+  // El tiempo límite también puede cortar la lectura del cuerpo.
+  try {
+    const tipo = respuesta.headers.get("content-type") ?? "";
+    if (tipo.includes("application/json")) return await respuesta.json();
+    const texto = await respuesta.text();
+    return texto.length > 0 ? texto : null;
+  } catch (error) {
+    throw new ErrorApi(0, MENSAJE_SIN_CONEXION, error);
+  }
 }
 
 /**
@@ -576,7 +588,7 @@ export async function subirArchivo(archivo: File): Promise<{ url: string }> {
     method: "POST",
     headers: cabeceras,
     body: formulario,
-  });
+  }, TIEMPO_SUBIDA_MS);
   if (respuesta.status === 401) cerrarSesionExpirada();
 
   const datos = await leerCuerpo(respuesta);
@@ -597,7 +609,7 @@ export async function subirComprobante(archivo: File): Promise<{ url: string }> 
   const respuesta = await ejecutarFetch(`${URL_BASE_API}/storage/comprobante`, {
     method: "POST",
     body: formulario,
-  });
+  }, TIEMPO_SUBIDA_MS);
 
   const datos = await leerCuerpo(respuesta);
   if (!respuesta.ok) {

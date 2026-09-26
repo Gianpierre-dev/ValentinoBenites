@@ -1,5 +1,7 @@
+import { Suspense } from "react";
 import type { Metadata } from "next";
 import { FormularioCheckout } from "@/components/tienda";
+import { Spinner } from "@/components/ui";
 import { listarBilleteras, obtenerConfiguracion } from "@/lib/api";
 import type { Billetera, Configuracion } from "@/lib/tipos";
 
@@ -28,7 +30,16 @@ export default async function PaginaCheckout() {
       />
       <div className="relative mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:py-14 lg:px-8">
         {/* El encabezado vive en el formulario: en la confirmación no corresponde. */}
-        <FormularioCheckout configuracion={configuracion} billeteras={billeteras} />
+        {/* El formulario lee ?pedido= con useSearchParams: requiere un Suspense. */}
+        <Suspense
+          fallback={
+            <div className="flex justify-center py-24">
+              <Spinner tamano="lg" etiqueta="Cargando checkout" />
+            </div>
+          }
+        >
+          <FormularioCheckout configuracion={configuracion} billeteras={billeteras} />
+        </Suspense>
       </div>
     </div>
   );

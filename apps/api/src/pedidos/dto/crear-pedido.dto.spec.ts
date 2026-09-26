@@ -40,7 +40,8 @@ describe('CrearPedidoDto (validación)', () => {
     process.env.API_PUBLIC_URL = API_PUBLICA;
   });
   afterAll(() => {
-    process.env.API_PUBLIC_URL = apiPublicaOriginal;
+    if (apiPublicaOriginal === undefined) delete process.env.API_PUBLIC_URL;
+    else process.env.API_PUBLIC_URL = apiPublicaOriginal;
   });
 
   it('acepta un pedido bien formado', () => {
