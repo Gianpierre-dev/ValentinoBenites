@@ -2,7 +2,7 @@ import {
   BadRequestException,
   ServiceUnavailableException,
 } from '@nestjs/common';
-import { EstadoPedido } from '@prisma/client';
+import { EstadoPedido, Prisma } from '@prisma/client';
 import { METODO_IZIPAY } from '../pedidos/metodos-pago';
 import { PagosService } from './pagos.service';
 
@@ -11,6 +11,7 @@ type UpdateArgs = [
     where: { id: string };
     data: {
       estado: EstadoPedido;
+      montoPagado?: Prisma.Decimal;
       proveedorPago: string;
       referenciaTransaccion: string;
       rawPago: Record<string, unknown>;
@@ -124,6 +125,8 @@ describe('PagosService (Izipay STUB)', () => {
         id: 'ped-1',
         estado: EstadoPedido.PENDIENTE_PAGO,
         metodoPago: METODO_IZIPAY,
+        subtotal: new Prisma.Decimal(84.9),
+        total: new Prisma.Decimal(99.9),
       });
       prisma.pedido.update.mockImplementation(({ data }) => ({
         id: 'ped-1',
@@ -139,6 +142,9 @@ describe('PagosService (Izipay STUB)', () => {
       const args = prisma.pedido.update.mock.calls[0][0];
       expect(args.where).toEqual({ id: 'ped-1' });
       expect(args.data.estado).toBe(EstadoPedido.PAGADO);
+      // El pago del checkout cubre los productos; el envio se cobra aparte.
+      expect(args.data.montoPagado?.toNumber()).toBe(84.9);
+      expect(args.data).not.toHaveProperty('estadoEnvio');
       expect(args.data.proveedorPago).toBe('IZIPAY');
       expect(args.data.referenciaTransaccion).toBe('IZI-TX-9999');
       expect(args.data.rawPago).toMatchObject({

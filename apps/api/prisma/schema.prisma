@@ -43,6 +43,16 @@ enum EstadoPedido {
   RECHAZADO
 }
 
+// El envio se cobra aparte de los productos (se coordina por WhatsApp segun el
+// destino), asi que tiene su propio estado de cobro.
+enum EstadoEnvio {
+  POR_COORDINAR // todavia no se definio el costo
+  COTIZADO // la tienda lo cobra y el cliente aun no lo pago
+  PAGADO // la tienda ya recibio el pago del envio
+  PAGO_EN_DESTINO // el cliente lo paga a la agencia al recibir; la tienda no lo cobra
+  SIN_COSTO // envio gratuito para este pedido
+}
+
 model Categoria {
   id        String     @id @default(cuid())
   nombre    String
@@ -145,6 +155,11 @@ model Pedido {
   subtotal      Decimal      @default(0) @db.Decimal(10, 2)
   costoEnvio    Decimal      @default(0) @db.Decimal(10, 2)
   total         Decimal      @db.Decimal(10, 2)
+  // Dinero efectivamente recibido: se fija al marcar el pedido como pagado y
+  // solo crece al registrar el pago del envio. Nunca se recalcula a partir del
+  // total, asi el registro coincide con la plata que entro. null = sin pagos.
+  montoPagado   Decimal?     @db.Decimal(10, 2)
+  estadoEnvio   EstadoEnvio  @default(POR_COORDINAR)
   // Ciudad/departamento que el cliente indica en el checkout (opcional, ayuda a
   // cotizar). La direccion exacta la completa la admin al coordinar el envio.
   ciudadEntrega    String?

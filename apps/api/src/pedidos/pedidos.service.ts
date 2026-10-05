@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { EstadoPedido, Prisma } from '@prisma/client';
+import { EstadoEnvio, EstadoPedido, Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import {
   CANTIDAD_MAXIMA_POR_LINEA,
@@ -9,15 +9,24 @@ import {
 } from './dto/crear-pedido.dto';
 import { ActualizarEstadoDto } from './dto/actualizar-estado.dto';
 import { ActualizarEnvioDto } from './dto/actualizar-envio.dto';
+import { RegistrarPagoEnvioDto } from './dto/registrar-pago-envio.dto';
 import { precioEfectivoVariante } from '../variantes/variantes.helpers';
 import { transicionPermitida } from './maquina-estados';
 import { METODO_WHATSAPP } from './metodos-pago';
+import { datosPagoRecibido } from './cobro';
 
 // Estados terminales/despachados: ya no se puede tocar el envio del pedido.
 const ESTADOS_ENVIO_CERRADO: EstadoPedido[] = [
   EstadoPedido.ENVIADO,
   EstadoPedido.CANCELADO,
   EstadoPedido.RECHAZADO,
+];
+
+// Estados en los que el pedido ya registro un pago.
+const ESTADOS_CON_PAGO: EstadoPedido[] = [
+  EstadoPedido.PAGADO,
+  EstadoPedido.EN_PRODUCCION,
+  EstadoPedido.ENVIADO,
 ];
 
 const INCLUIR_ITEMS = {
@@ -31,6 +40,9 @@ const COLOR_A_COORDINAR = 'A coordinar';
 const ZONA_HORARIA_NEGOCIO = 'America/Lima';
 
 const INTENTOS_CODIGO = 5;
+
+const MENSAJE_PEDIDO_CAMBIADO =
+  'El pedido cambió mientras lo editabas. Recarga la página e intenta de nuevo.';
 
 interface LineaCalculada {
   productoId: string;
@@ -161,12 +173,13 @@ export class PedidosService {
     // pedido entre la lectura y la escritura, no se pisa.
     const { count } = await this.prisma.pedido.updateMany({
       where: { id, estado: pedido.estado },
-      data: { estado: dto.estado },
+      data:
+        dto.estado === EstadoPedido.PAGADO
+          ? datosPagoRecibido(pedido)
+          : { estado: dto.estado },
     });
     if (count === 0) {
-      throw new BadRequestException(
-        'El pedido cambió mientras lo editabas. Recarga la página e intenta de nuevo.',
-      );
+      throw new BadRequestException(MENSAJE_PEDIDO_CAMBIADO);
     }
     return this.prisma.pedido.findUniqueOrThrow({
       where: { id },
@@ -177,8 +190,9 @@ export class PedidosService {
   /**
    * Registra el envio coordinado por la admin: costo y direccion exacta. El
    * total se RECALCULA server-side como subtotal + costoEnvio, para que sea la
-   * unica fuente de verdad. Solo tiene sentido mientras el pedido no se despacho
-   * ni se cerro (los estados terminales no admiten cambios de envio).
+   * unica fuente de verdad. El monto pagado NO se toca: si el pedido ya estaba
+   * pagado, el costo nuevo queda como saldo pendiente. No se admite una vez
+   * despachado/cerrado el pedido ni con el envio ya cobrado.
    */
   async actualizarEnvio(id: string, dto: ActualizarEnvioDto) {
     const pedido = await this.obtenerOFallar(id);
@@ -187,13 +201,26 @@ export class PedidosService {
         `No se puede editar el envío de un pedido ${pedido.estado}.`,
       );
     }
-    const costoEnvio = new Prisma.Decimal(dto.costoEnvio);
+    if (pedido.estadoEnvio === EstadoEnvio.PAGADO) {
+      throw new BadRequestException(
+        'El envío de este pedido ya se cobró: no se puede modificar.',
+      );
+    }
+    // Sin costo cargado (solo la direccion) el envio sigue por coordinar.
+    const costoEnvio = new Prisma.Decimal(
+      dto.pagoEnDestino ? 0 : (dto.costoEnvio ?? 0),
+    );
     const { count } = await this.prisma.pedido.updateMany({
-      where: { id, estado: { notIn: ESTADOS_ENVIO_CERRADO } },
+      where: {
+        id,
+        estado: { notIn: ESTADOS_ENVIO_CERRADO },
+        estadoEnvio: { not: EstadoEnvio.PAGADO },
+      },
       data: {
         costoEnvio,
         direccionEntrega: dto.direccionEntrega?.trim() || null,
         total: pedido.subtotal.plus(costoEnvio),
+        estadoEnvio: this.estadoEnvioCotizado(dto),
       },
     });
     if (count === 0) {
@@ -205,6 +232,61 @@ export class PedidosService {
       where: { id },
       include: INCLUIR_ITEMS,
     });
+  }
+
+  /**
+   * Registra que el cliente pago el envio: suma el costo al monto pagado y
+   * cierra el cobro del envio. Exige el pedido ya pagado (el pago de los
+   * productos va primero) y que el costo coincida con el que la admin vio al
+   * confirmar: si cambio desde otra pestaña, no se registra un monto distinto.
+   */
+  async registrarPagoEnvio(id: string, dto: RegistrarPagoEnvioDto) {
+    const pedido = await this.obtenerOFallar(id);
+    if (pedido.estadoEnvio !== EstadoEnvio.COTIZADO) {
+      throw new BadRequestException(
+        'Este pedido no tiene un envío pendiente de cobro.',
+      );
+    }
+    if (
+      !ESTADOS_CON_PAGO.includes(pedido.estado) ||
+      pedido.montoPagado === null
+    ) {
+      throw new BadRequestException(
+        'Primero marca el pedido como pagado y luego registra el pago del envío.',
+      );
+    }
+    const costoEsperado = new Prisma.Decimal(dto.costoEnvioEsperado);
+    if (!pedido.costoEnvio.equals(costoEsperado)) {
+      throw new BadRequestException(MENSAJE_PEDIDO_CAMBIADO);
+    }
+    const { count } = await this.prisma.pedido.updateMany({
+      where: {
+        id,
+        estado: { in: ESTADOS_CON_PAGO },
+        estadoEnvio: EstadoEnvio.COTIZADO,
+        montoPagado: pedido.montoPagado,
+        costoEnvio: costoEsperado,
+      },
+      data: {
+        montoPagado: pedido.montoPagado.plus(pedido.costoEnvio),
+        estadoEnvio: EstadoEnvio.PAGADO,
+      },
+    });
+    if (count === 0) {
+      throw new BadRequestException(MENSAJE_PEDIDO_CAMBIADO);
+    }
+    return this.prisma.pedido.findUniqueOrThrow({
+      where: { id },
+      include: INCLUIR_ITEMS,
+    });
+  }
+
+  /** Estado del envio segun lo que la admin acaba de coordinar. */
+  private estadoEnvioCotizado(dto: ActualizarEnvioDto): EstadoEnvio {
+    if (dto.pagoEnDestino) return EstadoEnvio.PAGO_EN_DESTINO;
+    if (dto.costoEnvio === undefined) return EstadoEnvio.POR_COORDINAR;
+    // Un 0 escrito explicitamente es un envio gratuito.
+    return dto.costoEnvio > 0 ? EstadoEnvio.COTIZADO : EstadoEnvio.SIN_COSTO;
   }
 
   private async obtenerOFallar(id: string) {

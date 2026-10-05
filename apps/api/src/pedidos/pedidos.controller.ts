@@ -15,6 +15,7 @@ import { PedidosService } from './pedidos.service';
 import { CotizarPedidoDto, CrearPedidoDto } from './dto/crear-pedido.dto';
 import { ActualizarEstadoDto } from './dto/actualizar-estado.dto';
 import { ActualizarEnvioDto } from './dto/actualizar-envio.dto';
+import { RegistrarPagoEnvioDto } from './dto/registrar-pago-envio.dto';
 
 @Controller('pedidos')
 export class PedidosController {
@@ -51,5 +52,15 @@ export class PedidosController {
   @UseGuards(JwtAuthGuard)
   actualizarEnvio(@Param('id') id: string, @Body() dto: ActualizarEnvioDto) {
     return this.pedidosService.actualizarEnvio(id, dto);
+  }
+
+  // El cliente pago el envio (se cobra aparte del pago de los productos).
+  @Patch(':id/envio/pago')
+  @UseGuards(JwtAuthGuard)
+  registrarPagoEnvio(
+    @Param('id') id: string,
+    @Body() dto: RegistrarPagoEnvioDto,
+  ) {
+    return this.pedidosService.registrarPagoEnvio(id, dto);
   }
 }

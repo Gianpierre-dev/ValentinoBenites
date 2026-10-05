@@ -8,6 +8,7 @@ import { EstadoPedido, Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { transicionPermitida } from '../pedidos/maquina-estados';
 import { METODO_IZIPAY } from '../pedidos/metodos-pago';
+import { datosPagoRecibido } from '../pedidos/cobro';
 import { GenerarTokenDto } from './dto/generar-token.dto';
 import { CallbackIzipayDto } from './dto/callback-izipay.dto';
 
@@ -96,7 +97,7 @@ export class PagosService {
     return this.prisma.pedido.update({
       where: { id: pedido.id },
       data: {
-        estado: EstadoPedido.PAGADO,
+        ...datosPagoRecibido(pedido),
         proveedorPago: PROVEEDOR_IZIPAY,
         referenciaTransaccion: dto.referenciaTransaccion,
         rawPago: dto as unknown as Prisma.InputJsonValue,

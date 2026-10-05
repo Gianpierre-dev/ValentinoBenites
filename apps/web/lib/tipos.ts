@@ -41,6 +41,14 @@ export type EstadoPedido =
   | "CANCELADO"
   | "RECHAZADO";
 
+/** Cobro del envío, independiente del pago de los productos. */
+export type EstadoEnvio =
+  | "POR_COORDINAR"
+  | "COTIZADO"
+  | "PAGADO"
+  | "PAGO_EN_DESTINO"
+  | "SIN_COSTO";
+
 export interface Categoria {
   id: string;
   nombre: string;
@@ -149,8 +157,11 @@ export interface Pedido {
   subtotal: number;
   /** Envío coordinado por la admin; 0 hasta que se define. */
   costoEnvio: number;
-  /** subtotal + costoEnvio: el número real cobrado. */
+  /** subtotal + costoEnvio: lo que el cliente debe pagar a la tienda. */
   total: number;
+  /** Dinero ya recibido; null mientras no se registra ningún pago. */
+  montoPagado: number | null;
+  estadoEnvio: EstadoEnvio;
   /** Ciudad/departamento que indicó el cliente (opcional). */
   ciudadEntrega: string | null;
   /** Dirección exacta que completa la admin al coordinar. */

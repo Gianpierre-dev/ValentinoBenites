@@ -1,5 +1,5 @@
 import { BadRequestException } from '@nestjs/common';
-import { EstadoPedido, Prisma } from '@prisma/client';
+import { EstadoEnvio, EstadoPedido, Prisma } from '@prisma/client';
 import { PedidosService } from './pedidos.service';
 import { CrearPedidoDto } from './dto/crear-pedido.dto';
 
@@ -451,43 +451,126 @@ describe('PedidosService', () => {
   });
 
   describe('actualizarEnvio', () => {
-    it('recalcula el total como subtotal + costoEnvio, condicionado a un estado editable', async () => {
-      prisma.pedido.findUnique.mockResolvedValueOnce({
-        id: 'ped-1',
-        subtotal: dec(84.9),
-        estado: EstadoPedido.PENDIENTE_PAGO,
-      });
+    /** Pedido guardado tal como lo lee el servicio antes de editar el envio. */
+    const guardado = (extra: Record<string, unknown> = {}) => ({
+      id: 'ped-1',
+      subtotal: dec(84.9),
+      costoEnvio: dec(0),
+      total: dec(84.9),
+      montoPagado: null,
+      estado: EstadoPedido.PENDIENTE_PAGO,
+      estadoEnvio: EstadoEnvio.POR_COORDINAR,
+      ...extra,
+    });
+
+    interface EscrituraEnvio {
+      where: {
+        id: string;
+        estado: { notIn: EstadoPedido[] };
+        estadoEnvio: { not: EstadoEnvio };
+      };
+      data: {
+        costoEnvio: Prisma.Decimal;
+        total: Prisma.Decimal;
+        direccionEntrega: string | null;
+        estadoEnvio: EstadoEnvio;
+        montoPagado?: unknown;
+      };
+    }
+
+    const escritura = () =>
+      (prisma.pedido.updateMany.mock.calls[0] as [EscrituraEnvio])[0];
+
+    beforeEach(() => {
       prisma.pedido.updateMany.mockResolvedValue({ count: 1 });
       prisma.pedido.findUniqueOrThrow.mockResolvedValue({ id: 'ped-1' });
+    });
+
+    it('recalcula el total y deja el envío cotizado, condicionado a un estado editable', async () => {
+      prisma.pedido.findUnique.mockResolvedValueOnce(guardado());
 
       await service.actualizarEnvio('ped-1', {
         costoEnvio: 15,
         direccionEntrega: 'Av. Los Incas 123, Arequipa',
       });
 
-      const [{ where, data }] = prisma.pedido.updateMany.mock.calls[0] as [
-        {
-          where: { id: string; estado: { notIn: EstadoPedido[] } };
-          data: {
-            costoEnvio: Prisma.Decimal;
-            total: Prisma.Decimal;
-            direccionEntrega: string;
-          };
-        },
-      ];
+      const { where, data } = escritura();
       expect(where.id).toBe('ped-1');
       expect(where.estado.notIn).toContain(EstadoPedido.ENVIADO);
+      expect(where.estadoEnvio).toEqual({ not: EstadoEnvio.PAGADO });
       expect(data.costoEnvio.toNumber()).toBe(15);
       expect(data.total.toNumber()).toBe(99.9);
       expect(data.direccionEntrega).toBe('Av. Los Incas 123, Arequipa');
+      expect(data.estadoEnvio).toBe(EstadoEnvio.COTIZADO);
+    });
+
+    it('con costo 0 el envío queda sin costo', async () => {
+      prisma.pedido.findUnique.mockResolvedValueOnce(guardado());
+
+      await service.actualizarEnvio('ped-1', { costoEnvio: 0 });
+
+      expect(escritura().data.estadoEnvio).toBe(EstadoEnvio.SIN_COSTO);
+      expect(escritura().data.total.toNumber()).toBe(84.9);
+    });
+
+    it('con solo la dirección (sin costo) el envío sigue por coordinar', async () => {
+      prisma.pedido.findUnique.mockResolvedValueOnce(guardado());
+
+      await service.actualizarEnvio('ped-1', {
+        direccionEntrega: 'Jr. Lima 456, Cusco',
+      });
+
+      const { data } = escritura();
+      expect(data.estadoEnvio).toBe(EstadoEnvio.POR_COORDINAR);
+      expect(data.costoEnvio.toNumber()).toBe(0);
+      expect(data.direccionEntrega).toBe('Jr. Lima 456, Cusco');
+    });
+
+    it('con pago en destino ignora el costo: la tienda no lo cobra', async () => {
+      prisma.pedido.findUnique.mockResolvedValueOnce(guardado());
+
+      await service.actualizarEnvio('ped-1', {
+        costoEnvio: 25,
+        pagoEnDestino: true,
+      });
+
+      const { data } = escritura();
+      expect(data.estadoEnvio).toBe(EstadoEnvio.PAGO_EN_DESTINO);
+      expect(data.costoEnvio.toNumber()).toBe(0);
+      expect(data.total.toNumber()).toBe(84.9);
+    });
+
+    it('en un pedido ya pagado no toca el monto pagado: el envío queda como saldo', async () => {
+      prisma.pedido.findUnique.mockResolvedValueOnce(
+        guardado({ estado: EstadoPedido.PAGADO, montoPagado: dec(84.9) }),
+      );
+
+      await service.actualizarEnvio('ped-1', { costoEnvio: 15 });
+
+      const { data } = escritura();
+      expect(data.total.toNumber()).toBe(99.9);
+      expect(data.estadoEnvio).toBe(EstadoEnvio.COTIZADO);
+      expect(data).not.toHaveProperty('montoPagado');
+    });
+
+    it('rechaza editar un envío que ya se cobró', async () => {
+      prisma.pedido.findUnique.mockResolvedValueOnce(
+        guardado({
+          estado: EstadoPedido.PAGADO,
+          estadoEnvio: EstadoEnvio.PAGADO,
+        }),
+      );
+
+      await expect(
+        service.actualizarEnvio('ped-1', { costoEnvio: 30 }),
+      ).rejects.toThrow('ya se cobró');
+      expect(prisma.pedido.updateMany).not.toHaveBeenCalled();
     });
 
     it('rechaza editar el envío de un pedido ya ENVIADO', async () => {
-      prisma.pedido.findUnique.mockResolvedValueOnce({
-        id: 'ped-1',
-        subtotal: dec(84.9),
-        estado: EstadoPedido.ENVIADO,
-      });
+      prisma.pedido.findUnique.mockResolvedValueOnce(
+        guardado({ estado: EstadoPedido.ENVIADO }),
+      );
 
       await expect(
         service.actualizarEnvio('ped-1', { costoEnvio: 15 }),
@@ -496,11 +579,9 @@ describe('PedidosService', () => {
     });
 
     it('falla si el pedido se cerró entre la lectura y la escritura', async () => {
-      prisma.pedido.findUnique.mockResolvedValueOnce({
-        id: 'ped-1',
-        subtotal: dec(84.9),
-        estado: EstadoPedido.EN_PRODUCCION,
-      });
+      prisma.pedido.findUnique.mockResolvedValueOnce(
+        guardado({ estado: EstadoPedido.EN_PRODUCCION }),
+      );
       prisma.pedido.updateMany.mockResolvedValue({ count: 0 });
 
       await expect(
@@ -515,12 +596,105 @@ describe('PedidosService', () => {
     });
   });
 
-  describe('actualizarEstado', () => {
-    it('aplica una transicion valida condicionada al estado leído', async () => {
-      prisma.pedido.findUnique.mockResolvedValueOnce({
+  describe('registrarPagoEnvio', () => {
+    const pagadoConEnvioPendiente = (extra: Record<string, unknown> = {}) => ({
+      id: 'ped-1',
+      subtotal: dec(84.9),
+      costoEnvio: dec(15),
+      total: dec(99.9),
+      montoPagado: dec(84.9),
+      estado: EstadoPedido.EN_PRODUCCION,
+      estadoEnvio: EstadoEnvio.COTIZADO,
+      ...extra,
+    });
+
+    it('suma el costo del envío al monto pagado y cierra el cobro', async () => {
+      prisma.pedido.findUnique.mockResolvedValueOnce(pagadoConEnvioPendiente());
+      prisma.pedido.updateMany.mockResolvedValue({ count: 1 });
+      prisma.pedido.findUniqueOrThrow.mockResolvedValue({ id: 'ped-1' });
+
+      await service.registrarPagoEnvio('ped-1', { costoEnvioEsperado: 15 });
+
+      const [{ where, data }] = prisma.pedido.updateMany.mock.calls[0] as [
+        {
+          where: Record<string, unknown>;
+          data: { montoPagado: Prisma.Decimal; estadoEnvio: EstadoEnvio };
+        },
+      ];
+      expect(where).toMatchObject({
         id: 'ped-1',
-        estado: EstadoPedido.PENDIENTE_PAGO,
+        estadoEnvio: EstadoEnvio.COTIZADO,
       });
+      expect((where.montoPagado as Prisma.Decimal).toNumber()).toBe(84.9);
+      expect((where.costoEnvio as Prisma.Decimal).toNumber()).toBe(15);
+      expect(data.montoPagado.toNumber()).toBe(99.9);
+      expect(data.estadoEnvio).toBe(EstadoEnvio.PAGADO);
+    });
+
+    it('pide marcar primero el pedido como pagado si sigue pendiente', async () => {
+      prisma.pedido.findUnique.mockResolvedValueOnce(
+        pagadoConEnvioPendiente({
+          estado: EstadoPedido.PENDIENTE_PAGO,
+          montoPagado: null,
+        }),
+      );
+
+      await expect(
+        service.registrarPagoEnvio('ped-1', { costoEnvioEsperado: 15 }),
+      ).rejects.toThrow('Primero marca el pedido como pagado');
+      expect(prisma.pedido.updateMany).not.toHaveBeenCalled();
+    });
+
+    it('rechaza si el costo cambió desde que la admin lo vio', async () => {
+      prisma.pedido.findUnique.mockResolvedValueOnce(
+        pagadoConEnvioPendiente({ costoEnvio: dec(20), total: dec(104.9) }),
+      );
+
+      await expect(
+        service.registrarPagoEnvio('ped-1', { costoEnvioEsperado: 15 }),
+      ).rejects.toThrow('cambió mientras lo editabas');
+      expect(prisma.pedido.updateMany).not.toHaveBeenCalled();
+    });
+
+    it.each([
+      EstadoEnvio.PAGADO,
+      EstadoEnvio.SIN_COSTO,
+      EstadoEnvio.PAGO_EN_DESTINO,
+      EstadoEnvio.POR_COORDINAR,
+    ])('rechaza registrar el pago con el envío %s', async (estadoEnvio) => {
+      prisma.pedido.findUnique.mockResolvedValueOnce(
+        pagadoConEnvioPendiente({ estadoEnvio }),
+      );
+
+      await expect(
+        service.registrarPagoEnvio('ped-1', { costoEnvioEsperado: 15 }),
+      ).rejects.toThrow('no tiene un envío pendiente de cobro');
+      expect(prisma.pedido.updateMany).not.toHaveBeenCalled();
+    });
+
+    it('rechaza si otra acción cambió el pedido en paralelo', async () => {
+      prisma.pedido.findUnique.mockResolvedValueOnce(pagadoConEnvioPendiente());
+      prisma.pedido.updateMany.mockResolvedValue({ count: 0 });
+
+      await expect(
+        service.registrarPagoEnvio('ped-1', { costoEnvioEsperado: 15 }),
+      ).rejects.toThrow('cambió mientras lo editabas');
+    });
+  });
+
+  describe('actualizarEstado', () => {
+    const pendiente = (extra: Record<string, unknown> = {}) => ({
+      id: 'ped-1',
+      subtotal: dec(84.9),
+      costoEnvio: dec(15),
+      total: dec(99.9),
+      estado: EstadoPedido.PENDIENTE_PAGO,
+      estadoEnvio: EstadoEnvio.COTIZADO,
+      ...extra,
+    });
+
+    it('al marcar pagado registra solo los productos: el envío cotizado queda por cobrar', async () => {
+      prisma.pedido.findUnique.mockResolvedValueOnce(pendiente());
       prisma.pedido.updateMany.mockResolvedValue({ count: 1 });
       prisma.pedido.findUniqueOrThrow.mockResolvedValue({
         id: 'ped-1',
@@ -533,16 +707,30 @@ describe('PedidosService', () => {
 
       expect(prisma.pedido.updateMany).toHaveBeenCalledWith({
         where: { id: 'ped-1', estado: EstadoPedido.PENDIENTE_PAGO },
-        data: { estado: EstadoPedido.PAGADO },
+        data: { estado: EstadoPedido.PAGADO, montoPagado: dec(84.9) },
       });
       expect(resultado.estado).toBe(EstadoPedido.PAGADO);
     });
 
-    it('rechaza si otro cambio de estado ganó en paralelo', async () => {
-      prisma.pedido.findUnique.mockResolvedValueOnce({
-        id: 'ped-1',
-        estado: EstadoPedido.PENDIENTE_PAGO,
+    it('las demás transiciones solo cambian el estado', async () => {
+      prisma.pedido.findUnique.mockResolvedValueOnce(
+        pendiente({ estado: EstadoPedido.PAGADO }),
+      );
+      prisma.pedido.updateMany.mockResolvedValue({ count: 1 });
+      prisma.pedido.findUniqueOrThrow.mockResolvedValue({ id: 'ped-1' });
+
+      await service.actualizarEstado('ped-1', {
+        estado: EstadoPedido.EN_PRODUCCION,
       });
+
+      const [{ data }] = prisma.pedido.updateMany.mock.calls[0] as [
+        { data: Record<string, unknown> },
+      ];
+      expect(data).toEqual({ estado: EstadoPedido.EN_PRODUCCION });
+    });
+
+    it('rechaza si otro cambio ganó en paralelo', async () => {
+      prisma.pedido.findUnique.mockResolvedValueOnce(pendiente());
       prisma.pedido.updateMany.mockResolvedValue({ count: 0 });
 
       await expect(
@@ -551,10 +739,7 @@ describe('PedidosService', () => {
     });
 
     it('rechaza una transicion invalida PENDIENTE_PAGO -> ENVIADO', async () => {
-      prisma.pedido.findUnique.mockResolvedValueOnce({
-        id: 'ped-1',
-        estado: EstadoPedido.PENDIENTE_PAGO,
-      });
+      prisma.pedido.findUnique.mockResolvedValueOnce(pendiente());
 
       await expect(
         service.actualizarEstado('ped-1', { estado: EstadoPedido.ENVIADO }),

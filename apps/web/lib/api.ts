@@ -458,11 +458,23 @@ export function cambiarEstadoPedido(
 /** Registra el envío coordinado (costo + dirección); el backend recalcula el total. */
 export function actualizarEnvioPedido(
   id: string,
-  datos: { costoEnvio: number; direccionEntrega?: string },
+  datos: { costoEnvio?: number; direccionEntrega?: string; pagoEnDestino?: boolean },
 ): Promise<Pedido> {
   return peticion<Pedido>(`/pedidos/${id}/envio`, {
     metodo: "PATCH",
     cuerpo: datos,
+    autenticado: true,
+  });
+}
+
+/**
+ * El cliente pagó el envío. Se envía el costo que la admin vio al confirmar:
+ * si cambió desde otra pestaña, el servidor rechaza el registro.
+ */
+export function registrarPagoEnvio(id: string, costoEnvioEsperado: number): Promise<Pedido> {
+  return peticion<Pedido>(`/pedidos/${id}/envio/pago`, {
+    metodo: "PATCH",
+    cuerpo: { costoEnvioEsperado },
     autenticado: true,
   });
 }
