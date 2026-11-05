@@ -59,6 +59,18 @@ describe('CrearPedidoDto (validación)', () => {
       delete sinConsentimiento.aceptaTerminos;
       expect(validar(sinConsentimiento).length).toBeGreaterThan(0);
     });
+
+    // La conversión implícita convierte cualquier texto no vacío en true
+    // (Boolean("false") === true): el consentimiento debe llegar como booleano.
+    it.each(['false', 'true', '0', 'no', 1])(
+      'rechaza el consentimiento enviado como %p en vez de booleano',
+      (valor) => {
+        const errores = validar({ ...base, aceptaTerminos: valor });
+        expect(errores.some((m) => /Política de Privacidad/.test(m))).toBe(
+          true,
+        );
+      },
+    );
   });
 
   describe('cantidad', () => {

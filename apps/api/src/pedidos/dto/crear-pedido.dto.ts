@@ -1,4 +1,4 @@
-import { Type } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 import {
   ArrayMaxSize,
   ArrayMinSize,
@@ -133,7 +133,10 @@ export class CrearPedidoDto extends ItemsPedidoDto {
   comprobanteUrl?: string;
 
   // Consentimiento de tratamiento de datos (Ley 29733): el servidor lo exige y
-  // registra el momento, no solo el formulario.
+  // registra el momento, no solo el formulario. Se valida el valor CRUDO del
+  // body: la conversión implícita global convertiría "false" en true
+  // (Boolean("false") === true) y daría por aceptado un consentimiento negado.
+  @Transform(({ obj }: { obj: Record<string, unknown> }) => obj.aceptaTerminos)
   @Equals(true, {
     message:
       'Debes aceptar la Política de Privacidad y los Términos y Condiciones.',
