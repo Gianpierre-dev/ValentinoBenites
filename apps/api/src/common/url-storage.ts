@@ -31,6 +31,15 @@ export function esUrlDeStorage(url: string): boolean {
   );
 }
 
+/**
+ * Nombre del archivo (uuid.ext) de una URL de NUESTRO storage, o null si la URL
+ * no es del proxy. Es la clave con la que se registra el comprobante.
+ */
+export function archivoDeUrlStorage(url: string): string | null {
+  if (!esUrlDeStorage(url)) return null;
+  return new URL(url).pathname.split('/').pop() ?? null;
+}
+
 /** Decorador de class-validator basado en esUrlDeStorage. */
 export function EsUrlDeStorage(opciones?: ValidationOptions) {
   return (objeto: object, propiedad: string): void => {

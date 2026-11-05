@@ -23,6 +23,8 @@ type PedidoCreateArgs = [
 ];
 
 type PrismaMock = {
+  $transaction: jest.Mock;
+  comprobantePago: { updateMany: jest.Mock };
   variante: { findMany: jest.Mock };
   producto: { findMany: jest.Mock };
   billetera: { findUnique: jest.Mock };
@@ -37,6 +39,8 @@ type PrismaMock = {
 const dec = (valor: number) => new Prisma.Decimal(valor);
 
 const crearPrismaMock = (): PrismaMock => ({
+  $transaction: jest.fn(),
+  comprobantePago: { updateMany: jest.fn() },
   variante: { findMany: jest.fn() },
   producto: { findMany: jest.fn() },
   billetera: { findUnique: jest.fn() },
@@ -76,7 +80,8 @@ const productoAndino = {
 // Billetera activa por defecto para los tests de pago manual.
 const billeteraYape = { id: 'bil-yape', nombre: 'Yape', activo: true };
 
-const COMPROBANTE = 'https://api.test/api/storage/archivo/pago.jpg';
+const API_PUBLICA = 'https://api.test';
+const COMPROBANTE = `${API_PUBLICA}/api/storage/archivo/pago.jpg`;
 
 /** Pedido valido con valores por defecto; cada test pisa lo que le importa. */
 const pedido = (extra: Partial<CrearPedidoDto> = {}): CrearPedidoDto => ({
@@ -100,9 +105,24 @@ describe('PedidosService', () => {
   let prisma: PrismaMock;
   let service: PedidosService;
 
+  const apiPublicaOriginal = process.env.API_PUBLIC_URL;
+  beforeAll(() => {
+    process.env.API_PUBLIC_URL = API_PUBLICA;
+  });
+  afterAll(() => {
+    if (apiPublicaOriginal === undefined) delete process.env.API_PUBLIC_URL;
+    else process.env.API_PUBLIC_URL = apiPublicaOriginal;
+  });
+
   beforeEach(() => {
     prisma = crearPrismaMock();
     service = new PedidosService(prisma as never);
+    // La transaccion corre el callback contra el mismo mock.
+    prisma.$transaction.mockImplementation(
+      (callback: (tx: PrismaMock) => unknown) => callback(prisma),
+    );
+    // Por defecto el comprobante esta registrado y libre.
+    prisma.comprobantePago.updateMany.mockResolvedValue({ count: 1 });
     // Por defecto: sin variantes ni productos hasta que cada test los configure.
     prisma.variante.findMany.mockResolvedValue([]);
     prisma.producto.findMany.mockResolvedValue([]);
@@ -179,6 +199,47 @@ describe('PedidosService', () => {
       expect(data.estado).toBeUndefined();
       expect(data.metodoPago).toBe('WhatsApp');
       expect(prisma.billetera.findUnique).not.toHaveBeenCalled();
+    });
+
+    describe('comprobante', () => {
+      it('asigna al pedido creado el comprobante registrado y libre', async () => {
+        prisma.variante.findMany.mockResolvedValue([varianteVino]);
+        prisma.pedido.create.mockImplementation(({ data }) =>
+          Promise.resolve({ id: 'ped-1', ...data }),
+        );
+
+        await service.crear(pedido());
+
+        expect(prisma.comprobantePago.updateMany).toHaveBeenCalledWith({
+          where: { archivo: 'pago.jpg', pedidoId: null },
+          data: { pedidoId: 'ped-1' },
+        });
+      });
+
+      it('rechaza un comprobante no registrado o ya usado en otro pedido', async () => {
+        prisma.variante.findMany.mockResolvedValue([varianteVino]);
+        prisma.pedido.create.mockImplementation(({ data }) =>
+          Promise.resolve({ id: 'ped-2', ...data }),
+        );
+        prisma.comprobantePago.updateMany.mockResolvedValue({ count: 0 });
+
+        await expect(service.crear(pedido())).rejects.toThrow(
+          'El comprobante no es válido o ya se usó en otro pedido. Vuelve a subirlo para continuar.',
+        );
+      });
+
+      it('un pedido por WhatsApp no reclama ningún comprobante', async () => {
+        prisma.variante.findMany.mockResolvedValue([varianteVino]);
+        prisma.pedido.create.mockImplementation(({ data }) =>
+          Promise.resolve({ id: 'ped-3', ...data }),
+        );
+
+        await service.crear(
+          pedido({ billeteraId: undefined, comprobanteUrl: undefined }),
+        );
+
+        expect(prisma.comprobantePago.updateMany).not.toHaveBeenCalled();
+      });
     });
 
     it('rechaza una billetera inexistente o inactiva', async () => {

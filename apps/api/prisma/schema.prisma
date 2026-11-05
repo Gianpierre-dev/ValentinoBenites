@@ -181,12 +181,28 @@ model Pedido {
   referenciaTransaccion String? // orderId/transactionId de Izipay; null en pagos manuales
   proveedorPago         String? // "IZIPAY" | null
   rawPago               Json? // payload crudo del callback (auditoria/debug)
+  comprobante   ComprobantePago?
   items         ItemPedido[]
   creadoEn      DateTime     @default(now())
   actualizadoEn DateTime     @updatedAt
 
   @@index([estado])
   @@map("pedidos")
+}
+
+// Registro de cada comprobante subido desde el checkout. El pedido solo acepta
+// un comprobante que exista aqui (subido por el endpoint publico, no una foto
+// del catalogo ni un archivo inexistente) y que no este asignado a otro pedido:
+// pedidoId unico impide reutilizar el mismo comprobante en dos pedidos.
+model ComprobantePago {
+  id       String   @id @default(cuid())
+  // Nombre del archivo en el storage (uuid.ext), el mismo de la URL del proxy.
+  archivo  String   @unique
+  pedidoId String?  @unique
+  pedido   Pedido?  @relation(fields: [pedidoId], references: [id], onDelete: SetNull)
+  subidoEn DateTime @default(now())
+
+  @@map("comprobantes_pago")
 }
 
 model ItemPedido {

@@ -76,7 +76,7 @@ export class StorageController {
     if (!archivo) {
       throw new BadRequestException('No se recibio ningun archivo.');
     }
-    return this.storageService.subir(archivo);
+    return this.storageService.subirComprobante(archivo);
   }
 
   /**

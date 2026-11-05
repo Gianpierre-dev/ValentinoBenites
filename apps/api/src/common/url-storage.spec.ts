@@ -1,4 +1,4 @@
-import { esUrlDeStorage } from './url-storage';
+import { archivoDeUrlStorage, esUrlDeStorage } from './url-storage';
 
 const API_PUBLICA = 'https://api-production-2c9f.up.railway.app';
 
@@ -52,5 +52,19 @@ describe('esUrlDeStorage', () => {
     ['texto que no es URL', 'no-es-una-url'],
   ])('rechaza %s', (_caso, url) => {
     expect(esUrlDeStorage(url)).toBe(false);
+  });
+
+  describe('archivoDeUrlStorage', () => {
+    it('devuelve el nombre del archivo de una URL del proxy', () => {
+      expect(
+        archivoDeUrlStorage(`${API_PUBLICA}/api/storage/archivo/abc-123.webp`),
+      ).toBe('abc-123.webp');
+    });
+
+    it('devuelve null si la URL no es de nuestro storage', () => {
+      expect(
+        archivoDeUrlStorage('https://atacante.tld/api/storage/archivo/a.png'),
+      ).toBeNull();
+    });
   });
 });

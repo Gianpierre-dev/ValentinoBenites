@@ -12,6 +12,7 @@ import {
 } from '@aws-sdk/client-s3';
 import type { Readable } from 'node:stream';
 import { randomUUID } from 'node:crypto';
+import { PrismaService } from '../prisma/prisma.service';
 import { detectarMimeReal, EXTENSION_POR_MIME } from './storage.config';
 
 export interface ArchivoSubido {
@@ -39,7 +40,10 @@ export class StorageService {
   private readonly prefijo: string;
   private readonly apiPublicUrl: string;
 
-  constructor(private readonly config: ConfigService) {
+  constructor(
+    private readonly config: ConfigService,
+    private readonly prisma: PrismaService,
+  ) {
     this.endpoint = this.config.get<string>('WASABI_ENDPOINT') ?? '';
     this.region = this.config.get<string>('WASABI_REGION') ?? '';
     this.bucket = this.config.get<string>('WASABI_BUCKET') ?? '';
@@ -72,6 +76,25 @@ export class StorageService {
   }
 
   async subir(archivo: Express.Multer.File): Promise<ArchivoSubido> {
+    const { url } = await this.guardar(archivo);
+    return { url };
+  }
+
+  /**
+   * Sube un comprobante de pago del checkout y lo registra: el pedido solo
+   * acepta comprobantes registrados aquí y sin pedido asignado, así no se
+   * puede presentar una foto del catálogo, un archivo inexistente ni el
+   * comprobante de otro pedido.
+   */
+  async subirComprobante(archivo: Express.Multer.File): Promise<ArchivoSubido> {
+    const { url, filename } = await this.guardar(archivo);
+    await this.prisma.comprobantePago.create({ data: { archivo: filename } });
+    return { url };
+  }
+
+  private async guardar(
+    archivo: Express.Multer.File,
+  ): Promise<ArchivoSubido & { filename: string }> {
     // No se confía en archivo.mimetype (lo controla el cliente): se valida la
     // firma real del contenido y se deriva la extensión del MIME verificado.
     const mimeReal = detectarMimeReal(archivo.buffer);
@@ -87,7 +110,7 @@ export class StorageService {
       this.logger.warn(
         `Subida simulada para "${archivo.originalname}". Configura WASABI_* para subir a Wasabi.`,
       );
-      return { url: `/uploads/placeholder/${filename}` };
+      return { url: `/uploads/placeholder/${filename}`, filename };
     }
 
     // El objeto queda PRIVADO (el bucket no permite acceso público). Se sirve por
@@ -102,7 +125,10 @@ export class StorageService {
       }),
     );
 
-    return { url: `${this.apiPublicUrl}/api/storage/archivo/${filename}` };
+    return {
+      url: `${this.apiPublicUrl}/api/storage/archivo/${filename}`,
+      filename,
+    };
   }
 
   /** Descarga un archivo por su filename para servirlo vía proxy. */

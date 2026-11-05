@@ -14,6 +14,7 @@ import { precioEfectivoVariante } from '../variantes/variantes.helpers';
 import { transicionPermitida } from './maquina-estados';
 import { METODO_WHATSAPP } from './metodos-pago';
 import { datosPagoRecibido } from './cobro';
+import { archivoDeUrlStorage } from '../common/url-storage';
 
 // Estados terminales/despachados: ya no se puede tocar el envio del pedido.
 const ESTADOS_ENVIO_CERRADO: EstadoPedido[] = [
@@ -40,6 +41,9 @@ const COLOR_A_COORDINAR = 'A coordinar';
 const ZONA_HORARIA_NEGOCIO = 'America/Lima';
 
 const INTENTOS_CODIGO = 5;
+
+const MENSAJE_COMPROBANTE_INVALIDO =
+  'El comprobante no es válido o ya se usó en otro pedido. Vuelve a subirlo para continuar.';
 
 const MENSAJE_PEDIDO_CAMBIADO =
   'El pedido cambió mientras lo editabas. Recarga la página e intenta de nuevo.';
@@ -111,6 +115,7 @@ export class PedidosService {
     }
 
     const metodoPago = await this.resolverMetodoPago(dto.billeteraId);
+    const archivoComprobante = this.archivoDelComprobante(dto.comprobanteUrl);
     const cotizadas = await this.cotizarLineas(dto.items);
     this.exigirDisponibles(cotizadas);
     const lineas = cotizadas.map((linea) => this.aLineaCalculada(linea));
@@ -122,22 +127,30 @@ export class PedidosService {
     // colision (P2002 sobre `codigo`) se reintenta con otro codigo.
     for (let intento = 0; intento < INTENTOS_CODIGO; intento += 1) {
       try {
-        return await this.prisma.pedido.create({
-          data: {
-            codigo: this.generarCodigo(),
-            nombreCliente: dto.nombreCliente,
-            telefono: dto.telefono,
-            metodoPago,
-            comprobanteUrl: dto.comprobanteUrl,
-            ciudadEntrega: dto.ciudadEntrega?.trim() || null,
-            subtotal,
-            total: subtotal, // costoEnvio = 0 al crear; total = subtotal.
-            consentimientoEn: new Date(),
-            claveIdempotencia: dto.claveIdempotencia ?? null,
-            // El estado inicial (PENDIENTE_PAGO) lo fija el default del schema.
-            items: { create: lineas },
-          },
-          include: INCLUIR_ITEMS,
+        // Pedido y asignacion del comprobante van juntos: si el comprobante no
+        // se puede reclamar, el pedido no queda creado.
+        return await this.prisma.$transaction(async (tx) => {
+          const creado = await tx.pedido.create({
+            data: {
+              codigo: this.generarCodigo(),
+              nombreCliente: dto.nombreCliente,
+              telefono: dto.telefono,
+              metodoPago,
+              comprobanteUrl: dto.comprobanteUrl,
+              ciudadEntrega: dto.ciudadEntrega?.trim() || null,
+              subtotal,
+              total: subtotal, // costoEnvio = 0 al crear; total = subtotal.
+              consentimientoEn: new Date(),
+              claveIdempotencia: dto.claveIdempotencia ?? null,
+              // El estado inicial (PENDIENTE_PAGO) lo fija el default del schema.
+              items: { create: lineas },
+            },
+            include: INCLUIR_ITEMS,
+          });
+          if (archivoComprobante) {
+            await this.reclamarComprobante(tx, archivoComprobante, creado.id);
+          }
+          return creado;
         });
       } catch (error) {
         const campo = this.campoDuplicado(error);
@@ -322,6 +335,36 @@ export class PedidosService {
       );
     }
     return billetera.nombre;
+  }
+
+  /** Archivo del comprobante enviado, o null si el pedido no trae uno. */
+  private archivoDelComprobante(comprobanteUrl?: string): string | null {
+    if (comprobanteUrl === undefined) return null;
+    const archivo = archivoDeUrlStorage(comprobanteUrl);
+    if (!archivo) {
+      throw new BadRequestException(MENSAJE_COMPROBANTE_INVALIDO);
+    }
+    return archivo;
+  }
+
+  /**
+   * Asigna el comprobante al pedido solo si fue subido desde el checkout y
+   * ningun otro pedido lo tiene. La actualizacion condicionada a pedidoId null
+   * resuelve tambien la carrera de dos pedidos con el mismo comprobante: el
+   * segundo no encuentra la fila libre y su transaccion se revierte.
+   */
+  private async reclamarComprobante(
+    tx: Prisma.TransactionClient,
+    archivo: string,
+    pedidoId: string,
+  ): Promise<void> {
+    const { count } = await tx.comprobantePago.updateMany({
+      where: { archivo, pedidoId: null },
+      data: { pedidoId },
+    });
+    if (count === 0) {
+      throw new BadRequestException(MENSAJE_COMPROBANTE_INVALIDO);
+    }
   }
 
   private async billeteraActiva(billeteraId: string): Promise<boolean> {
